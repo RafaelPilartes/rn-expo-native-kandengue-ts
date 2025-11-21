@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "412740995070",
+    "firebase_url": "https://kandengue-atrevido-5740d-default-rtdb.firebaseio.com",
+    "project_id": "kandengue-atrevido-5740d",
+    "storage_bucket": "kandengue-atrevido-5740d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:412740995070:android:885131ef95c8a7eff422af",
+        "android_client_info": {
+          "package_name": "com.kandengueatrevido.pro"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBn_QmENNj9jJ5rZf-I7JCrSYviIWuFdH4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:412740995070:android:c71d7cc2d7934f30f422af",
+        "android_client_info": {
+          "package_name": "com.kandengueatrevido.ride"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBn_QmENNj9jJ5rZf-I7JCrSYviIWuFdH4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
