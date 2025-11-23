@@ -78,8 +78,6 @@
     "plugins": [
       "@react-native-firebase/app",
       "@react-native-firebase/auth",
-      "react-native-maps",
-      "react-native-mmkv",
       [
         "expo-build-properties",
         {
