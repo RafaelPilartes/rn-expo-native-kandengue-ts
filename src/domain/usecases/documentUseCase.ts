@@ -1,0 +1,99 @@
+// src/domain/usecases/documentsUseCase.ts;
+import { documentRepository } from '@/modules/Api';
+import { DocumentEntity } from '@/core/entities/Document';
+import type { ListResponseType } from '@/interfaces/IApiResponse';
+
+export class DocumentUseCase {
+  private repository = documentRepository;
+
+  async getAll(
+    limit?: number,
+    offset?: number,
+    searchTerm?: string,
+    filters?: Partial<DocumentEntity>,
+  ): Promise<ListResponseType<DocumentEntity[]>> {
+    try {
+      return await this.repository.getAll(limit, offset, searchTerm, filters);
+    } catch (error: any) {
+      console.error('Erro ao buscar documentos:', error);
+      throw new Error(error.message || 'Erro ao buscar documentos');
+    }
+  }
+
+  async getById(id: string): Promise<DocumentEntity | null> {
+    try {
+      return await this.repository.getById(id);
+    } catch (error: any) {
+      console.error(`Erro ao buscar documento ${id}:`, error);
+      throw new Error(error.message || 'Erro ao buscar documento');
+    }
+  }
+
+  // get one by custom field
+  async getOneByField(
+    field: string,
+    value: any,
+  ): Promise<DocumentEntity | null> {
+    try {
+      return await this.repository.getOneByField(field, value);
+    } catch (error: any) {
+      console.error(`Erro ao buscar document por ${field}-${value}:`, error);
+      throw new Error(error.message || 'Erro ao buscar document');
+    }
+  }
+
+  // get by custom field
+  async getAllByField(
+    field: string,
+    value: any,
+    limit?: number,
+    offset?: number,
+  ): Promise<ListResponseType<DocumentEntity[]>> {
+    try {
+      const { data, pagination } = await this.repository.getAllByField(
+        field,
+        value,
+        limit,
+        offset,
+      );
+
+      return { data, pagination };
+    } catch (error: any) {
+      console.error(
+        `Erro ao buscar documento pelo campo ${field} com valor ${value}:`,
+        error,
+      );
+      throw new Error(error.message || 'Erro ao buscar documento');
+    }
+  }
+
+  async create(document: Omit<DocumentEntity, 'id'>): Promise<DocumentEntity> {
+    try {
+      return await this.repository.create(document);
+    } catch (error: any) {
+      console.error('Erro ao criar documento:', error);
+      throw new Error(error.message || 'Erro ao criar documento');
+    }
+  }
+
+  async update(
+    id: string,
+    document: Partial<DocumentEntity>,
+  ): Promise<DocumentEntity> {
+    try {
+      return await this.repository.update(id, document);
+    } catch (error: any) {
+      console.error(`Erro ao atualizar documento ${id}:`, error);
+      throw new Error(error.message || 'Erro ao atualizar documento');
+    }
+  }
+
+  async delete(id: string): Promise<void> {
+    try {
+      return await this.repository.delete(id);
+    } catch (error: any) {
+      console.error(`Erro ao deletar documento ${id}:`, error);
+      throw new Error(error.message || 'Erro ao deletar documento');
+    }
+  }
+}

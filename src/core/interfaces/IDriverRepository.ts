@@ -1,0 +1,37 @@
+// core/interfaces/IDriverRepository.ts
+import type { ListResponseType } from '@/interfaces/IApiResponse';
+import { DriverEntity } from '../entities/Driver';
+import { LocationType } from '@/types/geoLocation';
+
+export interface IDriverRepository {
+  getAll(
+    limit?: number,
+    offset?: number,
+    searchTerm?: string,
+    filters?: Partial<DriverEntity>,
+  ): Promise<ListResponseType<DriverEntity[]>>;
+  getById(id: string): Promise<DriverEntity | null>;
+  getByEmail(email: string): Promise<DriverEntity | null>;
+  getAllByField(
+    field: string,
+    value: any,
+    limit?: number,
+    offset?: number,
+  ): Promise<ListResponseType<DriverEntity[]>>;
+  getOneByField(field: string, value: any): Promise<DriverEntity | null>;
+  create(Driver: Omit<DriverEntity, 'id'>): Promise<DriverEntity>;
+  update(id: string, Driver: Partial<DriverEntity>): Promise<DriverEntity>;
+  delete(id: string): Promise<void>;
+  listenById(
+    id: string,
+    onUpdate: (driver: DriverEntity) => void,
+    onError?: (err: Error) => void,
+  ): () => void;
+
+  // updateStatus(id: string, status: DriverEntity['status']): Promise<void>;
+  updateAvailability(
+    id: string,
+    availability: DriverEntity['availability'],
+  ): Promise<void>;
+  updateLocation(id: string, location: LocationType): Promise<void>;
+}

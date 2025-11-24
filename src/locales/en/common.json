@@ -1,0 +1,42 @@
+{
+  "welcome": "Welcome",
+  "hello_user": "Hello, {{name}}!",
+
+  "error": "Error",
+  "incorrect_pin": "Incorrect PIN",
+  "logout": "Logout",
+  "logout_confirmation": "Do you want to log out?",
+  "yes": "Yes",
+  "no": "No",
+  "forgot_pin": "Forgot PIN",
+  "reset_pin_message": "To reset your PIN, we will send an email with instructions. Do you want to continue?",
+  "incorrect_pin_retry": "Incorrect PIN, please try again",
+  "enter_pin": "Enter your access PIN",
+  "recover_pin": "Recover PIN",
+
+  "buttons": {
+    "start": "Start",
+    "emergency": "Emergency Mode",
+    "continue": "Continue",
+    "cancel": "Cancel",
+    "close": "Close",
+    "next": "Next",
+    "previous": "Previous",
+    "save": "Save",
+    "done": "Done",
+    "skip": "Skip",
+    "finish": "Finish",
+    "confirm": "Confirm",
+    "confirm_action": "Confirm Action",
+    "conclude": "Conclude",
+    "sign_in": "Sign In",
+    "sign_up": "Sign Up",
+    "sign_in_now": "Sign In Now",
+    "recover": "Recover",
+    "verify": "Verify",
+    "settings": "settings",
+    "try_again": "Try again",
+    "allow": "Allow",
+    "get_started": "Get started"
+  }
+}

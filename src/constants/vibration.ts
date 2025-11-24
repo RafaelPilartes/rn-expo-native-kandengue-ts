@@ -1,0 +1,19 @@
+export const ONE_SECOND_IN_MS = 1000;
+
+export const VIBRATION_PATTERN_DEFAULT = [
+  0 * ONE_SECOND_IN_MS,
+  2 * ONE_SECOND_IN_MS,
+  1 * ONE_SECOND_IN_MS,
+  2 * ONE_SECOND_IN_MS,
+];
+
+export const VIBRATION_PATTERN_BOOST = [
+  0 * ONE_SECOND_IN_MS, // wait
+  ONE_SECOND_IN_MS / 2,
+  ONE_SECOND_IN_MS / 2, // wait
+  ONE_SECOND_IN_MS / 2,
+  ONE_SECOND_IN_MS / 2, // wait
+  ONE_SECOND_IN_MS / 2,
+  ONE_SECOND_IN_MS / 2, // wait
+  ONE_SECOND_IN_MS / 2,
+];

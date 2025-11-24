@@ -1,0 +1,34 @@
+{
+  "select_lang": "Selecione a língua",
+  "select_lang_message": "Escolha a sua língua para continuar",
+
+  "select_lang_pt": "Português",
+  "select_lang_native_pt": "(Português)",
+  "select_lang_en": "Inglês (uk)",
+  "select_lang_native_en": "(English)",
+  "select_lang_fr": "Francês",
+  "select_lang_native_fr": "(Français)",
+
+  "onboarding_title_1": "Segurança no caminho",
+  "onboarding_description_1": "Compartilhe sua localização em tempo real com quem você confia.",
+  "onboarding_title_2": "Publicite aqui",
+  "onboarding_description_2": "Faça publicidade aqui",
+  "onboarding_title_3": "Planeje sua viagem",
+  "onboarding_description_3": "Defina zonas de risco e receba alertas para evitar acidentes.",
+
+  "permissions_title": "Ative as permissões",
+  "permissions_description": "Permitir acesso para que o possa funcionar corretamente e ajudar na sua segurança.",
+
+  "permissions_title_1": "Acesso à localização",
+  "permissions_description_1": "Permitir acesso para calcular rotas e segurança.",
+  "permissions_title_2": "Acesso às notificações",
+  "permissions_description_2": "Receba atualizações sobre corridas e entregas.",
+  "permissions_title_3": "Acesso ao microfone",
+  "permissions_description_3": "Necessário para chamadas de voz com o motorista.",
+
+  "permission_denied_title": "Permissão recusada",
+  "permission_denied_message": "A permissão para {{permission}}, foi recusada",
+  "swipe_to_continue": "Arraste para o lado para continuar",
+  "swipe_hint": "Deslize",
+  "swipe": "Deslize"
+}

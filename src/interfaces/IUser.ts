@@ -1,0 +1,25 @@
+import { LocationType } from '@/types/geoLocation';
+import type { UserAvailability, UserStatus } from '../types/enum';
+
+export interface UserInterface {
+  id?: string;
+  entity_code?: string;
+  photo?: string;
+  name: string;
+  email: string;
+  phone: string;
+  password?: string;
+  status: UserStatus;
+  availability: UserAvailability;
+  email_verified?: boolean;
+  phone_verified?: boolean;
+  created_at?: Date;
+  updated_at?: Date;
+  last_login?: Date;
+  firebase_uid?: string;
+
+  // Localização
+  location?: LocationType;
+
+  last_location_update?: Date;
+}

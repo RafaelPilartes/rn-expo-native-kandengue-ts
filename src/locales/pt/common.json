@@ -1,0 +1,42 @@
+{
+  "welcome": "Bem-vindo",
+  "hello_user": "Olá, {{name}}!",
+
+  "error": "Erro",
+  "incorrect_pin": "PIN incorreto",
+  "logout": "Sair",
+  "logout_confirmation": "Deseja sair?",
+  "yes": "Sim",
+  "no": "Não",
+  "forgot_pin": "Esqueceu a senha",
+  "reset_pin_message": "Para redefinir seu PIN, enviaremos um e-mail com instruções. Deseja continuar?",
+  "incorrect_pin_retry": "PIN incorreto, tente novamente",
+  "enter_pin": "Digite seu PIN de acesso",
+  "recover_pin": "Recuperar PIN",
+
+  "buttons": {
+    "start": "Começar",
+    "emergency": "Modo Emergência",
+    "continue": "Continuar",
+    "cancel": "Cancelar",
+    "close": "Fechar",
+    "next": "Proximo",
+    "previous": "Anterior",
+    "save": "Salvar",
+    "done": "Feito",
+    "skip": "Pular",
+    "finish": "Terminar",
+    "confirm": "Confirmar",
+    "confirm_action": "Confirmar acao",
+    "conclude": "Concluir",
+    "sign_in": "Entrar",
+    "sign_up": "Registrar",
+    "sign_in_now": "Entrar agora",
+    "recover": "Recuperar",
+    "verify": "Verificar",
+    "settings": "Configurações",
+    "try_again": "Tentar novamente",
+    "allow": "Permitir",
+    "get_started": "Começar"
+  }
+}

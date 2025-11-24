@@ -1,0 +1,34 @@
+{
+  "select_lang": "Select Language",
+  "select_lang_message": "Choose your language to continue",
+
+  "select_lang_pt": "Portuguese",
+  "select_lang_native_pt": "(Português)",
+  "select_lang_en": "English (UK)",
+  "select_lang_native_en": "(English)",
+  "select_lang_fr": "French",
+  "select_lang_native_fr": "(Français)",
+
+  "onboarding_title_1": "Send an SOS alert",
+  "onboarding_description_1": "Quickly trigger an emergency alert to contacts and authorities.",
+  "onboarding_title_2": "Safety on the go",
+  "onboarding_description_2": "Share your real-time location with those you trust.",
+  "onboarding_title_3": "Plan your trip",
+  "onboarding_description_3": "Set risk zones and receive alerts to avoid accidents.",
+
+  "permissions_title": "Enable Permissions",
+  "permissions_description": "Allow access for the app to work properly and help with your safety.",
+
+  "permissions_title_1": "Location Access",
+  "permissions_description_1": "Allow access to calculate routes and ensure safety.",
+  "permissions_title_2": "Notification Access",
+  "permissions_description_2": "Receive updates on rides and deliveries.",
+  "permissions_title_3": "Microphone Access",
+  "permissions_description_3": "Required for voice calls with the driver.",
+
+  "permission_denied_title": "Permissão recusada",
+  "permission_denied_message": "A permissão para {{permission}}, foi recusada",
+  "swipe_to_continue": "Swipe to continue",
+  "swipe_hint": "Swipe Hint",
+  "swipe": "Swipe"
+}

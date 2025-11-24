@@ -1,0 +1,1 @@
+// ShutdownMonitor.ts # Detecta desligamento

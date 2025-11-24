@@ -1,0 +1,34 @@
+{
+  "select_lang": "Sélectionner la langue",
+  "select_lang_message": "Choisissez votre langue pour continuer",
+
+  "select_lang_pt": "Portugais",
+  "select_lang_native_pt": "(Português)",
+  "select_lang_en": "Anglais (UK)",
+  "select_lang_native_en": "(English)",
+  "select_lang_fr": "Français",
+  "select_lang_native_fr": "(Français)",
+
+  "onboarding_title_1": "Envoyer une alerte SOS",
+  "onboarding_description_1": "Déclenche rapidement une alerte d'urgence aux contacts et aux autorités.",
+  "onboarding_title_2": "Sécurité en chemin",
+  "onboarding_description_2": "Partagez votre localisation en temps réel avec ceux en qui vous avez confiance.",
+  "onboarding_title_3": "Planifiez votre voyage",
+  "onboarding_description_3": "Définissez des zones à risque et recevez des alertes pour éviter les accidents.",
+
+  "permissions_title": "Activez les autorisations",
+  "permissions_description": "Autorisez l'accès pour que l'application fonctionne correctement et vous aide à rester en sécurité.",
+
+  "permissions_title_1": "Accès à la localisation",
+  "permissions_description_1": "Autorisez l'accès pour calculer les itinéraires et assurer la sécurité.",
+  "permissions_title_2": "Accès aux notifications",
+  "permissions_description_2": "Recevez des mises à jour sur les courses et les livraisons.",
+  "permissions_title_3": "Accès au microphone",
+  "permissions_description_3": "Nécessaire pour les appels vocaux avec le conducteur.",
+
+  "permission_denied_title": "Permissão recusada",
+  "permission_denied_message": "A permissão para {{permission}}, foi recusada",
+  "swipe_to_continue": "Arraste para o lado para continuar",
+  "swipe_hint": "Deslize",
+  "swipe": "Deslize"
+}
