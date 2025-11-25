@@ -1,28 +1,28 @@
 // src/screens/Ride/components/RideStatusIdle.tsx
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react'
+import { View, Text, TouchableOpacity } from 'react-native'
 import {
   Clock,
   Users,
   MapPin,
   ChevronDown,
   ChevronUp,
-  AlertCircle,
-} from 'lucide-react-native';
-import { toDate } from '@/utils/formatDate';
+  AlertCircle
+} from 'lucide-react-native'
+import { toDate } from '@/utils/formatDate'
 
 interface RideStatusIdleProps {
-  pickupDescription: string;
-  dropoffDescription: string;
-  estimatedTime?: string;
-  price: string;
-  searchStartTime?: Date;
-  onCancel?: () => void;
-  onAutoCancel?: (reason: string) => void;
-  onCenterMap?: () => void;
+  pickupDescription: string
+  dropoffDescription: string
+  estimatedTime?: string
+  price: string
+  searchStartTime?: Date
+  onCancel?: () => void
+  onAutoCancel?: (reason: string) => void
+  onCenterMap?: () => void
 }
 
-type FireTimestamp = { seconds: number; nanoseconds: number };
+type FireTimestamp = { seconds: number; nanoseconds: number }
 
 export const RideStatusIdle: React.FC<RideStatusIdleProps> = ({
   pickupDescription,
@@ -32,50 +32,48 @@ export const RideStatusIdle: React.FC<RideStatusIdleProps> = ({
   searchStartTime,
   onCancel,
   onAutoCancel,
-  onCenterMap,
+  onCenterMap
 }) => {
-  const [showDetails, setShowDetails] = useState(false);
-  const [elapsedTime, setElapsedTime] = useState(0); // segundos
+  const [showDetails, setShowDetails] = useState(false)
+  const [elapsedTime, setElapsedTime] = useState(0) // segundos
 
-  const startTime = toDate(searchStartTime);
+  const startTime = toDate(searchStartTime)
 
   const COLOR_MAP: Record<string, string> = {
     'text-blue-600': '#2563EB',
     'text-orange-600': '#EA580C',
     'text-yellow-600': '#CA8A04',
-    'text-red-600': '#DC2626',
-  };
+    'text-red-600': '#DC2626'
+  }
 
   // 🔹 Calcular tempo decorrido desde o searchStartTime
   useEffect(() => {
     if (!startTime) {
-      setElapsedTime(0);
-      return;
+      setElapsedTime(0)
+      return
     }
 
     const calculateElapsedTime = () => {
-      const now = new Date();
-      const start = new Date(startTime);
-      const diffInSeconds = Math.floor(
-        (now.getTime() - start.getTime()) / 1000,
-      );
-      setElapsedTime(Math.max(0, diffInSeconds));
-    };
+      const now = new Date()
+      const start = new Date(startTime)
+      const diffInSeconds = Math.floor((now.getTime() - start.getTime()) / 1000)
+      setElapsedTime(Math.max(0, diffInSeconds))
+    }
 
     // Calcular imediatamente
-    calculateElapsedTime();
+    calculateElapsedTime()
 
     // Atualizar a cada segundo
-    const interval = setInterval(calculateElapsedTime, 1000);
+    const interval = setInterval(calculateElapsedTime, 1000)
 
-    return () => clearInterval(interval);
-  }, [startTime]);
+    return () => clearInterval(interval)
+  }, [startTime])
 
   const formatElapsedTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
 
   const getSearchStatus = () => {
     if (elapsedTime < 90) {
@@ -86,8 +84,8 @@ export const RideStatusIdle: React.FC<RideStatusIdleProps> = ({
         bgColor: 'bg-blue-50',
         borderColor: 'border-blue-200',
         icon: '🔍',
-        description: 'Procurando o entregador mais próximo da sua localização',
-      };
+        description: 'Procurando o entregador mais próximo da sua localização'
+      }
     }
     if (elapsedTime < 150) {
       // 1:30min - 2:30min
@@ -97,9 +95,8 @@ export const RideStatusIdle: React.FC<RideStatusIdleProps> = ({
         bgColor: 'bg-orange-50',
         borderColor: 'border-red-300',
         icon: '🗺️',
-        description:
-          'Ampliando a busca para encontrar um entregador disponível',
-      };
+        description: 'Ampliando a busca para encontrar um entregador disponível'
+      }
     }
     if (elapsedTime < 240) {
       // 2:30min - 4min
@@ -109,8 +106,8 @@ export const RideStatusIdle: React.FC<RideStatusIdleProps> = ({
         bgColor: 'bg-yellow-50',
         borderColor: 'border-yellow-200',
         icon: '⏳',
-        description: 'Poucos entregadores disponíveis no momento. Aguarde...',
-      };
+        description: 'Poucos entregadores disponíveis no momento. Aguarde...'
+      }
     }
     return {
       text: 'Tempo de espera prolongado',
@@ -119,33 +116,33 @@ export const RideStatusIdle: React.FC<RideStatusIdleProps> = ({
       borderColor: 'border-red-200',
       icon: '⚠️',
       description:
-        'Estamos com dificuldade para encontrar um entregador. Você pode cancelar e tentar novamente.',
-    };
-  };
+        'Estamos com dificuldade para encontrar um entregador. Você pode cancelar e tentar novamente.'
+    }
+  }
 
-  const searchStatus = getSearchStatus();
+  const searchStatus = getSearchStatus()
 
   const getProgressPercentage = () => {
     // Progresso baseado no tempo (máximo 6 minutos = 360 segundos)
-    return Math.min(95, (elapsedTime / 360) * 100);
-  };
+    return Math.min(95, (elapsedTime / 360) * 100)
+  }
 
   const getTimeEstimate = () => {
-    if (elapsedTime < 90) return '0 - 1min';
-    if (elapsedTime < 150) return '1:30min - 2:30min';
-    if (elapsedTime < 240) return '2:30min -4min';
-    return 'Indefinido';
-  };
+    if (elapsedTime < 90) return '0 - 1min'
+    if (elapsedTime < 150) return '1:30min - 2:30min'
+    if (elapsedTime < 240) return '2:30min -4min'
+    return 'Indefinido'
+  }
 
   // AUTO-CANCELAMENTO
   useEffect(() => {
     if (elapsedTime >= 360) {
-      onAutoCancel?.('Tempo de espera prolongado'); // dispara cancelamento automático
+      onAutoCancel?.('Tempo de espera prolongado') // dispara cancelamento automático
     }
-  }, [elapsedTime]);
+  }, [elapsedTime])
 
   return (
-    <View className="absolute top-4 left-4 right-4 bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
+    <View className="absolute top-safe left-4 right-4 bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
       {/* Header */}
       <View className="flex-row items-center justify-between mb-3">
         <View className="flex-1">
@@ -194,7 +191,7 @@ export const RideStatusIdle: React.FC<RideStatusIdleProps> = ({
             className="h-full rounded-full transition-all duration-1000"
             style={{
               width: `${getProgressPercentage()}%`,
-              backgroundColor: COLOR_MAP[searchStatus.color],
+              backgroundColor: COLOR_MAP[searchStatus.color]
             }}
           />
         </View>
@@ -342,5 +339,5 @@ export const RideStatusIdle: React.FC<RideStatusIdleProps> = ({
         </View>
       )}
     </View>
-  );
-};
+  )
+}

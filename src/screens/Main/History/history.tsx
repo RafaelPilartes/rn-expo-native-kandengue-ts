@@ -186,7 +186,7 @@ export default function History() {
               {title}
             </Text>
           )}
-          contentContainerStyle={{ paddingBottom: 20 }}
+          contentContainerStyle={{ paddingBottom: 75 }}
           showsVerticalScrollIndicator={false}
           // ⬇️ Pull to refresh
           refreshing={isRefreshing}

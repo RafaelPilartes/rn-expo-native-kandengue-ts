@@ -144,21 +144,21 @@ export default function RideChooseScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      {/* Top bar */}
-      <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200">
-        <BackButton className="mr-3" iconColor="black" />
-        <Text className="text-2xl font-semibold text-gray-800">
-          Solicitar Entrega
-        </Text>
-        <View className="w-8" />
-      </View>
-
       {/* Conteúdo */}
       <KeyboardAvoidingView
-        className="flex-1"
+        className="flex-1 bg-white"
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
       >
+        {/* Top bar */}
+        <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200">
+          <BackButton className="mr-3" iconColor="black" />
+          <Text className="text-2xl font-semibold text-gray-800">
+            Solicitar Entrega
+          </Text>
+          <View className="w-8" />
+        </View>
+
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <FlatList
             data={[]}

@@ -67,7 +67,7 @@ export default function RideHomeScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       {/* Top bar */}
-      <View className="absolute top-0 left-0 right-0 z-10">
+      <View className="absolute top-safe left-0 right-0 z-10">
         <AddressDisplay
           address={address ?? 'Não foi possivel obter o endereço...'}
           isLoading={isGettingAddress}
@@ -87,7 +87,7 @@ export default function RideHomeScreen() {
         showsUserLocation={false}
         showsMyLocationButton={false}
         showsCompass={true}
-        zoomControlEnabled={true}
+        zoomControlEnabled={false}
       >
         {location && (
           <Marker
@@ -99,7 +99,7 @@ export default function RideHomeScreen() {
       </MapView>
 
       {/* Bottom input-like box */}
-      <View className="absolute bottom-0 left-0 right-0">
+      <View className="absolute bottom-safe left-0 right-0">
         <View className="flex-row items-center justify-between m-4">
           <View className="flex-row items-center">
             <BackButton className="bg-white mr-3" iconColor="black" />

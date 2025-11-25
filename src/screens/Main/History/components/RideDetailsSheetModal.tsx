@@ -1,21 +1,21 @@
 // src/screens/Main/History/components/RideDetailsSheetModal.tsx
-import React, { forwardRef, useEffect } from 'react';
+import React, { forwardRef, useEffect } from 'react'
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
   BottomSheetView,
-  BottomSheetScrollView,
-} from '@gorhom/bottom-sheet';
-import { View, Text, Image } from 'react-native';
-import { Car, Bike, Package, Clock, Route, User } from 'lucide-react-native';
-import { RideInterface } from '@/interfaces/IRide';
-import { formatMoney } from '@/utils/formattedNumber';
-import { formatDate, formatFullDate } from '@/utils/formatDate';
+  BottomSheetScrollView
+} from '@gorhom/bottom-sheet'
+import { View, Text, Image } from 'react-native'
+import { Car, Bike, Package, Clock, Route, User } from 'lucide-react-native'
+import { RideInterface } from '@/interfaces/IRide'
+import { formatMoney } from '@/utils/formattedNumber'
+import { formatDate, formatFullDate } from '@/utils/formatDate'
 
 interface RideDetailsSheetModalProps {
-  selectedRide: RideInterface | null;
-  snapPoints: string[];
-  onChange: (index: number) => void;
+  selectedRide: RideInterface | null
+  snapPoints: string[]
+  onChange: (index: number) => void
 }
 
 const RideDetailsSheetModal = forwardRef<
@@ -24,19 +24,19 @@ const RideDetailsSheetModal = forwardRef<
 >(({ selectedRide, snapPoints, onChange }, ref) => {
   // Obter ícone do tipo
   const getTypeIcon = () => {
-    if (!selectedRide) return null;
+    if (!selectedRide) return null
 
     switch (selectedRide.type) {
       case 'car':
-        return <Car size={20} color="#000" />;
+        return <Car size={20} color="#000" />
       case 'motorcycle':
-        return <Bike size={20} color="#000" />;
+        return <Bike size={20} color="#000" />
       case 'delivery':
-        return <Package size={20} color="#000" />;
+        return <Package size={20} color="#000" />
       default:
-        return <Car size={20} color="#000" />;
+        return <Car size={20} color="#000" />
     }
-  };
+  }
 
   // Traduzir status
   const translateStatus = (status: string) => {
@@ -48,24 +48,24 @@ const RideDetailsSheetModal = forwardRef<
       driver_on_the_way: '🚗 A caminho da recolha',
       arrived_pickup: '📍 Chegou ao local de recolha',
       picked_up: '📦 Encomenda recolhida',
-      arrived_dropoff: '🏁 Chegou ao destino',
-    };
+      arrived_dropoff: '🏁 Chegou ao destino'
+    }
 
-    return statusMap[status] || status;
-  };
+    return statusMap[status] || status
+  }
 
   const earnings = selectedRide
     ? selectedRide.fare?.payouts?.driver_earnings
-    : 0;
-  const totalFare = selectedRide ? selectedRide.fare?.total : 0;
+    : 0
+  const totalFare = selectedRide ? selectedRide.fare?.total : 0
 
   useEffect(() => {
-    if (!selectedRide) null;
+    if (!selectedRide) null
     console.log(
       'selectedRide',
-      formatFullDate(selectedRide?.created_at, 'dd MMM yyyy - HH:mm'),
-    );
-  }, [selectedRide]);
+      formatFullDate(selectedRide?.created_at, 'dd MMM yyyy - HH:mm')
+    )
+  }, [selectedRide])
   return (
     <BottomSheetModal
       ref={ref}
@@ -86,10 +86,10 @@ const RideDetailsSheetModal = forwardRef<
         <>
           <BottomSheetScrollView
             style={{ flex: 1 }}
-            contentContainerStyle={{ paddingBottom: 20 }}
+            contentContainerStyle={{ paddingBottom: 45 }}
           >
             {/* Header */}
-            <View className="px-4 pt-2 pb-4 border-b border-gray-200">
+            <View className="px-4 pt-2 pb-4 mb-safe border-b border-gray-200">
               <View className="flex-row items-center justify-between mb-2">
                 <View className="flex-row items-center">
                   {getTypeIcon()}
@@ -225,7 +225,7 @@ const RideDetailsSheetModal = forwardRef<
                           Kz{' '}
                           {formatMoney(
                             selectedRide.fare.breakdown.base_fare,
-                            0,
+                            0
                           )}
                         </Text>
                       </View>
@@ -237,7 +237,7 @@ const RideDetailsSheetModal = forwardRef<
                           Kz{' '}
                           {formatMoney(
                             selectedRide.fare.breakdown.distance_cost,
-                            0,
+                            0
                           )}
                         </Text>
                       </View>
@@ -248,7 +248,7 @@ const RideDetailsSheetModal = forwardRef<
                             Kz{' '}
                             {formatMoney(
                               selectedRide.fare.breakdown.wait_cost,
-                              0,
+                              0
                             )}
                           </Text>
                         </View>
@@ -337,7 +337,7 @@ const RideDetailsSheetModal = forwardRef<
         </>
       )}
     </BottomSheetModal>
-  );
-});
+  )
+})
 
-export default RideDetailsSheetModal;
+export default RideDetailsSheetModal

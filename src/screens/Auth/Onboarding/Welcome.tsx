@@ -42,7 +42,7 @@ export default function WelcomeScreen() {
         onPress={() => navigateTo(ROUTES.AuthStack.SIGN_IN)}
       />
       <PrimaryButton
-        className="mb-6"
+        className="mb-safe"
         label={`${t('common:buttons.sign_up')}`}
         variant="outline"
         onPress={() => navigateTo(ROUTES.AuthStack.SIGN_UP)}

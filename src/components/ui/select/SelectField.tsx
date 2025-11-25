@@ -1,26 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'
 import {
   View,
   Text,
   TouchableOpacity,
   Modal,
   FlatList,
-  Pressable,
-} from 'react-native';
+  Pressable
+} from 'react-native'
 
 interface Option {
-  label: string;
-  value: string;
+  label: string
+  value: string
 }
 
 interface SelectFieldProps {
-  label?: string;
-  placeholder?: string;
-  options: Option[];
-  value?: string;
-  onSelect: (value: string) => void;
-  error?: string;
-  containerClass?: string;
+  label?: string
+  placeholder?: string
+  options: Option[]
+  value?: string
+  onSelect: (value: string) => void
+  error?: string
+  containerClass?: string
 }
 
 export const SelectField = ({
@@ -30,11 +30,11 @@ export const SelectField = ({
   value,
   onSelect,
   error,
-  containerClass = '',
+  containerClass = ''
 }: SelectFieldProps) => {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(false)
 
-  const selectedOption = options.find(opt => opt.value === value);
+  const selectedOption = options.find(opt => opt.value === value)
 
   return (
     <View className={`mb-4 ${containerClass}`}>
@@ -66,7 +66,7 @@ export const SelectField = ({
       <Modal visible={visible} transparent animationType="slide">
         {/* <Pressable */}
         <View
-          className="flex-1 bg-black/40"
+          className="flex-1 bg-black/40 mb-safe"
           // onPress={() => setVisible(false)}
         >
           <View className="mt-auto bg-white rounded-t-2xl p-4 max-h-[60%]">
@@ -81,8 +81,8 @@ export const SelectField = ({
                     item.value === value && 'bg-gray-100 px-3'
                   } border-gray-200`}
                   onPress={() => {
-                    onSelect(item.value);
-                    setVisible(false);
+                    onSelect(item.value)
+                    setVisible(false)
                   }}
                 >
                   <Text className="text-base">{item.label}</Text>
@@ -102,5 +102,5 @@ export const SelectField = ({
         </View>
       </Modal>
     </View>
-  );
-};
+  )
+}

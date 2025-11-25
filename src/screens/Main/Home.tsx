@@ -155,6 +155,7 @@ export default function HomeScreen() {
             tintColor="#EF4444"
           />
         }
+        contentContainerStyle={{ paddingBottom: 42 }}
       >
         {/* Header */}
         <HomeHeader user={user} onNotifications={handleNotifications} />

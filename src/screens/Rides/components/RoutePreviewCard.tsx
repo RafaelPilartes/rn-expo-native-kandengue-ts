@@ -12,7 +12,7 @@ export const RoutePreviewCard: React.FC<RoutePreviewCardProps> = ({
   dropoffDescription
 }) => {
   return (
-    <View className="absolute top-4 left-4 right-4 bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
+    <View className="absolute top-safe left-4 right-4 bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
       <Text className="text-lg font-bold text-gray-900 mb-3">
         Resumo do Percurso
       </Text>

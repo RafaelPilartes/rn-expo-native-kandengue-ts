@@ -1,23 +1,23 @@
 // src/screens/Ride/components/DriverStatusOverlay.tsx
-import React from 'react';
-import { View, Text } from 'react-native';
-import { Clock, User, Navigation, Shield } from 'lucide-react-native';
+import React from 'react'
+import { View, Text } from 'react-native'
+import { Clock, User, Navigation, Shield } from 'lucide-react-native'
 
 interface DriverStatusOverlayProps {
-  duration: string;
-  driverName: string;
-  estimatedTime?: string;
-  vehicleInfo?: string;
+  duration: string
+  driverName: string
+  estimatedTime?: string
+  vehicleInfo?: string
 }
 
 export const DriverStatusOverlay: React.FC<DriverStatusOverlayProps> = ({
   duration,
   driverName,
   estimatedTime,
-  vehicleInfo,
+  vehicleInfo
 }) => {
   return (
-    <View className="absolute top-4 left-4 right-4 bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
+    <View className="absolute top-safe left-4 right-4 bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
       {/* Header */}
       <View className="flex-row items-center justify-between mb-3">
         <Text className="text-lg font-bold text-gray-900">
@@ -83,5 +83,5 @@ export const DriverStatusOverlay: React.FC<DriverStatusOverlayProps> = ({
         </Text>
       </View> */}
     </View>
-  );
-};
+  )
+}

@@ -18,6 +18,7 @@ import { UserRidesProvider } from './context/UserRidesContext'
 import { useEffect } from 'react'
 import { ThemeProvider } from './providers/ThemeProvider'
 import { NetworkProvider } from './providers/NetworkProvider'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 const queryClient = new QueryClient()
 
@@ -46,23 +47,25 @@ export default function App() {
   }, [])
 
   return (
-    <ThemeProvider>
-      <QueryClientProvider client={queryClient}>
-        <NavigationContainer>
-          <GestureHandlerRootView style={{ flex: 1 }}>
-            <BottomSheetModalProvider>
-              <LocationProvider>
-                <UserRidesProvider>
-                  <NetworkProvider>
-                    <StatusBar style="dark" />
-                    <AppRouter />
-                  </NetworkProvider>
-                </UserRidesProvider>
-              </LocationProvider>
-            </BottomSheetModalProvider>
-          </GestureHandlerRootView>
-        </NavigationContainer>
-      </QueryClientProvider>
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          <NavigationContainer>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+              <BottomSheetModalProvider>
+                <LocationProvider>
+                  <UserRidesProvider>
+                    <NetworkProvider>
+                      <StatusBar style="dark" />
+                      <AppRouter />
+                    </NetworkProvider>
+                  </UserRidesProvider>
+                </LocationProvider>
+              </BottomSheetModalProvider>
+            </GestureHandlerRootView>
+          </NavigationContainer>
+        </QueryClientProvider>
+      </ThemeProvider>
+    </SafeAreaProvider>
   )
 }

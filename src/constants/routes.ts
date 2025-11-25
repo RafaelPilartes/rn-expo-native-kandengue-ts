@@ -15,14 +15,15 @@ const ROUTES = {
     NEW_PASSWORD: 'NewPasswordScreen',
     NEW_PASSWORD_SUCCESS: 'NewPasswordSuccessScreen',
 
-    CAMOUFLAGE: 'CamouflageScreen',
+    CAMOUFLAGE: 'CamouflageScreen'
   },
   HomeStack: {
     HOME: 'HomeScreen',
-    NOTIFICATIONS: 'NotificationsScreen',
+    NOTIFICATIONS: 'NotificationsScreen'
   },
   HistoryStack: {
     HISTORY: 'HistoryScreen',
+    HISTORY_DETAILS: 'HistoryDetailsScreen'
   },
   ProfileStack: {
     PROFILE: 'ProfileScreen',
@@ -35,11 +36,11 @@ const ROUTES = {
     COMPLAINTS: 'ComplaintsScreen',
     HELP: 'HelpScreen',
     PRIVATE: 'PrivacyPolicyScreen',
-    TERMS: 'TermsConditionsScreen',
+    TERMS: 'TermsConditionsScreen'
   },
   MotoBoyStack: {
     REQUESTS: 'RequestsScreen',
-    TRANSFERS: 'TransfersScreen',
+    TRANSFERS: 'TransfersScreen'
   },
   Rides: {
     HOME: 'RideHomeScreen',
@@ -47,14 +48,14 @@ const ROUTES = {
     SUMMARY: 'RideSummaryScreen',
     FINISHED: 'RideFinishedScreen',
     REQUESTS: 'RequestsScreen',
-    TRANSFERS: 'TransfersScreen',
+    TRANSFERS: 'TransfersScreen'
   },
   MainTab: {
     HOME: 'HomeTab',
     MAP: 'MapTab',
     HISTORY: 'HistoryTab',
-    PROFILE: 'ProfileTab',
-  },
-} as const;
+    PROFILE: 'ProfileTab'
+  }
+} as const
 
-export default ROUTES;
+export default ROUTES

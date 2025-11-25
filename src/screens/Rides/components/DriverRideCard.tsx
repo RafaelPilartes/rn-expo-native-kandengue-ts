@@ -1,8 +1,8 @@
 // src/screens/Ride/components/DriverRideCard.tsx
-import { RideStatusType } from '@/types/enum';
-import { CustomPlace } from '@/types/places';
-import { MapPinned, MessageCircle, Phone, X, Star } from 'lucide-react-native';
-import React, { forwardRef } from 'react';
+import { RideStatusType } from '@/types/enum'
+import { CustomPlace } from '@/types/places'
+import { MapPinned, MessageCircle, Phone, X, Star } from 'lucide-react-native'
+import React, { forwardRef } from 'react'
 import {
   View,
   Text,
@@ -10,21 +10,21 @@ import {
   Image,
   StyleSheet,
   Alert,
-  Linking,
-} from 'react-native';
-import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
-import { UserInterface } from '@/interfaces/IUser';
-import { RideInterface } from '@/interfaces/IRide';
-import { formatMoney } from '@/utils/formattedNumber';
+  Linking
+} from 'react-native'
+import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
+import { UserInterface } from '@/interfaces/IUser'
+import { RideInterface } from '@/interfaces/IRide'
+import { formatMoney } from '@/utils/formattedNumber'
 
 type Props = {
-  rideData: RideInterface;
-  rideStatus: RideStatusType;
-  distance: string;
-  onCancel: () => void;
-  onChange?: (index: number) => void;
-  snapPoints: (string | number)[];
-};
+  rideData: RideInterface
+  rideStatus: RideStatusType
+  distance: string
+  onCancel: () => void
+  onChange?: (index: number) => void
+  snapPoints: (string | number)[]
+}
 
 export const DriverRideSheet = forwardRef<BottomSheetModal, Props>(
   ({ rideData, rideStatus, distance, onCancel, snapPoints }, ref) => {
@@ -38,14 +38,14 @@ export const DriverRideSheet = forwardRef<BottomSheetModal, Props>(
             {
               text: 'Ligar',
               onPress: () =>
-                Linking.openURL(`tel:${rideData?.driver?.phone ?? '------'}`),
-            },
-          ],
-        );
+                Linking.openURL(`tel:${rideData?.driver?.phone ?? '------'}`)
+            }
+          ]
+        )
       } else {
-        Alert.alert('Info', 'Número do entregador não disponível');
+        Alert.alert('Info', 'Número do entregador não disponível')
       }
-    };
+    }
 
     const handleMessage = () => {
       if (rideData.driver?.phone) {
@@ -57,14 +57,14 @@ export const DriverRideSheet = forwardRef<BottomSheetModal, Props>(
             {
               text: 'Enviar',
               onPress: () =>
-                Linking.openURL(`sms:${rideData?.driver?.phone ?? '------'}`),
-            },
-          ],
-        );
+                Linking.openURL(`sms:${rideData?.driver?.phone ?? '------'}`)
+            }
+          ]
+        )
       } else {
-        Alert.alert('Info', 'Número do entregador não disponível');
+        Alert.alert('Info', 'Número do entregador não disponível')
       }
-    };
+    }
 
     const getStatusInfo = () => {
       switch (rideStatus) {
@@ -73,40 +73,40 @@ export const DriverRideSheet = forwardRef<BottomSheetModal, Props>(
             label: 'A caminho da recolha',
             color: 'bg-blue-100',
             textColor: 'text-blue-700',
-            description: 'Entregador está a caminho do local de recolha',
-          };
+            description: 'Entregador está a caminho do local de recolha'
+          }
         case 'arrived_pickup':
           return {
             label: 'No local de recolha',
             color: 'bg-green-100',
             textColor: 'text-green-700',
-            description: 'Entregador chegou no local de recolha',
-          };
+            description: 'Entregador chegou no local de recolha'
+          }
         case 'picked_up':
           return {
             label: 'Pacote recolhido',
             color: 'bg-orange-100',
             textColor: 'text-orange-700',
-            description: 'Pacote foi recolhido e está a caminho do destino',
-          };
+            description: 'Pacote foi recolhido e está a caminho do destino'
+          }
         case 'arrived_dropoff':
           return {
             label: 'No local de entrega',
             color: 'bg-purple-100',
             textColor: 'text-purple-700',
-            description: 'Entregador chegou no local de entrega',
-          };
+            description: 'Entregador chegou no local de entrega'
+          }
         default:
           return {
             label: 'Em andamento',
             color: 'bg-gray-100',
             textColor: 'text-gray-700',
-            description: 'Entrega em progresso',
-          };
+            description: 'Entrega em progresso'
+          }
       }
-    };
+    }
 
-    const statusInfo = getStatusInfo();
+    const statusInfo = getStatusInfo()
 
     return (
       <BottomSheetModal
@@ -119,7 +119,7 @@ export const DriverRideSheet = forwardRef<BottomSheetModal, Props>(
       >
         <BottomSheetView style={styles.container}>
           {/* Header com status */}
-          <View className="flex-row items-center justify-between mb-4">
+          <View className="flex-row items-center justify-between mb-safe">
             <View className={`px-3 py-1 rounded-full ${statusInfo.color}`}>
               <Text className={`text-xs font-medium ${statusInfo.textColor}`}>
                 {statusInfo.label}
@@ -149,7 +149,7 @@ export const DriverRideSheet = forwardRef<BottomSheetModal, Props>(
                   source={{
                     uri:
                       rideData.driver.photo ||
-                      'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
+                      'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'
                   }}
                   className="w-12 h-12 rounded-full mr-3"
                 />
@@ -253,12 +253,12 @@ export const DriverRideSheet = forwardRef<BottomSheetModal, Props>(
           </View>
         </BottomSheetView>
       </BottomSheetModal>
-    );
-  },
-);
+    )
+  }
+)
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
-  },
-});
+    padding: 16
+  }
+})

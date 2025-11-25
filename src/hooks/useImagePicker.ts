@@ -1,132 +1,132 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { Alert } from 'react-native';
+import { useState, useCallback, useRef, useEffect } from 'react'
+import { Alert } from 'react-native'
 import {
   ImagePickerService,
   ImageValidationRules,
-  ImagePickerResult,
-} from '@/services/picker/imagePicker';
+  ImagePickerResult
+} from '@/services/picker/imagePicker'
 import type {
   CameraOptions,
-  ImageLibraryOptions,
-} from 'react-native-image-picker';
+  ImageLibraryOptions
+} from 'react-native-image-picker'
 
 interface UseImagePickerReturn {
   pickImage: (
     config?: Partial<ImageLibraryOptions>,
-    validation?: ImageValidationRules,
-  ) => Promise<string | null>;
+    validation?: ImageValidationRules
+  ) => Promise<string | null>
   takePhoto: (
     config?: Partial<CameraOptions>,
-    validation?: ImageValidationRules,
-  ) => Promise<string | null>;
-  isUploading: boolean;
-  error: string | null;
-  clearError: () => void;
+    validation?: ImageValidationRules
+  ) => Promise<string | null>
+  isUploading: boolean
+  error: string | null
+  clearError: () => void
 }
 
 export const useImagePicker = (): UseImagePickerReturn => {
-  const [isUploading, setIsUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const isMounted = useRef(true);
+  const [isUploading, setIsUploading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const isMounted = useRef(true)
 
   useEffect(() => {
     return () => {
-      isMounted.current = false;
-    };
-  }, []);
+      isMounted.current = false
+    }
+  }, [])
 
   // ✅ Versão corrigida
   const safeSetState = useCallback(
     <T>(setter: React.Dispatch<React.SetStateAction<T>>, value: T) => {
-      if (isMounted.current) setter(value);
+      if (isMounted.current) setter(value)
     },
-    [],
-  );
+    []
+  )
 
   const clearError = useCallback(
     () => safeSetState(setError as any, null),
-    [safeSetState],
-  );
+    [safeSetState]
+  )
 
   const handleImageSelection = useCallback(
     async (
       pickerFunction: (
         config?: Partial<ImageLibraryOptions>,
-        validation?: ImageValidationRules,
+        validation?: ImageValidationRules
       ) => Promise<ImagePickerResult>,
       config?: Partial<ImageLibraryOptions>,
-      validation?: ImageValidationRules,
+      validation?: ImageValidationRules
     ): Promise<string | null> => {
-      safeSetState(setIsUploading as any, true);
-      safeSetState(setError as any, null);
+      safeSetState(setIsUploading as any, true)
+      safeSetState(setError as any, null)
 
       try {
-        const result = await pickerFunction(config, validation);
+        const result = await pickerFunction(config, validation)
 
         if (result.cancelled) {
-          console.log('🟡 Seleção de imagem cancelada pelo usuário');
-          return null;
+          console.log('🟡 Seleção de imagem cancelada pelo usuário')
+          return null
         }
 
         if (!result.success || !result.uri) {
-          const msg = result.error || 'Erro ao selecionar imagem';
-          console.warn('⚠️ Erro ao selecionar imagem:', msg);
-          safeSetState(setError as any, msg);
+          const msg = result.error || 'Erro ao selecionar imagem'
+          console.warn('⚠️ Erro ao selecionar imagem:', msg)
+          safeSetState(setError as any, msg)
 
           if (!result.cancelled) {
-            Alert.alert('Erro', msg);
+            Alert.alert('Erro', msg)
           }
-          return null;
+          return null
         }
 
         console.log('✅ Imagem selecionada com sucesso:', {
           uri: result.uri,
           size: result.fileSize,
-          dimensions: `${result.width}x${result.height}`,
-        });
+          dimensions: `${result.width}x${result.height}`
+        })
 
-        return result.uri;
+        return result.uri
       } catch (error) {
-        console.error('❌ Erro no image picker:', error);
+        console.error('❌ Erro no image picker:', error)
         const errorMessage =
-          error instanceof Error ? error.message : 'Erro desconhecido';
-        safeSetState(setError as any, errorMessage);
-        Alert.alert('Erro', 'Não foi possível processar a imagem');
-        return null;
+          error instanceof Error ? error.message : 'Erro desconhecido'
+        safeSetState(setError as any, errorMessage)
+        Alert.alert('Erro', 'Não foi possível processar a imagem')
+        return null
       } finally {
-        safeSetState(setIsUploading as any, false);
+        safeSetState(setIsUploading as any, false)
       }
     },
-    [safeSetState],
-  );
+    [safeSetState]
+  )
 
   const pickImage = useCallback(
     (
       config?: Partial<ImageLibraryOptions>,
-      validation?: ImageValidationRules,
+      validation?: ImageValidationRules
     ) => handleImageSelection(ImagePickerService.pickImage, config, validation),
-    [handleImageSelection],
-  );
+    [handleImageSelection]
+  )
 
   const takePhoto = useCallback(
     (
       config?: Partial<CameraOptions>,
-      validation?: ImageValidationRules,
+      validation?: ImageValidationRules
     ): Promise<string | null> => {
       return handleImageSelection(
         ImagePickerService.takePhoto,
         config,
-        validation,
-      );
+        validation
+      )
     },
-    [handleImageSelection],
-  );
+    [handleImageSelection]
+  )
 
   return {
     pickImage,
     takePhoto,
     isUploading,
     error,
-    clearError,
-  };
-};
+    clearError
+  }
+}

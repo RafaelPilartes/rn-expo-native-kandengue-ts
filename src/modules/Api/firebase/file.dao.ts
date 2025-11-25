@@ -1,11 +1,12 @@
-// src/infra/firebase/file.dao.ts
+// src/modules/Api/firebase/file.dao.ts
 import {
+  putFile,
   ref,
-  uploadBytesResumable,
   getDownloadURL,
-  deleteObject,
-  StorageError
-} from 'firebase/storage'
+  deleteObject
+} from '@react-native-firebase/storage'
+import { Platform } from 'react-native'
+import * as FileSystem from 'expo-file-system/legacy'
 import { storage } from '@/config/firebase.config'
 
 interface UploadResult {
@@ -16,38 +17,51 @@ interface UploadResult {
 
 export class FirebaseFileDAO {
   /**
-   * UPLOAD SIMPLES (principal método)
+   * ✅ UPLOAD HÍBRIDO - API modular + putFile namespaced
+   * Usa o melhor de ambos: modular recomendado + putFile que funciona
    */
   async uploadSimple(
     fileUri: string,
     folder: string = 'uploads'
   ): Promise<UploadResult> {
+    console.log('🚀 UPLOAD HÍBRIDO INICIADO')
+    console.log('📍 URI Original:', fileUri)
+
     try {
-      console.log('📤 Iniciando upload:', fileUri)
+      // 1. VALIDAR E CORRIGIR URI
+      const processedUri = this.processFileUri(fileUri)
+      console.log('📍 URI Processada:', processedUri)
 
-      const timestamp = Date.now()
-      const randomString = Math.random().toString(36).substring(2, 15)
-      const fileExtension = this.getFileExtension(fileUri)
-      const fileName = `file_${timestamp}_${randomString}.${fileExtension}`
+      // 2. VERIFICAR SE ARQUIVO EXISTE
+      const fileInfo = await FileSystem.getInfoAsync(processedUri)
+      if (!fileInfo.exists) {
+        throw new Error(`Arquivo não encontrado: ${processedUri}`)
+      }
+      console.log('📄 Arquivo existe, tamanho:', fileInfo.size)
+
+      // 3. GERAR NOME E CAMINHO
+      const fileName = this.generateFileName(fileUri)
       const fullPath = `${folder}/${fileName}`
+      console.log('📂 Caminho no Storage:', fullPath)
 
-      // Criar referência
+      // 4. CRIAR REFERÊNCIA (API MODULAR RECOMENDADA)
       const storageRef = ref(storage, fullPath)
 
-      // Buscar o arquivo como blob
-      console.log('🔄 Buscando arquivo...')
-      const response = await fetch(fileUri)
-      const blob = await response.blob()
+      // 5. FAZER UPLOAD COM putFile() namespaced (QUE FUNCIONA!)
+      console.log('🔼 Iniciando upload com putFile namespaced...')
 
-      console.log('🔄 Fazendo upload para:', fullPath)
+      // Usar API namespaced APENAS para putFile
+      const task = putFile(storageRef, processedUri, {
+        contentType: this.getContentType(fileName)
+      })
 
-      // Fazer upload
-      const snapshot = await uploadBytesResumable(storageRef, blob)
+      // 6. AGUARDAR CONCLUSÃO
+      await task
+      console.log('✅ Upload com putFile concluído com sucesso!')
 
-      // Obter URL de download
-      const url = await getDownloadURL(snapshot.ref)
-
-      console.log('✅ Upload concluído:', url)
+      // 7. OBTER URL (API MODULAR RECOMENDADA)
+      const url = await getDownloadURL(storageRef)
+      console.log('🌐 URL obtida:', url)
 
       return {
         url,
@@ -55,163 +69,271 @@ export class FirebaseFileDAO {
         metadata: {
           fileName,
           uploadedAt: new Date(),
-          size: snapshot.metadata.size,
-          contentType: snapshot.metadata.contentType
+          contentType: this.getContentType(fileName),
+          size: fileInfo.size
         }
       }
     } catch (error: any) {
-      console.error('❌ Erro no upload:', error)
+      console.error('💥 ERRO NO UPLOAD:', error.code, error.message)
+
+      // Tratamento específico de erros
+      if (error.code === 'storage/unknown') {
+        throw new Error(
+          'Erro desconhecido no upload. Verifique: 1. Regras do Firebase 2. Conexão com internet'
+        )
+      }
+
+      if (error.code === 'storage/object-not-found') {
+        throw new Error('Arquivo local não encontrado para upload.')
+      }
+
+      if (error.code === 'storage/unauthorized') {
+        throw new Error('Permissão negada no Firebase Storage.')
+      }
+
       throw new Error(`Falha no upload: ${error.message}`)
     }
   }
 
   /**
-   * UPLOAD COM PROGRESSO (para feedback visual)
+   * ✅ UPLOAD COM PROGRESSO
    */
-  async uploadWithProgress(
+  uploadWithProgress(
     fileUri: string,
-    folder: string = 'uploads',
+    folder: string,
     onProgress?: (progress: number) => void
   ): Promise<UploadResult> {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const timestamp = Date.now()
-        const randomString = Math.random().toString(36).substring(2, 15)
-        const fileExtension = this.getFileExtension(fileUri)
-        const fileName = `file_${timestamp}_${randomString}.${fileExtension}`
-        const fullPath = `${folder}/${fileName}`
+    return new Promise((resolve, reject) => {
+      const processedUri = this.processFileUri(fileUri)
+      const fileName = this.generateFileName(fileUri)
+      const fullPath = `${folder}/${fileName}`
 
-        const storageRef = ref(storage, fullPath)
+      console.log('🔄 UPLOAD COM PROGRESSO INICIADO')
 
-        // Buscar arquivo
-        const response = await fetch(fileUri)
-        const blob = await response.blob()
+      // Referência modular para getDownloadURL depois
+      const storageRef = ref(storage, fullPath)
 
-        console.log('🔄 Iniciando upload com progresso...')
+      // Referência namespaced para putFile com progresso
+      const task = putFile(storageRef, processedUri, {
+        contentType: this.getContentType(fileName)
+      })
 
-        const uploadTask = uploadBytesResumable(storageRef, blob)
-
-        uploadTask.on(
-          'state_changed',
-          snapshot => {
-            const progress =
-              (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-            console.log(`📊 Progresso do upload: ${progress.toFixed(2)}%`)
-            onProgress?.(progress)
-          },
-          (error: StorageError) => {
-            console.error('❌ Erro no upload com progresso:', error)
-            reject(new Error(`Falha no upload: ${error.message}`))
-          },
-          async () => {
-            try {
-              const url = await getDownloadURL(uploadTask.snapshot.ref)
-              console.log('✅ Upload com progresso concluído:', url)
-
-              resolve({
-                url,
-                path: fullPath,
-                metadata: {
-                  fileName,
-                  uploadedAt: new Date(),
-                  size: uploadTask.snapshot.metadata.size,
-                  contentType: uploadTask.snapshot.metadata.contentType
-                }
-              })
-            } catch (error: any) {
-              reject(new Error(`Falha ao obter URL: ${error.message}`))
-            }
+      task.on(
+        'state_changed',
+        snapshot => {
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+          console.log(`📊 Progresso: ${progress.toFixed(0)}%`)
+          onProgress?.(progress)
+        },
+        error => {
+          console.error('💥 Erro no upload com progresso:', error)
+          reject(error)
+        },
+        async () => {
+          try {
+            console.log('✅ Upload com progresso concluído')
+            // Usar API modular para getDownloadURL
+            const url = await getDownloadURL(storageRef)
+            resolve({
+              url,
+              path: fullPath,
+              metadata: {
+                fileName,
+                uploadedAt: new Date(),
+                contentType: this.getContentType(fileName)
+              }
+            })
+          } catch (error) {
+            reject(error)
           }
-        )
-      } catch (error: any) {
-        reject(new Error(`Falha no upload: ${error.message}`))
-      }
+        }
+      )
     })
   }
 
   /**
-   * UPLOAD MÚLTIPLO
+   * ✅ PROCESSAMENTO DE URI
    */
-  async uploadMultiple(
-    fileUris: string[],
-    folder: string = 'uploads'
-  ): Promise<UploadResult[]> {
-    try {
-      console.log(`📤 Iniciando upload de ${fileUris.length} arquivos`)
-      const results: UploadResult[] = []
+  private processFileUri(uri: string): string {
+    let processedUri = uri
 
-      for (const uri of fileUris) {
-        const result = await this.uploadSimple(uri, folder)
-        results.push(result)
-      }
+    // Remove query parameters
+    processedUri = processedUri.split('?')[0]
 
-      console.log('✅ Upload múltiplo concluído')
-      return results
-    } catch (error: any) {
-      console.error('❌ Erro no upload múltiplo:', error)
-      throw new Error(`Falha no upload múltiplo: ${error.message}`)
+    // Corrige encoding
+    processedUri = decodeURIComponent(processedUri)
+
+    // Android: Garante prefixo file://
+    if (Platform.OS === 'android' && !processedUri.startsWith('file://')) {
+      processedUri = `file://${processedUri}`
     }
+
+    // Remove caracteres problemáticos
+    processedUri = processedUri.replace(/%20/g, ' ')
+
+    return processedUri
   }
 
   /**
-   * DELETE (remover arquivo)
+   * ✅ UPLOAD PARA IMAGENS
+   */
+  async uploadImagePicker(
+    fileUri: string,
+    folder: string = 'images'
+  ): Promise<UploadResult> {
+    console.log('🖼️ UPLOAD DE IMAGEM')
+    return this.uploadSimple(fileUri, folder)
+  }
+
+  /**
+   * ✅ UPLOAD PARA PERFIL
+   */
+  async uploadProfileImage(
+    fileUri: string,
+    userId: string
+  ): Promise<UploadResult> {
+    console.log('👤 UPLOAD DE IMAGEM DE PERFIL')
+    console.log('👤 User ID:', userId)
+    return this.uploadSimple(fileUri, `profiles/${userId}`)
+  }
+
+  /**
+   * ✅ UPLOAD PARA DOCUMENTOS
+   */
+  async uploadDocument(
+    fileUri: string,
+    userId: string,
+    documentType: string
+  ): Promise<UploadResult> {
+    console.log('📄 UPLOAD DE DOCUMENTO')
+    console.log('👤 User ID:', userId)
+    console.log('📋 Tipo:', documentType)
+    return this.uploadSimple(fileUri, `documents/${userId}/${documentType}`)
+  }
+
+  /**
+   * ✅ UPLOAD PARA FOTOS DE CORRIDA
+   */
+  async uploadRidePhoto(
+    fileUri: string,
+    rideId: string,
+    photoType: 'pickup' | 'dropoff'
+  ): Promise<UploadResult> {
+    console.log('📸 UPLOAD DE FOTO DE CORRIDA')
+    console.log('🚗 Ride ID:', rideId)
+    console.log('📍 Tipo:', photoType)
+
+    const timestamp = Date.now()
+    const fileName = `${photoType}_${timestamp}.jpg`
+    const folder = `rides/${rideId}`
+
+    return this.uploadSimple(fileUri, `${folder}/${fileName}`)
+  }
+
+  /**
+   * ✅ DELETE ARQUIVO (API MODULAR)
    */
   async deleteFile(path: string): Promise<void> {
+    console.log('🗑️ DELETANDO ARQUIVO:', path)
+
     try {
-      console.log('🗑️ Removendo arquivo:', path)
       const storageRef = ref(storage, path)
       await deleteObject(storageRef)
-      console.log('✅ Arquivo removido com sucesso')
+      console.log('✅ Arquivo removido')
     } catch (error: any) {
+      console.error('❌ Erro ao remover arquivo:', error.message)
+
       if (error.code === 'storage/object-not-found') {
-        console.warn('⚠️ Arquivo já não existe:', path)
+        console.log('ℹ️ Arquivo já não existe')
         return
       }
-      console.error('❌ Erro ao remover arquivo:', error)
-      throw new Error(`Falha ao remover arquivo: ${error.message}`)
+
+      throw new Error(`Falha ao remover: ${error.message}`)
     }
   }
 
   /**
-   * GET URL (obter URL de download)
+   * ✅ OBTER URL (API MODULAR)
    */
   async getFileURL(path: string): Promise<string> {
+    console.log('🔗 OBTENDO URL:', path)
+
     try {
       const storageRef = ref(storage, path)
-      return await getDownloadURL(storageRef)
+      const url = await getDownloadURL(storageRef)
+      console.log('✅ URL obtida')
+      return url
     } catch (error: any) {
-      console.error('❌ Erro ao obter URL:', error)
+      console.error('❌ Erro ao obter URL:', error.message)
+
+      if (error.code === 'storage/object-not-found') {
+        throw new Error('Arquivo não encontrado no storage')
+      }
+
       throw new Error(`Falha ao obter URL: ${error.message}`)
     }
   }
 
   /**
-   * OBTÉM EXTENSÃO
+   * ✅ GERAR NOME DE ARQUIVO
+   */
+  private generateFileName(uri: string): string {
+    const timestamp = Date.now()
+    const randomString = Math.random().toString(36).substring(2, 10)
+    const extension = this.getFileExtension(uri)
+    return `file_${timestamp}_${randomString}.${extension}`
+  }
+
+  /**
+   * ✅ EXTRAIR EXTENSÃO
    */
   private getFileExtension(uri: string): string {
     try {
-      // Para URIs de arquivo local
-      if (uri.startsWith('file://')) {
-        const path = uri.split('?')[0]
-        const parts = path.split('.')
-        if (parts.length > 1) {
-          return parts.pop()?.toLowerCase() || 'jpg'
-        }
+      const cleanUri = uri.split('?')[0]
+      const filename = cleanUri.split('/').pop() || ''
+      const parts = filename.split('.')
+
+      if (parts.length > 1) {
+        const ext = parts.pop()?.toLowerCase() || 'jpg'
+        const validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf']
+        return validExtensions.includes(ext) ? ext : 'jpg'
       }
 
-      // Para URLs
-      const match = uri.match(/\.([a-zA-Z0-9]+)(?:\?|$)/)
-      if (match && match[1]) return match[1].toLowerCase()
-
-      // Fallbacks baseados no conteúdo
-      if (uri.includes('jpeg') || uri.includes('jpg')) return 'jpg'
-      if (uri.includes('png')) return 'png'
-      if (uri.includes('gif')) return 'gif'
-      if (uri.includes('pdf')) return 'pdf'
-
-      return 'jpg' // default
-    } catch {
       return 'jpg'
+    } catch (error) {
+      return 'jpg'
+    }
+  }
+
+  /**
+   * ✅ DETERMINAR CONTENT TYPE
+   */
+  private getContentType(fileName: string): string {
+    const ext = fileName.split('.').pop()?.toLowerCase()
+    const types: { [key: string]: string } = {
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      png: 'image/png',
+      gif: 'image/gif',
+      webp: 'image/webp',
+      pdf: 'application/pdf'
+    }
+    return types[ext || ''] || 'image/jpeg'
+  }
+
+  /**
+   * ✅ VERIFICAR SE ARQUIVO EXISTE (API MODULAR)
+   */
+  async fileExists(path: string): Promise<boolean> {
+    try {
+      await this.getFileURL(path)
+      return true
+    } catch (error: any) {
+      if (error.code === 'storage/object-not-found') {
+        return false
+      }
+      throw error
     }
   }
 }

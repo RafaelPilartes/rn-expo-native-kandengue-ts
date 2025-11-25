@@ -1,5 +1,5 @@
 // src/screens/Ride/components/CancelRideModal.tsx
-import React, { useState } from 'react';
+import React, { useState } from 'react'
 import {
   View,
   Text,
@@ -7,15 +7,15 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
-  Alert,
-} from 'react-native';
-import { X } from 'lucide-react-native';
+  Alert
+} from 'react-native'
+import { X } from 'lucide-react-native'
 
 interface CancelRideModalProps {
-  visible: boolean;
-  onClose: () => void;
-  onConfirm: (reason: string) => void;
-  isLoading?: boolean;
+  visible: boolean
+  onClose: () => void
+  onConfirm: (reason: string) => void
+  isLoading?: boolean
 }
 
 const CANCEL_REASONS = [
@@ -25,35 +25,35 @@ const CANCEL_REASONS = [
   'Emergência pessoal',
   'Estafeta cancelou',
   'Problema com a rota',
-  'Outro motivo',
-];
+  'Outro motivo'
+]
 
 export const CancelRideModal: React.FC<CancelRideModalProps> = ({
   visible,
   onClose,
   onConfirm,
-  isLoading = false,
+  isLoading = false
 }) => {
-  const [selectedReason, setSelectedReason] = useState('');
-  const [customReason, setCustomReason] = useState('');
+  const [selectedReason, setSelectedReason] = useState('')
+  const [customReason, setCustomReason] = useState('')
 
   const handleConfirm = () => {
     const reason =
-      selectedReason === 'Outro motivo' ? customReason : selectedReason;
+      selectedReason === 'Outro motivo' ? customReason : selectedReason
     if (!reason.trim()) {
-      Alert.alert('Atenção', 'Por favor, selecione ou digite um motivo.');
-      return;
+      Alert.alert('Atenção', 'Por favor, selecione ou digite um motivo.')
+      return
     }
-    onConfirm(reason);
-    setSelectedReason('');
-    setCustomReason('');
-  };
+    onConfirm(reason)
+    setSelectedReason('')
+    setCustomReason('')
+  }
 
   const handleClose = () => {
-    setSelectedReason('');
-    setCustomReason('');
-    onClose();
-  };
+    setSelectedReason('')
+    setCustomReason('')
+    onClose()
+  }
 
   return (
     <Modal
@@ -62,7 +62,7 @@ export const CancelRideModal: React.FC<CancelRideModalProps> = ({
       animationType="slide"
       onRequestClose={handleClose}
     >
-      <View className="flex-1 bg-black/50 justify-end">
+      <View className="flex-1 bg-black/50 justify-end mb-safe">
         <View className="bg-white rounded-t-3xl max-h-3/4">
           {/* Header */}
           <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
@@ -147,5 +147,5 @@ export const CancelRideModal: React.FC<CancelRideModalProps> = ({
         </View>
       </View>
     </Modal>
-  );
-};
+  )
+}

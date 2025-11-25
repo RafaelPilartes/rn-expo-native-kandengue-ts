@@ -1,33 +1,33 @@
 // src/screens/Ride/components/RideStatusArrival.tsx
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react'
+import { View, Text, TouchableOpacity } from 'react-native'
 import {
   User,
   Clock,
   MapPin,
   ChevronDown,
-  ChevronUp,
-} from 'lucide-react-native';
-import { RideStatusType } from '@/types/enum';
+  ChevronUp
+} from 'lucide-react-native'
+import { RideStatusType } from '@/types/enum'
 
 interface RideStatusArrivalProps {
-  rideStatus: RideStatusType;
-  currentTime: string;
-  additionalTime: string;
-  customerName?: string;
+  rideStatus: RideStatusType
+  currentTime: string
+  additionalTime: string
+  customerName?: string
 }
 
 export const RideStatusArrival: React.FC<RideStatusArrivalProps> = ({
   rideStatus,
   currentTime,
   additionalTime,
-  customerName,
+  customerName
 }) => {
-  const [showDetails, setShowDetails] = useState(false);
-  const isAtPickup = rideStatus === 'arrived_pickup';
+  const [showDetails, setShowDetails] = useState(false)
+  const isAtPickup = rideStatus === 'arrived_pickup'
 
   return (
-    <View className="absolute top-4 left-4 right-4 bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
+    <View className="absolute top-safe left-4 right-4 bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
       {/* Header */}
       <View className="flex-row items-center justify-between mb-3">
         <View className="flex-1">
@@ -142,5 +142,5 @@ export const RideStatusArrival: React.FC<RideStatusArrivalProps> = ({
         </Text>
       </View> */}
     </View>
-  );
-};
+  )
+}

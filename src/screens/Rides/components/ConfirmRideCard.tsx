@@ -1,14 +1,14 @@
 // src/screens/Ride/components/ConfirmRideCard.tsx
-import React from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { Clock, MapPin, Shield } from 'lucide-react-native';
+import React from 'react'
+import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native'
+import { Clock, MapPin, Shield } from 'lucide-react-native'
 
 interface ConfirmRideCardProps {
-  price: string;
-  duration: string;
-  isLoading: boolean;
-  onConfirm: () => void;
-  onCancel?: () => void;
+  price: string
+  duration: string
+  isLoading: boolean
+  onConfirm: () => void
+  onCancel?: () => void
 }
 
 export const ConfirmRideCard: React.FC<ConfirmRideCardProps> = ({
@@ -16,10 +16,10 @@ export const ConfirmRideCard: React.FC<ConfirmRideCardProps> = ({
   duration,
   isLoading,
   onConfirm,
-  onCancel,
+  onCancel
 }) => {
   return (
-    <View className="absolute bottom-4 left-4 right-4 bg-white rounded-2xl shadow-2xl border border-gray-100">
+    <View className="absolute bottom-safe left-4 right-4 bg-white rounded-2xl shadow-2xl border border-gray-100">
       {/* Header */}
       <View className="p-4 border-b border-gray-100">
         <Text className="text-lg font-bold text-gray-900 text-center">
@@ -80,5 +80,5 @@ export const ConfirmRideCard: React.FC<ConfirmRideCardProps> = ({
         </Text>
       </View>
     </View>
-  );
-};
+  )
+}

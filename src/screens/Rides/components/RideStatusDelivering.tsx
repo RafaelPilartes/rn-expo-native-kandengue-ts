@@ -1,21 +1,21 @@
 // src/screens/Ride/components/RideStatusDelivering.tsx
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { Clock, User, ChevronDown, ChevronUp } from 'lucide-react-native';
+import React, { useState } from 'react'
+import { View, Text, TouchableOpacity } from 'react-native'
+import { Clock, User, ChevronDown, ChevronUp } from 'lucide-react-native'
 
 interface PackageInfo {
-  type?: string;
-  description?: string;
-  size?: string;
-  quantity?: number;
+  type?: string
+  description?: string
+  size?: string
+  quantity?: number
 }
 
 interface RideStatusDeliveringProps {
-  distanceTraveled: string;
-  distanceTotal: string;
-  duration: string;
-  packageInfo?: PackageInfo;
-  customerName?: string;
+  distanceTraveled: string
+  distanceTotal: string
+  duration: string
+  packageInfo?: PackageInfo
+  customerName?: string
 }
 
 export const RideStatusDelivering: React.FC<RideStatusDeliveringProps> = ({
@@ -23,15 +23,15 @@ export const RideStatusDelivering: React.FC<RideStatusDeliveringProps> = ({
   distanceTotal,
   duration,
   packageInfo,
-  customerName,
+  customerName
 }) => {
-  const [showDetails, setShowDetails] = useState(false);
+  const [showDetails, setShowDetails] = useState(false)
 
   // Calcular progresso aproximado
-  const progress = Math.min(100, 50); // Mock - pode ser calculado baseado na distância
+  const progress = Math.min(100, 50) // Mock - pode ser calculado baseado na distância
 
   return (
-    <View className="absolute top-4 left-4 right-4 bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
+    <View className="absolute top-safe left-4 right-4 bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
       {/* Header */}
       <View className="flex-row items-center justify-between mb-3">
         <View className="flex-1">
@@ -122,5 +122,5 @@ export const RideStatusDelivering: React.FC<RideStatusDeliveringProps> = ({
         </Text>
       </View> */}
     </View>
-  );
-};
+  )
+}

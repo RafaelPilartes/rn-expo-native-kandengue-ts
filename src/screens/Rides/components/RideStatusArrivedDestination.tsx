@@ -1,32 +1,32 @@
 // src/screens/Ride/components/RideStatusArrivedDestination.tsx
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react'
+import { View, Text, TouchableOpacity } from 'react-native'
 import {
   Package,
   User,
   CheckCircle,
   ChevronDown,
-  ChevronUp,
-} from 'lucide-react-native';
+  ChevronUp
+} from 'lucide-react-native'
 
 interface PackageInfo {
-  type?: string;
-  description?: string;
-  size?: string;
+  type?: string
+  description?: string
+  size?: string
 }
 
 interface RideStatusArrivedDestinationProps {
-  customerName?: string;
-  packageInfo?: PackageInfo;
+  customerName?: string
+  packageInfo?: PackageInfo
 }
 
 export const RideStatusArrivedDestination: React.FC<
   RideStatusArrivedDestinationProps
 > = ({ customerName, packageInfo }) => {
-  const [showDetails, setShowDetails] = useState(false);
+  const [showDetails, setShowDetails] = useState(false)
 
   return (
-    <View className="absolute top-4 left-4 right-4 bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
+    <View className="absolute top-safe left-4 right-4 bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
       {/* Header */}
       <View className="flex-row items-center justify-between mb-3">
         <View className="flex-1">
@@ -141,5 +141,5 @@ export const RideStatusArrivedDestination: React.FC<
         </View>
       </View>
     </View>
-  );
-};
+  )
+}

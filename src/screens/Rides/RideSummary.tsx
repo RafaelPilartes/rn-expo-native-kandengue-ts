@@ -439,7 +439,7 @@ export default function RideSummaryScreen() {
       case 'canceled':
         // Mostrar mensagem de cancelamento
         return (
-          <View className="absolute top-4 left-4 right-4 bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
+          <View className="absolute top-safe left-4 right-4 bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
             <Text className="text-lg font-bold text-red-600 text-center mb-2">
               Corrida Cancelada
             </Text>
@@ -481,17 +481,12 @@ export default function RideSummaryScreen() {
                 longitude:
                   currentRide?.pickup.longitude || location.pickup.longitude
               }}
+              image={require('@/assets/markers/pickup.png')}
               title="Local de Recolha"
               description={
                 currentRide?.pickup.description || location.pickup.description
               }
-            >
-              <View className="items-center justify-center">
-                <View className="w-10 h-10 bg-green-500 rounded-full border-3 border-white shadow-lg items-center justify-center">
-                  <Text className="text-white font-bold text-xs">R</Text>
-                </View>
-              </View>
-            </Marker>
+            />
 
             {/* Marker de Dropoff */}
             <Marker
@@ -501,17 +496,12 @@ export default function RideSummaryScreen() {
                 longitude:
                   currentRide?.dropoff.longitude || location.dropoff.longitude
               }}
+              image={require('@/assets/markers/dropoff.png')}
               title="Local de Entrega"
               description={
                 currentRide?.dropoff.description || location.dropoff.description
               }
-            >
-              <View className="items-center justify-center">
-                <View className="w-10 h-10 bg-red-500 rounded-full border-3 border-white shadow-lg items-center justify-center">
-                  <Text className="text-white font-bold text-xs">E</Text>
-                </View>
-              </View>
-            </Marker>
+            />
           </>
         )}
 
