@@ -1,32 +1,33 @@
 // src/screens/hooks/useRideSummary.ts
-import { useEffect, useState } from 'react';
-import { useWaitTimerByDate } from './useWaitTimerByDate';
-import { useRideRatesViewModel } from '@/viewModels/RideRateViewModel';
-import { RideRateEntity } from '@/core/entities/RideRate';
-import { useRideRealtime } from './ride/useRideRealtime';
-import { useRideRoute } from './ride/useRideRoute';
-import { useRideFlow } from './ride/useRideFlow';
-import { useFareCalculation } from './ride/useFareCalculation';
-import { RideStatusType } from '@/types/enum';
-import { isWithinTimeRange, timeToMinutes } from '@/helpers/rideTime';
-import { RateType } from '@/types/ride';
+import { useEffect, useState } from 'react'
+import { useWaitTimerByDate } from './useWaitTimerByDate'
+import { useRideRatesViewModel } from '@/viewModels/RideRateViewModel'
+import { RideRateEntity } from '@/core/entities/RideRate'
+import { useRideRealtime } from './ride/useRideRealtime'
+import { useRideRoute } from './ride/useRideRoute'
+import { useRideFlow } from './ride/useRideFlow'
+import { useFareCalculation } from './ride/useFareCalculation'
+import { RideStatusType } from '@/types/enum'
+import { isWithinTimeRange, timeToMinutes } from '@/helpers/rideTime'
+import { RateType } from '@/types/ride'
 
 export function useRideSummary(rideId?: string) {
-  const initial: RideStatusType = 'idle';
+  const initial: RideStatusType = 'idle'
 
   // Estados principais
-  const [loading, setLoading] = useState(true);
-  const [rateByTime, setRateByTime] = useState<RateType | null>(null);
-  const [rideStatus, setRideStatus] = useState<RideStatusType>(initial);
-  const [rideRates, setRideRates] = useState<RideRateEntity | null>(null);
+  const [loading, setLoading] = useState(true)
+  const [rateByTime, setRateByTime] = useState<RateType | null>(null)
+  const [rideStatus, setRideStatus] = useState<RideStatusType>(initial)
+  const [rideRates, setRideRates] = useState<RideRateEntity | null>(null)
 
   // HOOKS PRINCIPAIS
-  const { ride, isLoading: isLoadingRide } = useRideRealtime(rideId);
-  const { listenAll: listenRates } = useRideRatesViewModel();
+  const { ride, isLoadingRide, rideTracking, isLoadingTracking } =
+    useRideRealtime(rideId)
+  const { listenAll: listenRates } = useRideRatesViewModel()
 
   // CÁLCULOS DE ROTA
   const { routeCoords, distanceKm, durationMinutes, distance, duration } =
-    useRideRoute(ride?.pickup, ride?.dropoff);
+    useRideRoute(ride?.pickup, ride?.dropoff)
 
   // ROTA DO MOTORISTA (se existir)
   const {
@@ -34,11 +35,12 @@ export function useRideSummary(rideId?: string) {
     distanceKm: distanceKmDriver,
     durationMinutes: durationMinutesDriver,
     distance: distanceDriver,
-    duration: durationDriver,
+    duration: durationDriver
   } = useRideRoute(
-    ride?.driver?.location,
-    ride?.status === 'picked_up' ? ride.dropoff : ride?.pickup,
-  );
+    // last position
+    rideTracking?.path[rideTracking?.path.length - 1],
+    ride?.status === 'picked_up' ? ride.dropoff : ride?.pickup
+  )
 
   // TEMPO DE ESPERA
   const { formatted, extraMinutes, totalMinutes, elapsedSeconds } =
@@ -46,15 +48,15 @@ export function useRideSummary(rideId?: string) {
       isWaiting: rideStatus === 'arrived_pickup',
       startDate: ride?.waiting_start_at,
       endDate: ride?.waiting_end_at,
-      freeMinutes: rateByTime?.wait_time_free_minutes,
-    });
+      freeMinutes: rateByTime?.wait_time_free_minutes
+    })
 
   // CÁLCULO DA TARIFA
   const { fareDetails, handleCalculateFareSummary } = useFareCalculation(
     distanceKm,
     totalMinutes ?? 0,
-    rideRates ?? null,
-  );
+    rideRates ?? null
+  )
 
   // FLUXO DA CORRIDA (ATUALIZADO PARA USUÁRIO)
   const {
@@ -64,80 +66,74 @@ export function useRideSummary(rideId?: string) {
     pickedUp: handlePickedUpRide,
     arrivedDropoff: handleArrivedToDropoff,
     completed: handleCompletedRide,
-    canceled: handleCanceledRide,
-  } = useRideFlow(rideId, fareDetails);
+    canceled: handleCanceledRide
+  } = useRideFlow(rideId, fareDetails)
 
   // Atualizar status quando a corrida m
   useEffect(() => {
     if (ride?.status) {
-      setRideStatus(ride.status);
+      setRideStatus(ride.status)
     }
-  }, [ride?.status]);
+  }, [ride?.status])
 
   // Carregar taxas
   useEffect(() => {
     const unsubscribe = listenRates((rates: RideRateEntity[]) => {
-      if (!rates) return;
-      setRideRates(rates[0]);
-    });
-    return unsubscribe;
-  }, []);
+      if (!rates) return
+      setRideRates(rates[0])
+    })
+    return unsubscribe
+  }, [])
 
   useEffect(() => {
     // Se não tem rideId, não precisa carregar dados da corrida
     if (!rideId) {
-      setLoading(true);
-      return;
+      setLoading(true)
+      return
     }
 
     // Se tem rideId, espera os dados da corrida carregarem
-    if (!isLoadingRide && ride) {
-      setLoading(false);
+    if (!isLoadingRide && !isLoadingTracking && ride) {
+      setLoading(false)
     }
 
     // Se tem routeCoords e fareDetails
     if (routeCoords.length > 0 && fareDetails) {
-      setLoading(false);
+      setLoading(false)
     }
-  }, [
-    routeCoords,
-    fareDetails,
-    routeCoordsDriver,
-    rideId,
-    isLoadingRide,
-    ride,
-  ]);
+  }, [routeCoords, fareDetails, routeCoordsDriver, rideId, isLoadingRide, ride])
 
   // Calcular taxa baseada no horário
   useEffect(() => {
-    if (!rideRates) return;
+    if (!rideRates) return
 
-    const currentRate = rideRates;
+    const currentRate = rideRates
 
-    const now = new Date();
-    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    const now = new Date()
+    const currentMinutes = now.getHours() * 60 + now.getMinutes()
 
-    const dayStart = timeToMinutes(currentRate.day_rates.start_time);
-    const dayEnd = timeToMinutes(currentRate.day_rates.end_time);
+    const dayStart = timeToMinutes(currentRate.day_rates.start_time)
+    const dayEnd = timeToMinutes(currentRate.day_rates.end_time)
 
-    const nightStart = timeToMinutes(currentRate.night_rates.start_time);
-    const nightEnd = timeToMinutes(currentRate.night_rates.end_time);
+    const nightStart = timeToMinutes(currentRate.night_rates.start_time)
+    const nightEnd = timeToMinutes(currentRate.night_rates.end_time)
 
-    let rate;
+    let rate
     if (isWithinTimeRange(currentMinutes, dayStart, dayEnd)) {
-      rate = currentRate.day_rates;
+      rate = currentRate.day_rates
     } else if (isWithinTimeRange(currentMinutes, nightStart, nightEnd)) {
-      rate = currentRate.night_rates;
+      rate = currentRate.night_rates
     } else {
-      rate = currentRate.night_rates;
+      rate = currentRate.night_rates
     }
 
-    setRateByTime(rate);
-  }, [rideRates]);
+    setRateByTime(rate)
+  }, [rideRates])
 
   return {
     ride,
     loading,
+    rideTracking,
     routeCoords,
     distance,
     duration,
@@ -170,6 +166,6 @@ export function useRideSummary(rideId?: string) {
     handleCanceledRide, // Motorista cancelou a entrega
     handleCalculateFareSummary,
 
-    handleCancelFindRide: handleCanceledRide,
-  };
+    handleCancelFindRide: handleCanceledRide
+  }
 }

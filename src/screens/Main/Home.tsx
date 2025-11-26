@@ -24,10 +24,32 @@ import { RideActiveCard } from '@/components/RideActiveCard'
 import { useAppProvider } from '@/providers/AppProvider'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-// exemplo de imagens estáticas
 const banners = [
-  { id: '1', image: require('@/assets/banner/banner1.png') },
-  { id: '2', image: require('@/assets/banner/banner2.png') }
+  {
+    id: '1',
+    title: 'Entrega com Confiança',
+    description:
+      'Estafetas verificados, entrega segura e acompanhamento em tempo real.',
+    image: require('@/assets/banner/banner1.png'),
+    action: () => {
+      Alert.alert(
+        'Entrega com Confiança',
+        'Os nossos estafetas são verificados e treinados para garantir entregas rápidas, seguras e rastreáveis em tempo real.'
+      )
+    }
+  },
+  {
+    id: '2',
+    title: 'Rápido & Seguro Sempre',
+    description: 'Tempos médios de entrega entre 15–30 min na sua zona.',
+    image: require('@/assets/banner/banner2.png'),
+    action: () => {
+      Alert.alert(
+        'Rápido & Seguro Sempre',
+        'Na sua área, o tempo médio de entrega varia entre 15 e 30 minutos, dependendo da distância e trânsito.'
+      )
+    }
+  }
 ]
 
 const services = [
@@ -252,7 +274,7 @@ export default function HomeScreen() {
           {banners.map(banner => (
             <TouchableOpacity
               key={banner.id}
-              onPress={() => Alert.alert('Banner', 'Banner pressionado')}
+              onPress={banner.action}
               activeOpacity={0.8}
             >
               <Image

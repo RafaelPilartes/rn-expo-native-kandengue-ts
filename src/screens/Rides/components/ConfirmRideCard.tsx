@@ -1,11 +1,12 @@
 // src/screens/Ride/components/ConfirmRideCard.tsx
 import React from 'react'
 import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native'
-import { Clock, MapPin, Shield } from 'lucide-react-native'
+import { Clock, MapPin, Route } from 'lucide-react-native'
 
 interface ConfirmRideCardProps {
   price: string
   duration: string
+  distance: string
   isLoading: boolean
   onConfirm: () => void
   onCancel?: () => void
@@ -14,6 +15,7 @@ interface ConfirmRideCardProps {
 export const ConfirmRideCard: React.FC<ConfirmRideCardProps> = ({
   price,
   duration,
+  distance,
   isLoading,
   onConfirm,
   onCancel
@@ -29,6 +31,14 @@ export const ConfirmRideCard: React.FC<ConfirmRideCardProps> = ({
 
       {/* Detalhes */}
       <View className="p-4">
+        <View className="flex-row justify-between items-center mb-4">
+          <View className="flex-row items-center">
+            <Route size={20} color="#6B7280" />
+            <Text className="text-gray-600 ml-2">Distância total</Text>
+          </View>
+          <Text className="text-gray-900 font-semibold">{distance}</Text>
+        </View>
+
         <View className="flex-row justify-between items-center mb-4">
           <View className="flex-row items-center">
             <Clock size={20} color="#6B7280" />

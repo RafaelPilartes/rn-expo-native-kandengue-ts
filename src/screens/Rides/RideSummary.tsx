@@ -54,6 +54,7 @@ import {
   VIBRATION_PATTERN_BOOST
 } from '@/constants/vibration'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { calculateHeading } from '@/helpers/bearing'
 
 type RideSummaryScreenRouteParams = {
   id: string | undefined
@@ -93,6 +94,7 @@ export default function RideSummaryScreen() {
   const {
     loading: isLoadingDataRide,
     ride: currentRide,
+    rideTracking,
     routeCoords,
     distance,
     duration,
@@ -129,6 +131,18 @@ export default function RideSummaryScreen() {
     distanceKmTemp,
     durationMinutesTemp ?? 0,
     rideRates ?? null
+  )
+
+  const ridePath = rideTracking?.path || []
+
+  const lastPointTracked = ridePath[ridePath.length - 1]
+  const prevPointTracked = ridePath[ridePath.length - 2] || lastPointTracked
+
+  const markerHeading = calculateHeading(
+    prevPointTracked.latitude,
+    prevPointTracked.longitude,
+    lastPointTracked.latitude,
+    lastPointTracked.longitude
   )
 
   // Centralizar no pickup
@@ -334,6 +348,7 @@ export default function RideSummaryScreen() {
           <ConfirmRideCard
             price={formatMoney(fareDetailsTemp?.total || 0, 0)}
             duration={durationTemp}
+            distance={distanceTemp}
             isLoading={isCreatingRide}
             onConfirm={handleCreateNewRide}
             onCancel={() => navigation.goBack()}
@@ -470,6 +485,23 @@ export default function RideSummaryScreen() {
         showsMyLocationButton={false}
         showsCompass={true}
       >
+        {/* Localização do motorista */}
+        {rideTracking && currentRide?.driver && (
+          <>
+            {/* Marker do motorista */}
+            <Marker
+              coordinate={{
+                latitude: lastPointTracked.latitude,
+                longitude: lastPointTracked.longitude
+              }}
+              image={require('@/assets/markers/driver.png')}
+              rotation={markerHeading} // rotaciona o marker
+              anchor={{ x: 0.5, y: 0.5 }} // mantém centrado
+              flat={true} // permite ficar deitado sobre o mapa
+            />
+          </>
+        )}
+
         {/* Pontos de pickup e dropoff */}
         {(currentRide || !currentRideId) && (
           <>
@@ -503,6 +535,15 @@ export default function RideSummaryScreen() {
               }
             />
           </>
+        )}
+
+        {/* Rota principal temporária */}
+        {routeCoordsTemp.length > 0 && (
+          <Polyline
+            coordinates={routeCoordsTemp}
+            strokeColor="#10B981"
+            strokeWidth={4}
+          />
         )}
 
         {/* Rota principal */}
