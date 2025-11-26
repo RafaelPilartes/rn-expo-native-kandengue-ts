@@ -119,7 +119,7 @@ export const DriverRideSheet = forwardRef<BottomSheetModal, Props>(
       >
         <BottomSheetView style={styles.container}>
           {/* Header com status */}
-          <View className="flex-row items-center justify-between mb-safe">
+          <View className="flex-row items-center justify-between mb-2">
             <View className={`px-3 py-1 rounded-full ${statusInfo.color}`}>
               <Text className={`text-xs font-medium ${statusInfo.textColor}`}>
                 {statusInfo.label}
@@ -229,7 +229,7 @@ export const DriverRideSheet = forwardRef<BottomSheetModal, Props>(
           </View>
 
           {/* Preço e ações */}
-          <View className="flex-row items-center justify-between border-t border-gray-200 pt-4">
+          <View className="flex-row items-center justify-between border-t border-gray-200 pt-4 mb-12">
             <View>
               <Text className="text-green-600 text-2xl font-bold">
                 Kz {formatMoney(rideData.fare.total, 0)}

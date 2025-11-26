@@ -135,15 +135,19 @@ export default function RideSummaryScreen() {
 
   const ridePath = rideTracking?.path || []
 
-  const lastPointTracked = ridePath[ridePath.length - 1]
-  const prevPointTracked = ridePath[ridePath.length - 2] || lastPointTracked
+  let markerHeading = 0
 
-  const markerHeading = calculateHeading(
-    prevPointTracked.latitude,
-    prevPointTracked.longitude,
-    lastPointTracked.latitude,
-    lastPointTracked.longitude
-  )
+  if (ridePath.length >= 2) {
+    const lastPointTracked = ridePath[ridePath.length - 1]
+    const prevPointTracked = ridePath[ridePath.length - 2]
+
+    markerHeading = calculateHeading(
+      prevPointTracked.latitude,
+      prevPointTracked.longitude,
+      lastPointTracked.latitude,
+      lastPointTracked.longitude
+    )
+  }
 
   // Centralizar no pickup
   const centerOnPickup = async () => {
@@ -470,14 +474,14 @@ export default function RideSummaryScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-white m-safe">
       {/* MAPA */}
       <MapView
         ref={mapRef}
         style={StyleSheet.absoluteFillObject}
         initialRegion={{
-          latitude: currentRide?.pickup.latitude || location.pickup.latitude,
-          longitude: currentRide?.pickup.longitude || location.pickup.longitude,
+          latitude: currentRide?.pickup.latitude ?? location.pickup.latitude,
+          longitude: currentRide?.pickup.longitude ?? location.pickup.longitude,
           latitudeDelta: 0.05,
           longitudeDelta: 0.05
         }}
@@ -486,13 +490,13 @@ export default function RideSummaryScreen() {
         showsCompass={true}
       >
         {/* Localização do motorista */}
-        {rideTracking && currentRide?.driver && (
+        {ridePath && currentRide?.driver && (
           <>
             {/* Marker do motorista */}
             <Marker
               coordinate={{
-                latitude: lastPointTracked.latitude,
-                longitude: lastPointTracked.longitude
+                latitude: ridePath[ridePath.length - 1].latitude,
+                longitude: ridePath[ridePath.length - 1].longitude
               }}
               image={require('@/assets/markers/driver.png')}
               rotation={markerHeading} // rotaciona o marker
