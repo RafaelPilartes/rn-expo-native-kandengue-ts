@@ -89,7 +89,7 @@ const RideDetailsSheetModal = forwardRef<
             contentContainerStyle={{ paddingBottom: 45 }}
           >
             {/* Header */}
-            <View className="px-4 pt-2 pb-4 mb-safe border-b border-gray-200">
+            <View className="px-4 pt-2 pb-4 border-b border-gray-200">
               <View className="flex-row items-center justify-between mb-2">
                 <View className="flex-row items-center">
                   {getTypeIcon()}

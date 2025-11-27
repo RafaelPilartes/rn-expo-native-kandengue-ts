@@ -490,7 +490,7 @@ export default function RideSummaryScreen() {
         showsCompass={true}
       >
         {/* Localização do motorista */}
-        {ridePath && currentRide?.driver && (
+        {ridePath && ridePath.length >= 1 && currentRide?.driver && (
           <>
             {/* Marker do motorista */}
             <Marker
@@ -498,7 +498,7 @@ export default function RideSummaryScreen() {
                 latitude: ridePath[ridePath.length - 1].latitude,
                 longitude: ridePath[ridePath.length - 1].longitude
               }}
-              image={require('@/assets/markers/driver.png')}
+              image={require('@/assets/markers/moto.png')}
               rotation={markerHeading} // rotaciona o marker
               anchor={{ x: 0.5, y: 0.5 }} // mantém centrado
               flat={true} // permite ficar deitado sobre o mapa

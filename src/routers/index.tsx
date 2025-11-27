@@ -4,16 +4,25 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import AuthRouter from './navigation/AuthRouter'
 import TabRouter from './Tab/TabRouter'
 import LoadingScreen from '@/screens/Loading'
-import { Alert } from 'react-native'
+import { Alert, Platform } from 'react-native'
+import Constants from 'expo-constants'
+import VersionCheck from 'react-native-version-check'
 
 import { useAuthViewModel } from '@/viewModels/AuthViewModel'
 import { useAuthStore } from '@/storage/store/useAuthStore'
 import { UserInterface } from '@/interfaces/IUser'
+import UpdateAppScreen from '@/screens/UpdateApp'
+import { AppConfigInfo } from '@/constants/config'
 
 const Stack = createNativeStackNavigator()
 
 export default function AppRouter() {
   const [isInitializing, setIsInitializing] = useState(true)
+  const [isCheckingVersion, setIsCheckingVersion] = useState(true)
+  const [lastVersionAvailable, setLastVersionAvailable] = useState<
+    string | null
+  >(null)
+  const [hasUpdated, setHasUpdated] = useState(false)
 
   // ViewModel (React Query + use cases)
   const {
@@ -209,11 +218,80 @@ export default function AppRouter() {
   console.log('  User:', currentUser?.email || 'Nulo')
   console.log('  Acesso permitido:', canAccessApp)
 
+  async function checkForUpdate() {
+    try {
+      setIsCheckingVersion(true)
+
+      console.log('🔄 Verificando atualizações...')
+
+      // const androidPackageName = 'com.mercadolibre'
+      const androidPackageName = AppConfigInfo.androidPackageName
+      const iosBundleIdentifier = AppConfigInfo.iosBundleIdentifier
+
+      if (!androidPackageName) {
+        console.log('❌ Não foi possível obter o nome do pacote Android.')
+        return
+      }
+      if (!iosBundleIdentifier) {
+        console.log('❌ Não foi possível obter o bundle identifier do iOS.')
+        return
+      }
+
+      const currentVersion = Constants.expoConfig?.version
+
+      if (!currentVersion) {
+        console.log('❌ Não foi possível obter a versão atual.')
+        return
+      }
+
+      const lastVersion = await VersionCheck.getLatestVersion({
+        provider: Platform.OS === 'ios' ? 'appStore' : 'playStore',
+        packageName:
+          Platform.OS === 'ios' ? iosBundleIdentifier : androidPackageName
+      })
+
+      console.log('📦 Última versão:', lastVersion)
+      console.log('📦 Versão atual:', currentVersion)
+
+      if (lastVersion && lastVersion > currentVersion) {
+        console.log('🔄 Nova versão disponível!')
+        setLastVersionAvailable(lastVersion)
+        setHasUpdated(true)
+      } else {
+        console.log('✅ Você está usando a versão mais recente.')
+        setHasUpdated(false)
+      }
+    } catch (error) {
+      console.error('Erro ao verificar atualizações:', error)
+    } finally {
+      setIsCheckingVersion(false)
+    }
+  }
+
+  function handleLater() {
+    setHasUpdated(false)
+  }
+
+  useEffect(() => {
+    checkForUpdate()
+  }, [])
   // =========================================================
   // LOADING: Enquanto inicializa ou enquanto o VM está carregando: mostra loading
   // =========================================================
-  if (isInitializing || authLoading) {
+  if (isInitializing || authLoading || isCheckingVersion) {
     return <LoadingScreen />
+  }
+
+  // =========================================================
+  // UPDATE: Se houver atualização, mostra tela de update
+  // =========================================================
+  if (hasUpdated) {
+    return (
+      <UpdateAppScreen
+        version={lastVersionAvailable || ''}
+        onLater={handleLater}
+      />
+    )
   }
 
   // =========================================================
