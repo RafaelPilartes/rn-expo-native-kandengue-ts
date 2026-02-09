@@ -1,41 +1,63 @@
-// src/components/HomeHeader.tsx
-import React from 'react';
-import { View, Text, Image, TouchableOpacity, Switch } from 'react-native';
-import { ArrowLeft, Bell } from 'lucide-react-native';
-import { DriverInterface } from '@/interfaces/IDriver';
-import { useNavigation } from '@react-navigation/native';
+import React from 'react'
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
+import { useNavigation } from '@react-navigation/native'
+import { ArrowLeft } from 'lucide-react-native'
 
-interface HeaderProps {
-  title: string;
-  subtitle?: string;
-  canGoBack: boolean;
+interface Props {
+  title: string
+  showBack?: boolean
+  rightComponent?: React.ReactNode
 }
 
-const PageHeader: React.FC<HeaderProps> = ({
+export const PageHeader: React.FC<Props> = ({
   title,
-  subtitle,
-  canGoBack = true,
+  showBack = true,
+  rightComponent
 }) => {
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation()
 
   return (
-    <View className="px-4 py-5 relative bg-white shadow flex-row items-start">
-      {canGoBack && (
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          activeOpacity={0.7}
-          className="absolute mt-3 ml-0 flex-row justify-start items-center gap-1 py-2 px-4"
-        >
-          <ArrowLeft size={16} color="#e0212d" />
-          <Text className="text-s font-normal text-black">Voltar</Text>
-        </TouchableOpacity>
-      )}
-      <View className="w-full flex-1 flex-col justify-start items-center">
-        <Text className="text-xl font-bold text-black">{title}</Text>
-        {subtitle && <Text className="text-sm text-gray-600">{subtitle}</Text>}
+    <View style={styles.container}>
+      <View style={styles.leftContainer}>
+        {showBack && (
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}
+          >
+            <ArrowLeft color="black" size={24} />
+          </TouchableOpacity>
+        )}
+        <Text style={styles.title}>{title}</Text>
       </View>
+      <View style={styles.rightContainer}>{rightComponent}</View>
     </View>
-  );
-};
+  )
+}
 
-export default PageHeader;
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: 'white',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0'
+  },
+  leftContainer: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  backButton: {
+    marginRight: 12
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333'
+  },
+  rightContainer: {
+    //
+  }
+})

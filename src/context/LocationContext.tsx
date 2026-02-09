@@ -1,176 +1,143 @@
-// src/contexts/LocationContext.tsx
-import React, { createContext, useState, useRef, useEffect } from 'react'
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode
+} from 'react'
 import * as Location from 'expo-location'
-import { getAddressFromCoords } from '@/services/google/googleApi'
-import { AddressResponse } from '@/types/geoLocation'
+import { Alert, AppState, AppStateStatus } from 'react-native'
+import {
+  checkLocationPermission,
+  requestForegroundPermission,
+  requestBackgroundPermission
+} from '../services/permissions/locationPermission'
+import { TrackingMode, LocationUpdate } from '../types/trackingTypes'
+import * as TaskManager from 'expo-task-manager'
+import { LOCATION_TASK_NAME } from '../services/location/BackgroundLocationTask'
 
-type Coords = { latitude: number; longitude: number }
-
-interface LocationContextType {
-  location: Coords | null
-  address: string | null
-  fullAddress: AddressResponse | null
-  isTracking: boolean
-  error: string | null
-  isLoading: boolean
-  isGettingAddress: boolean
-
-  requestCurrentLocation: () => Promise<Coords | null>
-  startTracking: () => void
-  stopTracking: () => void
-  fetchAddress: (coords?: Coords) => Promise<void>
-  clearError: () => void
+interface LocationContextData {
+  location: Location.LocationObject | null
+  errorMsg: string | null
+  mode: TrackingMode
+  startTracking: (mode: TrackingMode) => Promise<void>
+  stopTracking: () => Promise<void>
+  permissionStatus: Location.PermissionStatus | null
+  triggerPermissionFlow: () => Promise<boolean>
 }
 
-export const LocationContext = createContext<LocationContextType>(
-  {} as LocationContextType
+const LocationContext = createContext<LocationContextData>(
+  {} as LocationContextData
 )
 
-export function LocationProvider({ children }: { children: React.ReactNode }) {
-  const [location, setLocation] = useState<Coords | null>(null)
-  const [address, setAddress] = useState<string | null>(null)
-  const [fullAddress, setFullAddress] = useState<AddressResponse | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [isTracking, setIsTracking] = useState(false)
-  const [isGettingAddress, setIsGettingAddress] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+export const useLocation = () => useContext(LocationContext)
 
-  const watcher = useRef<Location.LocationSubscription | null>(null)
+export const LocationProvider: React.FC<{ children: ReactNode }> = ({
+  children
+}) => {
+  const [location, setLocation] = useState<Location.LocationObject | null>(null)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [mode, setMode] = useState<TrackingMode>('PASSIVE')
+  const [permissionStatus, setPermissionStatus] =
+    useState<Location.PermissionStatus | null>(null)
 
-  /** ---- Permissões (Expo) ---- */
-  const requestPermission = async () => {
-    const { status } = await Location.requestForegroundPermissionsAsync()
-    return status === 'granted'
+  useEffect(() => {
+    checkPermissions()
+    const subscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange
+    )
+    return () => {
+      subscription.remove()
+    }
+  }, [])
+
+  const handleAppStateChange = (nextAppState: AppStateStatus) => {
+    if (nextAppState === 'active') {
+      checkPermissions()
+    }
   }
 
-  /** ---- Buscar endereço via Google (reverse geocoding) ---- */
-  const fetchAddress = async (coords?: Coords) => {
-    setIsGettingAddress(true)
+  const checkPermissions = async () => {
+    const status = await checkLocationPermission()
+    setPermissionStatus(status)
+  }
+
+  const triggerPermissionFlow = async (): Promise<boolean> => {
+    // This function can be called from UI to show explanation modal first
+    // Then request permissions
+    const foreground = await requestForegroundPermission()
+    if (!foreground) return false
+
+    // Background permission request (optional based on requirement)
+    // const background = await requestBackgroundPermission();
+    return true
+  }
+
+  const startTracking = async (newMode: TrackingMode) => {
+    setMode(newMode)
 
     try {
-      const c = coords || location
-      if (!c) {
-        setAddress('Sem coordenadas para obter o endereço')
-        setFullAddress(null)
+      const { status } = await Location.getForegroundPermissionsAsync()
+      if (status !== 'granted') {
+        setErrorMsg('Permission to access location was denied')
         return
       }
 
-      const result = await getAddressFromCoords(c.latitude, c.longitude)
-
-      if (typeof result === 'string') {
-        setAddress(result)
-        setFullAddress(null)
-      } else {
-        setAddress(result.addr)
-        setFullAddress(result)
-      }
-    } catch (e) {
-      console.warn('⚠️ Erro buscando endereço:', e)
-      setAddress('Não foi possível obter o endereço')
-      setFullAddress(null)
-    } finally {
-      setIsGettingAddress(false)
-    }
-  }
-
-  /** ---- Pega localização só uma vez ---- */
-  const requestCurrentLocation = async (): Promise<Coords | null> => {
-    setIsLoading(true)
-    setError(null)
-
-    const hasPermission = await requestPermission()
-    if (!hasPermission) {
-      setError('Permissão de localização negada.')
-      setIsLoading(false)
-      return null
-    }
-
-    try {
-      const pos = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced
-      })
-
-      const coords = {
-        latitude: pos.coords.latitude,
-        longitude: pos.coords.longitude
-      }
-
-      setLocation(coords)
-      fetchAddress(coords)
-      return coords
-    } catch (err: any) {
-      console.warn('Erro getCurrentLocation:', err)
-      setError(err?.message || 'Erro ao obter localização')
-      return null
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  /** ---- Clear error ---- */
-  const clearError = () => setError(null)
-
-  /** ---- Tracking contínuo ---- */
-  const startTracking = async () => {
-    if (isTracking) return
-
-    const hasPermission = await requestPermission()
-    if (!hasPermission) {
-      setError('Permissão negada para acessar localização.')
-      return
-    }
-
-    setIsTracking(true)
-
-    watcher.current = await Location.watchPositionAsync(
-      {
-        accuracy: Location.Accuracy.High,
-        timeInterval: 5000, // 5 segundos
-        distanceInterval: 3
-      },
-      pos => {
-        const coords = {
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude
+      if (newMode === 'RIDE') {
+        await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
+          accuracy: Location.Accuracy.High,
+          distanceInterval: 10, // Update every 10 meters
+          deferredUpdatesInterval: 5000,
+          foregroundService: {
+            notificationTitle: "You're on a ride",
+            notificationBody: 'Tracking your ride for safety.'
+          }
+        })
+      } else if (newMode === 'PASSIVE') {
+        // Stop high accuracy tracking, maybe do single update
+        const isTaskRegistered =
+          await TaskManager.isTaskRegisteredAsync(LOCATION_TASK_NAME)
+        if (isTaskRegistered) {
+          await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME)
         }
-        setLocation(coords)
-        fetchAddress(coords)
+
+        // Get current location once
+        const current = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced
+        })
+        setLocation(current)
+      } else {
+        // OFFLINE
+        stopTracking()
       }
-    )
+    } catch (err) {
+      console.error('Error starting tracking:', err)
+    }
   }
 
-  /** ---- Para tracking ---- */
-  const stopTracking = () => {
-    if (!isTracking) return
-
-    watcher.current?.remove()
-    watcher.current = null
-
-    setIsTracking(false)
-    console.log('⏹ Tracking parado')
+  const stopTracking = async () => {
+    try {
+      const isTaskRegistered =
+        await TaskManager.isTaskRegisteredAsync(LOCATION_TASK_NAME)
+      if (isTaskRegistered) {
+        await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME)
+      }
+    } catch (err) {
+      console.error('Error stopping tracking:', err)
+    }
   }
-
-  /** Pega uma localização inicial */
-  useEffect(() => {
-    requestCurrentLocation()
-  }, [])
 
   return (
     <LocationContext.Provider
       value={{
         location,
-        address,
-        fullAddress,
-        isTracking,
-        error,
-        isLoading,
-        isGettingAddress,
-
-        requestCurrentLocation,
+        errorMsg,
+        mode,
         startTracking,
         stopTracking,
-        fetchAddress,
-        clearError
+        permissionStatus,
+        triggerPermissionFlow
       }}
     >
       {children}

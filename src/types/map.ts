@@ -1,23 +1,18 @@
-import MapView from 'react-native-maps';
-
-// src/types/map.ts
-export type Coords = { latitude: number; longitude: number };
-
-export interface MapContextType {
-  mapRef: React.RefObject<MapView | null>;
-  mapReady: boolean;
-  location: Coords | null;
-  address: string | null;
-  isLoading: boolean;
-  isTracking: boolean;
-  hasPermission: boolean;
-  error: string | null;
-  isGettingAddress: boolean;
-
-  getCurrentLocation: () => Promise<Coords | null>;
-  centerOnUser: () => Promise<void>;
-  startTracking: () => void;
-  stopTracking: () => void;
-  handleMapReady: () => void;
-  clearError: () => void;
+export interface Region {
+  latitude: number
+  longitude: number
+  latitudeDelta: number
+  longitudeDelta: number
 }
+
+export interface CameraState {
+  center: {
+    latitude: number
+    longitude: number
+  }
+  pitch: number
+  heading: number
+  zoom: number
+}
+
+export type MapType = 'standard' | 'satellite' | 'hybrid' | 'terrain'

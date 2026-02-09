@@ -62,10 +62,15 @@ src/
 │   │   └── CustomAlert.tsx       # Reanimated Modal Component
 │   ├── map/
 │   │   └── MapView.tsx           # Platform-specific map export
-│   └── PageHeader.tsx            # Standardized Header
+│   ├── modals/
+│   │   └── LocationDisclosureModal.tsx # Location permission disclosure
+│   ├── PageHeader.tsx            # Standardized Header
+│   └── NetworkStatusBanner.tsx   # Offline status indicator
 ├── services/
 │   ├── location/
 │   │   └── BackgroundLocationTask.ts # Background tracking task
+│   ├── permissions/
+│   │   └── locationPermission.ts     # Permission logic
 │   └── google/
 │   │   └── googleApi.ts          # Geocoding/Places API
 └── types/
@@ -84,8 +89,11 @@ src/
 **Types ([src/types/trackingTypes.ts](file:///c:/_Projects/react_native/RnNativeKandengueProTs/src/types/trackingTypes.ts)):**
 
 ```typescript
-export type TrackingMode = 'OFFLINE' | 'INVISIBLE' | 'AVAILABILITY' | 'RIDE'
-// *Passenger App Note: 'RIDE' mode should be active if `activeRides.length > 0`. Tracking might need to cover multiple simultaneous active rides or just the user's current location relative to them.*
+export type TrackingMode = 'PASSIVE' | 'RIDE' | 'OFFLINE'
+// *Passenger App Logic:*
+// - 'PASSIVE': Determine current city/region (low frequency).
+// - 'RIDE': High frequency tracking during an active ride (safety/sharing).
+// - 'OFFLINE': No tracking (logged out or not needed).
 ```
 
 **Key Interfaces:**
@@ -99,15 +107,17 @@ export type TrackingMode = 'OFFLINE' | 'INVISIBLE' | 'AVAILABILITY' | 'RIDE'
 - Defined in [src/services/location/BackgroundLocationTask.ts](file:///c:/_Projects/react_native/RnNativeKandengueProTs/src/services/location/BackgroundLocationTask.ts).
 - Uses `expo-task-manager`.
 - **Logic Difference**:
-  - **Pro (Driver)**: Checks `currentMissionId` (Single active mission).
-  - **Passenger**: Checks `activeRides` (Array). User may have multiple active rides. Tracking logic should verify if _any_ ride is in progress to enable `RIDE` mode.
+  - **Passenger Modes**:
+    - **PASSIVE**: Updates location occasionally (e.g., every 5-10min or significant change) to keep "Current City/Region" relevant.
+    - **RIDE**: Active when `activeRides.length > 0`. High precision. Updates `ride_tracking` for safety/share features.
+    - **OFFLINE**: No background updates.
 
 ### B. Map Provider ([src/providers/MapProvider.tsx](file:///c:/_Projects/react_native/RnNativeKandengueProTs/src/providers/MapProvider.tsx))
 
 **Concept:** Decouples MapView refs and state from screens.
 
 - **State**: `location`, `address`, `isTracking`.
-- **Methods**: [centerOnUser()](file:///c:/_Projects/react_native/RnNativeKandengueProTs/src/screens/Rides/RideSummary.tsx#58-76), [startTracking()](file:///c:/_Projects/react_native/RnNativeKandengueProTs/src/context/LocationContext.tsx#335-388).
+- **Methods**: [centerOnUser()](file:///c:/_Projects/react_native/RnNativeKandengueProTs/src/providers/MapProvider.tsx#98-110), [startTracking()](file:///c:/_Projects/react_native/RnNativeKandengueProTs/src/context/LocationContext.tsx#335-388).
 - **Usage**: Screens consume [useMap()](file:///c:/_Projects/react_native/RnNativeKandengueProTs/src/providers/MapProvider.tsx#229-230) to control the map without direct ref manipulation.
 
 ### C. Custom Alerts ([src/context/AlertContext.tsx](file:///c:/_Projects/react_native/RnNativeKandengueProTs/src/context/AlertContext.tsx))
@@ -137,13 +147,16 @@ The "Active Ride" screen is now componentized:
     - Displays differents views based on `rideStatus` ('driver_on_the_way', 'arrived', etc.).
 
 3.  **`RideModals`**:
-    - Contains `CancellationModal`, `ArrivalModal`, `OTPModal`.
+    - Contains `CancellationModal`, etc.
     - Kept separate to clean up the main screen render.
 
 ### Network & Permissions
 
-- **PermisisonBlocker**: A specific component shown when location/notification permissions are missing, blocking usage until resolved.
-- **NetworkProvider**: Monitors `NetInfo` and shows a "Sem Conexão" banner if offline.
+- **NetworkProvider**: Monitors `NetInfo` and shows a `<NetworkStatusBanner />` (red banner) if offline.
+- **Permission Flow**:
+  - Use [src/services/permissions/locationPermission.ts](file:///c:/_Projects/react_native/RnNativeKandengueProTs/src/services/permissions/locationPermission.ts) to encapsulate check/request logic.
+  - **Disclosure**: Before requesting system permission, show `<LocationDisclosureModal />` to explain usage (Google Play requirement).
+  - **PermisisonBlocker**: A full-screen blocker component shown when critical permissions are missing.
 
 ---
 
