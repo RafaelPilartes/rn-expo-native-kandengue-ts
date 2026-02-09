@@ -12,9 +12,10 @@ import { NavigationContainer } from '@react-navigation/native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { LocationProvider } from './context/LocationContext'
 import { UserRidesProvider } from './context/UserRidesContext'
-import { useEffect } from 'react'
+import { AppProvider } from './providers/AppProvider'
+// import { LocationProvider } from './context/LocationContext'
+import React, { useEffect } from 'react'
 import { ThemeProvider } from './providers/ThemeProvider'
 import { NetworkProvider } from './providers/NetworkProvider'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
@@ -52,14 +53,14 @@ export default function App() {
           <NavigationContainer>
             <GestureHandlerRootView style={{ flex: 1 }}>
               <BottomSheetModalProvider>
-                <LocationProvider>
+                <AppProvider>
                   <UserRidesProvider>
                     <NetworkProvider>
                       <StatusBar style="dark" />
                       <AppRouter />
                     </NetworkProvider>
                   </UserRidesProvider>
-                </LocationProvider>
+                </AppProvider>
               </BottomSheetModalProvider>
             </GestureHandlerRootView>
           </NavigationContainer>

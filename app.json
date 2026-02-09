@@ -30,7 +30,7 @@
         "NSBluetoothPeripheralUsageDescription": "Bluetooth access is required to interact with nearby devices.",
         "NSCalendarsUsageDescription": "Calendar access is required for scheduling features.",
         "NSRemindersUsageDescription": "Reminders access is needed for task scheduling.",
-        "NSCameraUsageDescription": "Camera access is needed for taking photos.",
+
         "NSUserTrackingUsageDescription": "Tracking permission is needed for analytics and personalized experience.",
         "NSSpeechRecognitionUsageDescription": "Speech recognition is required to support voice features."
       },
@@ -53,6 +53,8 @@
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
         "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_LOCATION",
         "RECORD_AUDIO",
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE",
@@ -78,11 +80,18 @@
     "plugins": [
       "@react-native-firebase/app",
       "@react-native-firebase/auth",
+      "expo-maps",
       [
         "expo-build-properties",
         {
           "ios": {
-            "useFrameworks": "static"
+            "useFrameworks": "static",
+            "deploymentTarget": "15.1"
+          },
+          "android": {
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "buildToolsVersion": "35.0.0"
           }
         }
       ]

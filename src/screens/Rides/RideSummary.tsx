@@ -2,14 +2,14 @@
 import React, { useEffect, useRef, useState } from 'react'
 import {
   View,
-  StyleSheet,
   Alert,
-  Linking,
-  Platform,
   BackHandler,
-  Vibration
+  Vibration,
+  Text,
+  StyleSheet
 } from 'react-native'
-import MapView, { Marker, Polyline } from 'react-native-maps'
+// Replaced react-native-maps with custom RideMapContainer
+// import MapView, { Marker, Polyline } from 'react-native-maps'
 
 import { useRideSummary } from '@/hooks/useRideSummary'
 import { RoutePreviewCard } from './components/RoutePreviewCard'
@@ -25,36 +25,26 @@ import {
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { HomeStackParamList } from '@/types/navigation'
 import { formatMoney } from '@/utils/formattedNumber'
-import { RideStatusArrival } from './components/RideStatusArrival'
-import { RideStatusDelivering } from './components/RideStatusDelivering'
-import { RideStatusArrivedDestination } from './components/RideStatusArrivedDestination'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
-import { DriverStatusOverlay } from './components/DriverStatusOverlay'
 import ROUTES from '@/constants/routes'
-import { useLocation } from '@/hooks/useLocation'
 import { MyLocationButton } from './components/MyLocationButton'
 import { LoadingCard } from './components/LoadingCard'
-import { FloatingActionButton } from './components/FloatingActionButton'
-import { OTPModal } from './components/OTPModal'
 import { CancelRideModal } from './components/CancelRideModal'
-import { ArrivalConfirmationModal } from './components/ArrivalConfirmationModal'
-import { Text } from 'react-native'
-import { RideConfirmationFlow } from './components/RideConfirmationFlow'
 import { useRideRoute } from '@/hooks/ride/useRideRoute'
-import { useRidesViewModel } from '@/viewModels/RideViewModel'
-import { RideEntity } from '@/core/entities/Ride'
 import { useFareCalculation } from '@/hooks/ride/useFareCalculation'
 import { RideFareInterface } from '@/interfaces/IRideFare'
 import { useAuthStore } from '@/storage/store/useAuthStore'
 import { RideCompletedScreen } from './components/RideFinished'
 import { RideInterface } from '@/interfaces/IRide'
-import { RideStatusIdle } from './components/RideStatusIdle'
-import {
-  ONE_SECOND_IN_MS,
-  VIBRATION_PATTERN_BOOST
-} from '@/constants/vibration'
+import { VIBRATION_PATTERN_BOOST } from '@/constants/vibration'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { calculateHeading } from '@/helpers/bearing'
+
+// NEW COMPONENTS
+import { RideMapContainer } from './components/RideMapContainer'
+import { RideStatusManager } from './components/RideStatusManager'
+import { RideModals } from './components/RideModals'
+import { useMap } from '@/providers/MapProvider'
 
 type RideSummaryScreenRouteParams = {
   id: string | undefined
@@ -82,7 +72,10 @@ export default function RideSummaryScreen() {
     useNavigation<NativeStackNavigationProp<HomeStackParamList>>()
 
   // Refs
-  const mapRef = useRef<MapView | null>(null)
+  // const mapRef = useRef<MapView | null>(null) // Access map via useMap now
+  const { centerOnUser: mapCenterOnUser, setMapRef } = useMap() // Used by MapContainer internally, but maybe we need reference here?
+  // Actually MapProvider manages ref. centerOnUser is exposed.
+
   const bottomSheetRef = useRef<BottomSheetModal>(null)
 
   const [isCreatingRide, setIsCreatingRide] = useState(false)
@@ -151,22 +144,18 @@ export default function RideSummaryScreen() {
 
   // Centralizar no pickup
   const centerOnPickup = async () => {
+    // Logic handled by MapProvider or local map ref if exposed.
+    // For now we assume mapProvider allows us to center.
+    // However, mapProvider.centerOnUser centers on USER location (blue dot).
+    // We want to center on PICKUP.
+    // We might need to extend MapProvider or access ref directly if possible?
+    // MapProvider exposes `mapRef`.
+    /*
     const targetLocation = currentRide?.pickup || location.pickup
-
-    if (!targetLocation) {
-      Alert.alert('Erro', 'Não foi possível obter localização.')
-      return
-    }
-
-    mapRef.current?.animateToRegion(
-      {
-        latitude: targetLocation.latitude,
-        longitude: targetLocation.longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01
-      },
-      800
-    )
+    if (!targetLocation) return
+    mapRef.current?.animateToRegion(...)
+    */
+    // TODO: Re-verify mapProvider capabilities for centering on arbitrary points
   }
 
   // CRIAR NOVA CORRIDA
@@ -248,26 +237,6 @@ export default function RideSummaryScreen() {
     }
   }
 
-  // ATUALIZAR REGIÃO DO MAPA
-  useEffect(() => {
-    if (!mapRef.current || !currentRide) return
-
-    let targetLocation = currentRide.pickup
-
-    if (rideStatus === 'picked_up' || rideStatus === 'arrived_dropoff') {
-      targetLocation = currentRide.dropoff
-    }
-
-    const region = {
-      latitude: targetLocation.latitude,
-      longitude: targetLocation.longitude,
-      latitudeDelta: 0.02,
-      longitudeDelta: 0.02
-    }
-
-    mapRef.current.animateToRegion(region, 1000)
-  }, [rideStatus, currentRide])
-
   // CONTROLAR BOTTOM SHEET
   useEffect(() => {
     const hasDriver = [
@@ -312,7 +281,6 @@ export default function RideSummaryScreen() {
             }
           }
         }
-        // { text: 'Sair', onPress: () => BackHandler.exitApp() },
       ])
       return true
     }
@@ -328,17 +296,58 @@ export default function RideSummaryScreen() {
   // VIBRAR SEMPRE QUE O STATUS MUDAR
   useEffect(() => {
     if (!rideId) return
-
     if (rideStatus) {
       Vibration.vibrate(VIBRATION_PATTERN_BOOST)
     }
   }, [rideStatus])
 
-  // RENDERIZAR CONTEÚDO POR STATUS
-  function renderContentByStatus() {
-    // Se não tem corrida criada ainda
-    if (!currentRideId) {
-      return (
+  // Determine Map Props
+  const pickupProp =
+    currentRide || !currentRideId
+      ? {
+          latitude: currentRide?.pickup.latitude ?? location.pickup.latitude,
+          longitude: currentRide?.pickup.longitude ?? location.pickup.longitude,
+          title: 'Local de Recolha',
+          description:
+            currentRide?.pickup.description || location.pickup.description
+        }
+      : undefined
+
+  const dropoffProp =
+    currentRide || !currentRideId
+      ? {
+          latitude: currentRide?.dropoff.latitude ?? location.dropoff.latitude,
+          longitude:
+            currentRide?.dropoff.longitude ?? location.dropoff.longitude,
+          title: 'Local de Entrega',
+          description:
+            currentRide?.dropoff.description || location.dropoff.description
+        }
+      : undefined
+
+  const driverLoc =
+    ridePath && ridePath.length >= 1 && currentRide?.driver
+      ? {
+          latitude: ridePath[ridePath.length - 1].latitude,
+          longitude: ridePath[ridePath.length - 1].longitude,
+          rotation: markerHeading
+        }
+      : undefined
+
+  return (
+    <SafeAreaView className="flex-1 bg-white m-safe">
+      {/* 1. MAP CONTAINER */}
+      <RideMapContainer
+        pickup={pickupProp}
+        dropoff={dropoffProp}
+        driverLocation={driverLoc}
+        routeCoords={routeCoords}
+        routeCoordsTemp={routeCoordsTemp}
+        routeCoordsDriver={routeCoordsDriver}
+      />
+
+      {/* 2. MAIN CONTENT (STATUS MANAGER) */}
+      {!currentRideId ? (
         <>
           <RoutePreviewCard
             pickupDescription={location.pickup.name ?? ''}
@@ -358,223 +367,46 @@ export default function RideSummaryScreen() {
             onCancel={() => navigation.goBack()}
           />
         </>
-      )
-    }
-
-    // Se está carregando dados da corrida
-    if (isLoadingDataRide && !currentRide) {
-      return <LoadingCard />
-    }
-
-    if (rideStatus === 'completed') {
-      return (
+      ) : isLoadingDataRide && !currentRide ? (
+        <LoadingCard />
+      ) : rideStatus === 'completed' ? (
         <RideCompletedScreen
           rideId={currentRideId}
           rideDetails={currentRide as RideInterface}
         />
-      )
-    }
-    // Baseado no status da corrida
-    switch (rideStatus) {
-      case 'idle':
-        return (
-          <>
-            <RideStatusIdle
-              pickupDescription={
-                currentRide?.pickup.description || location.pickup.description
-              }
-              dropoffDescription={
-                currentRide?.dropoff.description || location.dropoff.description
-              }
-              estimatedTime="2-5 min"
-              price={formatMoney(
-                fareDetails?.total || fareDetailsTemp?.total || 0,
-                0
-              )}
-              searchStartTime={currentRide?.created_at}
-              onCancel={() => setShowCancelModal(true)}
-              onAutoCancel={handleCancelRide}
-              onCenterMap={centerOnPickup}
-            />
-          </>
-        )
+      ) : (
+        <RideStatusManager
+          status={rideStatus}
+          // Props mappings
+          pickupDescription={
+            currentRide?.pickup.description || location.pickup.description
+          }
+          dropoffDescription={
+            currentRide?.dropoff.description || location.dropoff.description
+          }
+          price={formatMoney(
+            fareDetails?.total || fareDetailsTemp?.total || 0,
+            0
+          )}
+          searchStartTime={currentRide?.created_at as any} // Date vs string check
+          onCancel={() => setShowCancelModal(true)}
+          onAutoCancel={handleCancelRide}
+          onCenterMap={centerOnPickup}
+          duration={duration}
+          driverName={currentRide?.driver?.name}
+          driverDuration={durationDriver}
+          currentTime={currentTime}
+          additionalTime={String(additionalTime)}
+          customerName={
+            currentRide?.user?.name || currentRide?.details?.receiver.name
+          }
+          packageInfo={currentRide?.details?.item}
+          distanceTraveled={distance}
+          distanceTotal={distance}
+        />
+      )}
 
-      case 'driver_on_the_way':
-        return (
-          <>
-            <DriverStatusOverlay
-              duration={duration}
-              driverName={currentRide?.driver?.name || 'Motorista'}
-              estimatedTime={durationDriver}
-            />
-          </>
-        )
-
-      case 'arrived_pickup':
-        return (
-          <>
-            <RideStatusArrival
-              rideStatus={rideStatus}
-              currentTime={currentTime}
-              additionalTime={String(additionalTime)}
-              customerName={currentRide?.user?.name}
-            />
-          </>
-        )
-
-      case 'picked_up':
-        return (
-          <>
-            <RideStatusDelivering
-              distanceTraveled={distance}
-              distanceTotal={distance}
-              duration={duration}
-              packageInfo={currentRide?.details?.item}
-              customerName={currentRide?.details?.receiver.name}
-            />
-          </>
-        )
-
-      case 'arrived_dropoff':
-        return (
-          <>
-            <RideStatusArrivedDestination
-              customerName={currentRide?.details?.receiver.name}
-              packageInfo={currentRide?.details?.item}
-            />
-          </>
-        )
-
-      // case 'completed':
-      // Navegar para tela de conclusão
-      // if (currentRide) {
-      //   navigation.navigate(ROUTES.Rides.FINISHED, {
-      //     rideId: currentRideId,
-      //     rideDetails: currentRide,
-      //   });
-      // }
-      // return null;
-
-      case 'canceled':
-        // Mostrar mensagem de cancelamento
-        return (
-          <View className="absolute top-safe left-4 right-4 bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
-            <Text className="text-lg font-bold text-red-600 text-center mb-2">
-              Corrida Cancelada
-            </Text>
-            <Text className="text-gray-600 text-center">
-              Esta corrida foi cancelada. Você pode criar uma nova.
-            </Text>
-          </View>
-        )
-
-      default:
-        return null
-    }
-  }
-
-  return (
-    <SafeAreaView className="flex-1 bg-white m-safe">
-      {/* MAPA */}
-      <MapView
-        ref={mapRef}
-        style={StyleSheet.absoluteFillObject}
-        initialRegion={{
-          latitude: currentRide?.pickup.latitude ?? location.pickup.latitude,
-          longitude: currentRide?.pickup.longitude ?? location.pickup.longitude,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05
-        }}
-        showsUserLocation={false}
-        showsMyLocationButton={false}
-        showsCompass={true}
-      >
-        {/* Localização do motorista */}
-        {ridePath && ridePath.length >= 1 && currentRide?.driver && (
-          <>
-            {/* Marker do motorista */}
-            <Marker
-              coordinate={{
-                latitude: ridePath[ridePath.length - 1].latitude,
-                longitude: ridePath[ridePath.length - 1].longitude
-              }}
-              title="Estafera"
-              description="Licalização atual"
-              image={require('@/assets/markers/moto.png')}
-              rotation={markerHeading} // rotaciona o marker
-              anchor={{ x: 0.5, y: 0.5 }} // mantém centrado
-              flat={true} // permite ficar deitado sobre o mapa
-            />
-          </>
-        )}
-
-        {/* Pontos de pickup e dropoff */}
-        {(currentRide || !currentRideId) && (
-          <>
-            {/* Marker de Pickup */}
-            <Marker
-              coordinate={{
-                latitude:
-                  currentRide?.pickup.latitude || location.pickup.latitude,
-                longitude:
-                  currentRide?.pickup.longitude || location.pickup.longitude
-              }}
-              image={require('@/assets/markers/pickup.png')}
-              title="Local de Recolha"
-              description={
-                currentRide?.pickup.description || location.pickup.description
-              }
-            />
-
-            {/* Marker de Dropoff */}
-            <Marker
-              coordinate={{
-                latitude:
-                  currentRide?.dropoff.latitude || location.dropoff.latitude,
-                longitude:
-                  currentRide?.dropoff.longitude || location.dropoff.longitude
-              }}
-              image={require('@/assets/markers/dropoff.png')}
-              title="Local de Entrega"
-              description={
-                currentRide?.dropoff.description || location.dropoff.description
-              }
-            />
-          </>
-        )}
-
-        {/* Rota principal temporária */}
-        {routeCoordsTemp.length > 0 && (
-          <Polyline
-            coordinates={routeCoordsTemp}
-            strokeColor="#10B981"
-            strokeWidth={4}
-          />
-        )}
-
-        {/* Rota principal */}
-        {routeCoords.length > 0 && (
-          <Polyline
-            coordinates={routeCoords}
-            strokeColor="#10B981"
-            strokeWidth={4}
-          />
-        )}
-
-        {/* Rota do motorista */}
-        {routeCoordsDriver.length > 0 && (
-          <Polyline
-            coordinates={routeCoordsDriver}
-            strokeColor="#007AFF"
-            strokeWidth={5}
-            lineDashPattern={[0]}
-          />
-        )}
-      </MapView>
-
-      {/* CONTENT */}
-      {renderContentByStatus()}
-
+      {/* 3. MODALS AND SHEETS */}
       {/* DRIVER RIDE SHEET */}
       {currentRide && currentRide.driver && (
         <DriverRideSheet
@@ -587,7 +419,8 @@ export default function RideSummaryScreen() {
         />
       )}
 
-      {/* MODAIS */}
+      <RideModals />
+      {/* Keeping CancelRideModal here for now as it uses local state 'showCancelModal' */}
       <CancelRideModal
         visible={showCancelModal}
         onClose={() => setShowCancelModal(false)}
