@@ -1,5 +1,4 @@
 import { StatusBar } from 'expo-status-bar'
-import { Text, View } from 'react-native'
 import './i18n'
 import '@/styles/global.css'
 import 'react-native-gesture-handler'

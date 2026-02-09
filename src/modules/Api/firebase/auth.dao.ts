@@ -7,6 +7,7 @@ import {
   updateProfile,
   sendEmailVerification,
   reload,
+  getIdToken
 } from '@react-native-firebase/auth';
 import {
   doc,
@@ -92,7 +93,7 @@ export class FirebaseAuthDAO implements IAuthRepository {
 
       return {
         user: userEntity,
-        token: await firebaseUser.getIdToken(),
+        token: await getIdToken(firebaseUser),
       };
     } catch (error: any) {
       console.error('Erro no registro:', error);
@@ -154,7 +155,7 @@ export class FirebaseAuthDAO implements IAuthRepository {
 
       return {
         user: userEntity,
-        token: await firebaseUser.getIdToken(),
+        token: await getIdToken(firebaseUser),
       };
     } catch (error: any) {
       console.error('Erro no login:', error);

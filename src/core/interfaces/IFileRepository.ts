@@ -1,30 +1,34 @@
 // core/interfaces/IFileRepository.ts
 export interface UploadResult {
-  url: string;
-  path: string;
+  url: string
+  path: string
   metadata?: {
-    fileName: string;
-    size: number;
-    type: string;
-    uploadedAt: Date;
-  };
+    fileName: string
+    size: number
+    type: string
+    uploadedAt: Date
+  }
 }
 
 export interface IFileRepository {
-  // PRINCIPAIS MÉTODOS (React Native)
-  uploadSimple(fileUri: string, folder?: string): Promise<UploadResult>;
+  // 🔹 PRINCIPAIS MÉTODOS (React Native)
+  uploadSimple(fileUri: string, folder: string): Promise<UploadResult>
   uploadWithProgress(
     fileUri: string,
-    folder?: string,
-    onProgress?: (progress: number) => void,
-  ): Promise<UploadResult>;
-  uploadMultiple(fileUris: string[], folder?: string): Promise<UploadResult[]>;
-
-  // MÉTODOS BÁSICOS
-  deleteFile(path: string): Promise<void>;
-  getFileURL(path: string): Promise<string>;
-
-  // MÉTODOS DE COMPATIBILIDADE (Web)
-  uploadFile(file: File, path: string): Promise<string>;
-  uploadBlob(blob: Blob, path: string): Promise<string>;
+    folder: string,
+    onProgress?: (progress: number) => void
+  ): Promise<UploadResult>
+  uploadImagePicker(fileUri: string, folder: string): Promise<UploadResult>
+  uploadProfileImage(fileUri: string, userId: string): Promise<UploadResult>
+  uploadDocument(
+    fileUri: string,
+    userId: string,
+    documentType: string
+  ): Promise<UploadResult>
+  uploadRidePhoto(
+    fileUri: string,
+    rideId: string,
+    photoType: 'pickup' | 'dropoff'
+  ): Promise<UploadResult>
+  deleteFile(path: string): Promise<void>
 }

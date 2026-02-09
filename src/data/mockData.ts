@@ -20,6 +20,7 @@ export const users: UserInterface[] = [
     email: 'carlos@admin.com',
     phone: '+244900111111',
     status: 'active',
+    availability: 'available',
     created_at: new Date()
   },
   {
@@ -29,6 +30,7 @@ export const users: UserInterface[] = [
     email: 'ana@admin.com',
     phone: '+244900222222',
     status: 'active',
+    availability: 'available',
     created_at: new Date()
   },
   {
@@ -38,6 +40,7 @@ export const users: UserInterface[] = [
     email: 'marcos@user.com',
     phone: '+244900333333',
     status: 'active',
+    availability: 'available',
     created_at: new Date()
   },
   {
@@ -47,6 +50,7 @@ export const users: UserInterface[] = [
     email: 'bia@user.com',
     phone: '+244900444444',
     status: 'pending',
+    availability: 'available',
     created_at: new Date()
   },
   {
@@ -56,6 +60,7 @@ export const users: UserInterface[] = [
     email: 'joao@driver.com',
     phone: '+244900555555',
     status: 'active',
+    availability: 'available',
     created_at: new Date()
   },
   {
@@ -65,6 +70,7 @@ export const users: UserInterface[] = [
     email: 'maria@driver.com',
     phone: '+244900666666',
     status: 'active',
+    availability: 'available',
     created_at: new Date()
   }
 ]
@@ -239,7 +245,7 @@ export const notifications: NotificationInterface[] = [
     id: 'n1',
     title: 'Nova corrida disponível',
     message: 'Tem uma nova solicitação de entrega próxima.',
-    type: 'ride',
+    type: 'push',
     category: 'driver',
     specific_user: true,
     user: users[4],
@@ -249,7 +255,7 @@ export const notifications: NotificationInterface[] = [
     id: 'n2',
     title: 'Documento aprovado',
     message: 'Sua carta de condução foi aprovada.',
-    type: 'document',
+    type: 'push',
     category: 'driver',
     specific_user: true,
     user: users[5],
@@ -259,7 +265,7 @@ export const notifications: NotificationInterface[] = [
     id: 'n3',
     title: 'Carregamento pendente',
     message: 'Seu carregamento de 5000 Kz está em análise.',
-    type: 'wallet',
+    type: 'push',
     category: 'driver',
     specific_user: true,
     user: users[5],
@@ -269,7 +275,7 @@ export const notifications: NotificationInterface[] = [
     id: 'n4',
     title: 'Nova atualização',
     message: 'Aplicativo atualizado para versão 1.0.5',
-    type: 'system',
+    type: 'push',
     category: 'all',
     created_at: new Date()
   }

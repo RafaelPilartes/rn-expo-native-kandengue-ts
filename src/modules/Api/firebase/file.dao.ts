@@ -16,6 +16,17 @@ interface UploadResult {
 }
 
 export class FirebaseFileDAO {
+  async copyToExpoAccessiblePath(uri: string): Promise<string> {
+    try {
+      const newPath = `${FileSystem.cacheDirectory}${Date.now()}.jpg`
+      await FileSystem.copyAsync({ from: uri, to: newPath })
+      return newPath
+    } catch (err) {
+      console.error('❌ Erro ao copiar arquivo:', err)
+      throw new Error('Falha ao preparar arquivo para upload')
+    }
+  }
+
   /**
    * ✅ UPLOAD HÍBRIDO - API modular + putFile namespaced
    * Usa o melhor de ambos: modular recomendado + putFile que funciona
@@ -29,7 +40,7 @@ export class FirebaseFileDAO {
 
     try {
       // 1. VALIDAR E CORRIGIR URI
-      const processedUri = this.processFileUri(fileUri)
+      const processedUri = await this.copyToExpoAccessiblePath(fileUri)
       console.log('📍 URI Processada:', processedUri)
 
       // 2. VERIFICAR SE ARQUIVO EXISTE
@@ -103,8 +114,8 @@ export class FirebaseFileDAO {
     folder: string,
     onProgress?: (progress: number) => void
   ): Promise<UploadResult> {
-    return new Promise((resolve, reject) => {
-      const processedUri = this.processFileUri(fileUri)
+    return new Promise(async (resolve, reject) => {
+      const processedUri = await this.copyToExpoAccessiblePath(fileUri)
       const fileName = this.generateFileName(fileUri)
       const fullPath = `${folder}/${fileName}`
 
@@ -150,29 +161,6 @@ export class FirebaseFileDAO {
         }
       )
     })
-  }
-
-  /**
-   * ✅ PROCESSAMENTO DE URI
-   */
-  private processFileUri(uri: string): string {
-    let processedUri = uri
-
-    // Remove query parameters
-    processedUri = processedUri.split('?')[0]
-
-    // Corrige encoding
-    processedUri = decodeURIComponent(processedUri)
-
-    // Android: Garante prefixo file://
-    if (Platform.OS === 'android' && !processedUri.startsWith('file://')) {
-      processedUri = `file://${processedUri}`
-    }
-
-    // Remove caracteres problemáticos
-    processedUri = processedUri.replace(/%20/g, ' ')
-
-    return processedUri
   }
 
   /**

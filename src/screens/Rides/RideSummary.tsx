@@ -498,6 +498,8 @@ export default function RideSummaryScreen() {
                 latitude: ridePath[ridePath.length - 1].latitude,
                 longitude: ridePath[ridePath.length - 1].longitude
               }}
+              title="Estafera"
+              description="Licalização atual"
               image={require('@/assets/markers/moto.png')}
               rotation={markerHeading} // rotaciona o marker
               anchor={{ x: 0.5, y: 0.5 }} // mantém centrado

@@ -75,14 +75,14 @@ export function useRideRealtime(rideId?: string) {
     setupRealtimeListener()
     setupRealtimeTrackingListener()
 
-    const unsubscribeRides = listenRideRealtime(rideId, setRide)
+    const unsubscribeRide = listenRideRealtime(rideId, setRide)
     const unsubscribeRideTrackings = listenRideTrackingsByField(
       'ride_id',
       rideId,
       setRideTracking
     )
     return () => {
-      unsubscribeRides
+      unsubscribeRide
       unsubscribeRideTrackings
     }
   }, [rideId])
