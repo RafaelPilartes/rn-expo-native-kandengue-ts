@@ -1,13 +1,5 @@
 import React, { JSX, useEffect, useState } from 'react'
-import {
-  View,
-  Text,
-  ScrollView,
-  Image,
-  Alert,
-  Platform,
-  Linking
-} from 'react-native'
+import { View, Text, ScrollView, Image, Platform, Linking } from 'react-native'
 import PermissionCard from '@/components/ui/card/PermissionCard'
 import PrimaryButton from '@/components/ui/button/PrimaryButton'
 import { useNavigation } from '@react-navigation/native'
@@ -17,17 +9,20 @@ import ROUTES from '@/constants/routes'
 import LineGradient from '@/components/LineGradient'
 import { useTranslation } from 'react-i18next'
 import { Check, Mic, Navigation, X } from 'lucide-react-native'
+import { LocationPermission } from '@/constants/images'
 import { usePermissionsStore } from '@/storage/store/usePermissionsStore'
 import {
   checkLocationPermission,
   LocationPermissionResponse,
   requestLocationPermission
 } from '@/services/permissions/locationPermission'
+import LocationDisclosureModal from '@/components/modals/LocationDisclosureModal'
 import {
   checkNotificationPermission,
   NotificationPermissionResponse,
   requestNotificationPermission
 } from '@/services/permissions/notificationPermission'
+import { useAlert } from '@/context/AlertContext'
 
 type PermissionStatus = 'pending' | 'granted' | 'denied' | 'blocked'
 
@@ -44,13 +39,16 @@ const Permissions = () => {
     useNavigation<NativeStackNavigationProp<AuthStackParamList>>()
 
   const { setPermissionsSeen } = usePermissionsStore()
+  const { showAlert } = useAlert()
 
   const { t } = useTranslation(['onboarding', 'common'])
 
   const [permissions, setPermissions] = useState<PermissionItem[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
-  // Verificar status atual das permissões
+  const [showLocationDisclosure, setShowLocationDisclosure] = useState(false)
+
+  // 🔹 Verificar status atual das permissões
   const checkAllPermissions = async () => {
     try {
       const locationStatus = await checkLocationPermission()
@@ -77,7 +75,7 @@ const Permissions = () => {
     }
   }
 
-  // Mapear status da localização
+  // 🔹 Mapear status da localização
   const mapLocationStatus = (
     status: LocationPermissionResponse
   ): PermissionStatus => {
@@ -87,7 +85,7 @@ const Permissions = () => {
     return 'pending'
   }
 
-  // Mapear status das notificações
+  // 🔹 Mapear status das notificações
   const mapNotificationStatus = (
     status: NotificationPermissionResponse
   ): PermissionStatus => {
@@ -97,8 +95,19 @@ const Permissions = () => {
     return 'pending'
   }
 
-  // Solicitar permissão individual
+  // 🔹 Solicitar permissão individual
   const requestPermission = async (
+    permissionId: 'location' | 'notifications'
+  ) => {
+    if (permissionId === 'location') {
+      setShowLocationDisclosure(true)
+      return
+    }
+
+    await processPermissionRequest(permissionId)
+  }
+
+  const processPermissionRequest = async (
     permissionId: 'location' | 'notifications'
   ) => {
     try {
@@ -122,28 +131,38 @@ const Permissions = () => {
       }
     } catch (error) {
       console.error(`Erro ao solicitar permissão ${permissionId}:`, error)
-      Alert.alert('Erro', 'Erro na solicitação da permissão')
+      showAlert('Erro', 'Erro na solicitação da permissão', 'error')
     } finally {
       setIsLoading(false)
     }
   }
 
-  // Feedback visual quando permissão é concedida
+  const handleAcceptLocationDisclosure = async () => {
+    setShowLocationDisclosure(false)
+    await processPermissionRequest('location')
+  }
+
+  const handleDeclineLocationDisclosure = () => {
+    setShowLocationDisclosure(false)
+  }
+
+  // 🔹 Feedback visual quando permissão é concedida
   const showPermissionGrantedFeedback = (permissionId: string) => {
     // Feedback visual será mostrado através do ícone no PermissionCard
     console.log(`Permissão ${permissionId} concedida!`)
   }
 
-  // Feedback quando permissão é negada
+  // 🔹 Feedback quando permissão é negada
   const showPermissionDeniedFeedback = (permissionId: string) => {
     const permissionName =
       permissionId === 'location'
         ? t('onboarding:permissions_title_1')
         : t('onboarding:permissions_title_2')
 
-    Alert.alert(
+    showAlert(
       t('onboarding:permission_denied_title'),
       t('onboarding:permission_denied_message', { permission: permissionName }),
+      'warning',
       [
         {
           text: t('common:buttons.settings'),
@@ -164,7 +183,7 @@ const Permissions = () => {
     )
   }
 
-  // Ir para próxima tela
+  // 🔹 Ir para próxima tela
   const goToNextStep = () => {
     try {
       // Marcar que o usuário já viu as permissões
@@ -178,7 +197,7 @@ const Permissions = () => {
     }
   }
 
-  // Verificar se pode continuar (todas as permissões foram tratadas)
+  // 🔹 Verificar se pode continuar (todas as permissões foram tratadas)
   const canContinue = permissions.every(
     permission =>
       permission.status !== 'pending' &&
@@ -186,7 +205,7 @@ const Permissions = () => {
       permission.status !== 'blocked'
   )
 
-  // Obter ícone baseado no status
+  // 🔹 Obter ícone baseado no status
   const getStatusIcon = (status: PermissionStatus) => {
     switch (status) {
       case 'granted':
@@ -199,7 +218,7 @@ const Permissions = () => {
     }
   }
 
-  // Obter cor do status
+  // 🔹 Obter cor do status
   const getStatusColor = (status: PermissionStatus) => {
     switch (status) {
       case 'granted':
@@ -212,18 +231,15 @@ const Permissions = () => {
     }
   }
 
-  // Inicializar estados das permissões
+  // 🔹 Inicializar estados das permissões
   useEffect(() => {
     checkAllPermissions()
   }, [])
 
   return (
-    <View className="flex-1 bg-white p-container">
+    <View className="flex-1 bg-white p-container m-safe">
       <View className="flex items-center my-6">
-        <Image
-          source={require('@/assets/images/illustration/location-permission.png')}
-          style={{ width: 235, height: 280, resizeMode: 'contain' }}
-        />
+        <LocationPermission width={235} height={280} />
 
         <Text className="text-2xl font-extrabold mt-4">
           {t('onboarding:permissions_title')}
@@ -265,6 +281,12 @@ const Permissions = () => {
 
       {/* line linear gradient */}
       <LineGradient />
+
+      <LocationDisclosureModal
+        visible={showLocationDisclosure}
+        onAccept={handleAcceptLocationDisclosure}
+        onDecline={handleDeclineLocationDisclosure}
+      />
     </View>
   )
 }

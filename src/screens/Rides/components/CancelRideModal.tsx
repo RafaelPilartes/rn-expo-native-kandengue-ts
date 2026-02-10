@@ -6,9 +6,9 @@ import {
   Modal,
   TouchableOpacity,
   TextInput,
-  ScrollView,
-  Alert
+  ScrollView
 } from 'react-native'
+import { useAlert } from '@/context/AlertContext'
 import { X } from 'lucide-react-native'
 
 interface CancelRideModalProps {
@@ -34,6 +34,7 @@ export const CancelRideModal: React.FC<CancelRideModalProps> = ({
   onConfirm,
   isLoading = false
 }) => {
+  const { showAlert } = useAlert()
   const [selectedReason, setSelectedReason] = useState('')
   const [customReason, setCustomReason] = useState('')
 
@@ -41,7 +42,11 @@ export const CancelRideModal: React.FC<CancelRideModalProps> = ({
     const reason =
       selectedReason === 'Outro motivo' ? customReason : selectedReason
     if (!reason.trim()) {
-      Alert.alert('Atenção', 'Por favor, selecione ou digite um motivo.')
+      showAlert(
+        'Atenção',
+        'Por favor, selecione ou digite um motivo.',
+        'warning'
+      )
       return
     }
     onConfirm(reason)

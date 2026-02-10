@@ -1,101 +1,98 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'
 import {
   View,
   Text,
   TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
-  ScrollView,
-  Alert,
-} from 'react-native';
-import { Mail } from 'lucide-react-native';
-import PrimaryButton from '@/components/ui/button/PrimaryButton';
-import LineGradient from '@/components/LineGradient';
-import { InputField } from '@/components/ui/input/InputField';
-import { AuthStackParamList } from '@/types/navigation';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import ROUTES from '@/constants/routes';
-import { BackButton } from '@/components/ui/button/BackButton';
-import { useTranslation } from 'react-i18next';
-import { useAuthViewModel } from '@/viewModels/AuthViewModel';
-import { mapFirebaseError } from '@/helpers/mapFirebaseError';
+  ScrollView
+} from 'react-native'
+import { Mail } from 'lucide-react-native'
+import PrimaryButton from '@/components/ui/button/PrimaryButton'
+import LineGradient from '@/components/LineGradient'
+import { InputField } from '@/components/ui/input/InputField'
+import { AuthStackParamList } from '@/types/navigation'
+import { useNavigation } from '@react-navigation/native'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import ROUTES from '@/constants/routes'
+import { BackButton } from '@/components/ui/button/BackButton'
+import { useTranslation } from 'react-i18next'
+import { useAuthViewModel } from '@/viewModels/AuthViewModel'
+import { mapFirebaseError } from '@/helpers/mapFirebaseError'
+import { useAlert } from '@/context/AlertContext'
 
 export default function ForgotPasswordScreen() {
   const navigation =
-    useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
-  const { t } = useTranslation(['auth', 'common']);
+    useNavigation<NativeStackNavigationProp<AuthStackParamList>>()
+  const { t } = useTranslation(['auth', 'common'])
 
   const navigateTo = (to: any) => {
     navigation.reset({
       index: 0,
-      routes: [{ name: to }],
-    });
-  };
+      routes: [{ name: to }]
+    })
+  }
 
-  const { forgotPassword } = useAuthViewModel();
-  const [isLoading, setIsLoading] = useState(false);
+  const { forgotPassword } = useAuthViewModel()
+  const [isLoading, setIsLoading] = useState(false)
+  const { showAlert } = useAlert()
 
-  const [email, setEmail] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState('')
+  const [error, setError] = useState('')
 
   const handleRecover = async () => {
     // Validação local
     if (!email) {
-      setError(`${t('auth:validate_email_required')}`);
-      return;
+      setError(`${t('auth:validate_email_required')}`)
+      return
     }
     if (!/\S+@\S+\.\S+/.test(email)) {
-      setError(`${t('auth:validate_email_invalid')}`);
-      return;
+      setError(`${t('auth:validate_email_invalid')}`)
+      return
     }
 
-    setError('');
-    setIsLoading(true);
+    setError('')
+    setIsLoading(true)
 
     try {
-      console.log('Solicitando recuperação para:', email);
+      console.log('Solicitando recuperação para:', email)
 
       // CHAMAR: Serviço de recuperação de senha
       await forgotPassword
         .mutateAsync(email)
         .then(() => {
-          console.log('✅ Email de recuperação enviado com sucesso');
+          console.log('✅ Email de recuperação enviado com sucesso')
 
           // NAVEGAR: Para tela de sucesso
-          navigation.navigate(ROUTES.AuthStack.FORGOT_PASSWORD_SUCCESS);
+          navigation.navigate(ROUTES.AuthStack.FORGOT_PASSWORD_SUCCESS)
         })
         .catch((error: any) => {
-          console.error('❌ Erro ao solicitar recuperação:', error);
+          console.error('❌ Erro ao solicitar recuperação:', error)
 
           // TRATAMENTO: De erros específicos
           let errorMessage =
-            mapFirebaseError(error) || 'Erro ao enviar email de recuperação';
+            mapFirebaseError(error) || 'Erro ao enviar email de recuperação'
 
-          Alert.alert('Erro ao solicitar recuperação', errorMessage, [
-            { text: 'OK' },
-          ]);
-        });
+          showAlert('Erro ao solicitar recuperação', errorMessage, 'error')
+        })
     } catch (error: any) {
-      console.error('❌ Erro ao solicitar recuperação:', error);
+      console.error('❌ Erro ao solicitar recuperação:', error)
 
       // TRATAMENTO: De erros específicos
       let errorMessage =
-        mapFirebaseError(error) || 'Erro ao enviar email de recuperação';
+        mapFirebaseError(error) || 'Erro ao enviar email de recuperação'
 
-      Alert.alert('Erro ao solicitar recuperação', errorMessage, [
-        { text: 'OK' },
-      ]);
+      showAlert('Erro ao solicitar recuperação', errorMessage, 'error')
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   // Limpar erro quando o usuário digitar
   const handleEmailChange = (text: string) => {
-    setEmail(text.toLowerCase()); // Converter para minúsculo
-    if (error) setError(''); // Limpar erro quando usuário começar a digitar
-  };
+    setEmail(text.toLowerCase()) // Converter para minúsculo
+    if (error) setError('') // Limpar erro quando usuário começar a digitar
+  }
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -170,5 +167,5 @@ export default function ForgotPasswordScreen() {
         </View>
       </ScrollView>
     </TouchableWithoutFeedback>
-  );
+  )
 }

@@ -11,7 +11,7 @@ import {
   Share2
 } from 'lucide-react-native'
 import { useNavigation } from '@react-navigation/native'
-import PageHeader from '@/components/PageHeader'
+import { PageHeader } from '@/components/PageHeader'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function PrivacyPolicyScreen() {

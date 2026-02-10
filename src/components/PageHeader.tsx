@@ -5,13 +5,13 @@ import { ArrowLeft } from 'lucide-react-native'
 
 interface Props {
   title: string
-  showBack?: boolean
+  canGoBack?: boolean
   rightComponent?: React.ReactNode
 }
 
 export const PageHeader: React.FC<Props> = ({
   title,
-  showBack = true,
+  canGoBack = true,
   rightComponent
 }) => {
   const navigation = useNavigation()
@@ -19,7 +19,7 @@ export const PageHeader: React.FC<Props> = ({
   return (
     <View style={styles.container}>
       <View style={styles.leftContainer}>
-        {showBack && (
+        {canGoBack && (
           <TouchableOpacity
             onPress={() => navigation.goBack()}
             style={styles.backButton}

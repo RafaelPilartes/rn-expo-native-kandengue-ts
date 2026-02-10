@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import AuthRouter from './navigation/AuthRouter'
 import TabRouter from './Tab/TabRouter'
 import LoadingScreen from '@/screens/Loading'
-import { Alert, Platform } from 'react-native'
+import { Platform } from 'react-native'
 import Constants from 'expo-constants'
 import VersionCheck from 'react-native-version-check'
 
@@ -13,6 +13,7 @@ import { useAuthStore } from '@/storage/store/useAuthStore'
 import { UserInterface } from '@/interfaces/IUser'
 import UpdateAppScreen from '@/screens/UpdateApp'
 import { AppConfigInfo } from '@/constants/config'
+import { useAlert } from '@/context/AlertContext'
 
 const Stack = createNativeStackNavigator()
 
@@ -40,6 +41,8 @@ export default function AppRouter() {
     setUser: setZustandUser,
     logout: zustandLogout
   } = useAuthStore()
+
+  const { showAlert } = useAlert()
 
   // =========================================================
   // FUNÇÃO AUXILIAR: Validations for app access — adapta conforme os campos reais do UserInterface
@@ -143,23 +146,26 @@ export default function AppRouter() {
         const status = user.status ?? 'active'
 
         if (!isVerified) {
-          Alert.alert(
+          showAlert(
             'Email não verificado',
             'Por favor, verifique seu email antes de acessar o aplicativo.',
+            'warning',
             [{ text: 'OK' }]
           )
         } else if (status !== 'active') {
-          Alert.alert(
+          showAlert(
             'Conta inativa',
             'Sua conta está inativa. Entre em contato com o suporte.',
+            'error',
             [{ text: 'OK' }]
           )
         }
       } else {
         // fallback genérico
-        Alert.alert(
+        showAlert(
           'Acesso negado',
-          'Conta inválida. Faça login novamente ou contate o suporte.'
+          'Conta inválida. Faça login novamente ou contate o suporte.',
+          'error'
         )
       }
     } catch (error) {

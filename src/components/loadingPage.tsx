@@ -1,19 +1,19 @@
-import { Text } from 'react-native';
-import { ActivityIndicator, View } from 'react-native';
-import PageHeader from './PageHeader';
+import { Text } from 'react-native'
+import { ActivityIndicator, View } from 'react-native'
+import { PageHeader } from './PageHeader'
 
 interface LoadingPageProps {
-  title?: string;
-  primaryText: string;
-  canGoBack?: boolean;
-  secondaryText?: string;
-  isLoading?: boolean;
+  title?: string
+  primaryText: string
+  canGoBack?: boolean
+  secondaryText?: string
+  isLoading?: boolean
 }
 
 export const BlackLoadingPage = ({
   primaryText,
   secondaryText,
-  isLoading = false,
+  isLoading = false
 }: LoadingPageProps) => {
   return (
     <View className="absolute inset-0 bg-black bg-opacity-50 items-center justify-center">
@@ -35,15 +35,15 @@ export const BlackLoadingPage = ({
         </View>
       )}
     </View>
-  );
-};
+  )
+}
 
 export const BaseLoadingPage = ({
   title = 'Carregando...',
   primaryText,
   canGoBack = true,
   secondaryText,
-  isLoading = false,
+  isLoading = false
 }: LoadingPageProps) => {
   return (
     <View className="flex-1 bg-gray-50">
@@ -53,5 +53,5 @@ export const BaseLoadingPage = ({
         <Text className="text-gray-600 mt-4">{primaryText}</Text>
       </View>
     </View>
-  );
-};
+  )
+}

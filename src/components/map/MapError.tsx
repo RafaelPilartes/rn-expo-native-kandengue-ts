@@ -1,7 +1,6 @@
-// src/screens/Map/components/MapError.tsx
 import React from 'react'
 import { View, Text, TouchableOpacity } from 'react-native'
-import MapView from 'react-native-maps'
+import PlatformMapView from '@/components/map/MapView'
 import { BackButton } from '@/components/ui/button/BackButton'
 
 interface MapErrorProps {
@@ -18,16 +17,19 @@ export const MapError: React.FC<MapErrorProps> = ({
   return (
     <View className="flex-1 bg-white">
       {/* Mapa de fundo (estático) */}
-      <MapView
+      <PlatformMapView
         style={{ flex: 1 }}
-        initialRegion={{
-          latitude: -8.839987,
-          longitude: 13.289437,
-          latitudeDelta: 0.06,
-          longitudeDelta: 0.01
+        cameraPosition={{
+          coordinates: {
+            latitude: -8.839987,
+            longitude: 13.289437
+          },
+          zoom: 15
         }}
-        scrollEnabled={false}
-        zoomEnabled={false}
+        uiSettings={{
+          scrollGesturesEnabled: false,
+          zoomGesturesEnabled: false
+        }}
       />
 
       {/* Overlay de erro */}

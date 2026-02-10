@@ -37,6 +37,8 @@
     "settings": "settings",
     "try_again": "Try again",
     "allow": "Allow",
-    "get_started": "Get started"
+    "get_started": "Get started",
+    "accept": "Accept",
+    "decline": "Decline"
   }
 }

@@ -1,30 +1,19 @@
 import React, { useMemo } from 'react'
 import { View, StyleSheet } from 'react-native'
-import {
-  CustomMapView,
-  MapMarker,
-  MapPolyline
+import PlatformMapView, {
+  Marker,
+  Polyline
 } from '../../../components/map/MapView'
-// import { useMap } from '../../../providers/MapProvider';
-import { GoogleMaps } from 'expo-maps'
+import { CustomPlace } from '@/types/places'
+import { LatLngType } from '@/types/latLng'
 
 interface Props {
-  pickup?: {
-    latitude: number
-    longitude: number
-    title?: string
-    description?: string
-  }
-  dropoff?: {
-    latitude: number
-    longitude: number
-    title?: string
-    description?: string
-  }
-  driverLocation?: { latitude: number; longitude: number; rotation?: number }
-  routeCoords?: { latitude: number; longitude: number }[]
-  routeCoordsDriver?: { latitude: number; longitude: number }[]
-  routeCoordsTemp?: { latitude: number; longitude: number }[]
+  pickup?: CustomPlace
+  dropoff?: CustomPlace
+  driverLocation?: LatLngType
+  routeCoords?: LatLngType[]
+  routeCoordsDriver?: LatLngType[]
+  routeCoordsTemp?: LatLngType[]
 }
 
 export const RideMapContainer: React.FC<Props> = ({
@@ -36,13 +25,13 @@ export const RideMapContainer: React.FC<Props> = ({
   routeCoordsTemp = []
 }) => {
   const markers = useMemo(() => {
-    const list: MapMarker[] = []
+    const list: Marker[] = []
 
     if (pickup) {
       list.push({
         id: 'pickup',
         coordinates: { latitude: pickup.latitude, longitude: pickup.longitude },
-        title: pickup.title ?? 'Pickup',
+        title: pickup.name ?? 'Pickup',
         snippet: pickup.description
         // icon: require('@/assets/markers/pickup.png'), // TODO: Handle image icons in expo-maps
       })
@@ -55,7 +44,7 @@ export const RideMapContainer: React.FC<Props> = ({
           latitude: dropoff.latitude,
           longitude: dropoff.longitude
         },
-        title: dropoff.title ?? 'Dropoff',
+        title: dropoff.name ?? 'Dropoff',
         snippet: dropoff.description
         // icon: require('@/assets/markers/dropoff.png'),
       })
@@ -70,9 +59,7 @@ export const RideMapContainer: React.FC<Props> = ({
         },
         title: 'Driver'
         // icon: require('@/assets/markers/moto.png'),
-        // rotation: driverLocation.rotation // expo-maps marker doesn't seem to have rotation?
-        // GoogleMapsMarker type in types.ts does NOT show rotation.
-        // But it has `anchor`.
+        // rotation: driverLocation.rotation
       })
     }
 
@@ -80,7 +67,7 @@ export const RideMapContainer: React.FC<Props> = ({
   }, [pickup, dropoff, driverLocation])
 
   const polylines = useMemo(() => {
-    const list: MapPolyline[] = []
+    const list: Polyline[] = []
 
     if (routeCoordsTemp.length > 0) {
       list.push({
@@ -106,7 +93,6 @@ export const RideMapContainer: React.FC<Props> = ({
         coordinates: routeCoordsDriver,
         color: '#007AFF',
         width: 5
-        // pattern: [0] // expo-maps polyline doesn't explicitly show pattern in types?
       })
     }
 
@@ -115,10 +101,14 @@ export const RideMapContainer: React.FC<Props> = ({
 
   return (
     <View style={styles.container}>
-      <CustomMapView
+      <PlatformMapView
+        style={styles.map}
         markers={markers}
         polylines={polylines}
-        showUserLocation={false}
+        // CustomMapView logic for userLocation is not needed here as RideMapContainer is for static/driver view?
+        // If we need to show user location, we pass coordinates.
+        // PlatformMapView supports `showUserLocation`?
+        // No, expo-maps uses `userLocation` prop which is object { coordinates, followUserLocation }.
       />
     </View>
   )
@@ -126,6 +116,12 @@ export const RideMapContainer: React.FC<Props> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1
+    flex: 1,
+    overflow: 'hidden',
+    borderRadius: 16
+  },
+  map: {
+    width: '100%',
+    height: '100%'
   }
 })

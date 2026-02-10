@@ -1,13 +1,6 @@
 // src/screens/About.tsx
 import React, { useState } from 'react'
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Linking,
-  Alert
-} from 'react-native'
+import { View, Text, ScrollView, TouchableOpacity, Linking } from 'react-native'
 import {
   Info,
   Shield,
@@ -21,7 +14,8 @@ import {
   ExternalLink
 } from 'lucide-react-native'
 import { useNavigation } from '@react-navigation/native'
-import PageHeader from '@/components/PageHeader'
+import { PageHeader } from '@/components/PageHeader'
+import { useAlert } from '@/context/AlertContext'
 import {
   APP_VERSION,
   BUILD_NUMBER,
@@ -33,6 +27,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function AboutScreen() {
   const [expandedSection, setExpandedSection] = useState<string | null>(null)
+  const { showAlert } = useAlert()
 
   const toggleSection = (section: string) => {
     setExpandedSection(expandedSection === section ? null : section)
@@ -40,25 +35,33 @@ export default function AboutScreen() {
 
   const handleOpenWebsite = () => {
     Linking.openURL(`${SITE_URL}`).catch(() =>
-      Alert.alert('Erro', 'Não foi possível abrir o website.')
+      showAlert('Erro', 'Não foi possível abrir o website.', 'error')
     )
   }
 
   const handleOpenPrivacyPolicy = () => {
     Linking.openURL(`${SITE_URL}/privacy`).catch(() =>
-      Alert.alert('Erro', 'Não foi possível abrir a política de privacidade.')
+      showAlert(
+        'Erro',
+        'Não foi possível abrir a política de privacidade.',
+        'error'
+      )
     )
   }
 
   const handleOpenTerms = () => {
     Linking.openURL(`${SITE_URL}/terms`).catch(() =>
-      Alert.alert('Erro', 'Não foi possível abrir os termos de uso.')
+      showAlert('Erro', 'Não foi possível abrir os termos de uso.', 'error')
     )
   }
 
   const handleOpenDev = () => {
     Linking.openURL(`${DEVELOPER_SITE}`).catch(() =>
-      Alert.alert('Erro', 'Não foi possível abrir os site do desenvolvedor.')
+      showAlert(
+        'Erro',
+        'Não foi possível abrir os site do desenvolvedor.',
+        'error'
+      )
     )
   }
 

@@ -12,11 +12,11 @@ import { useRidesViewModel } from '@/viewModels/RideViewModel'
 import { useAuthStore } from '@/storage/store/useAuthStore'
 import { RideInterface } from '@/interfaces/IRide'
 import { BaseLoadingPage } from '@/components/loadingPage'
-import PageHeader from '@/components/PageHeader'
-import { useAppProvider } from '@/providers/AppProvider'
 import { toDate } from '@/utils/formatDate'
 import { useUserRides } from '@/context/UserRidesContext'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { PageHeader } from '@/components/PageHeader'
+import { useAppProvider } from '@/providers/AppProvider'
 
 type Section = {
   title: string

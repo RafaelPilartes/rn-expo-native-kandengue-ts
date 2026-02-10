@@ -30,5 +30,7 @@
   "permission_denied_message": "A permissão para {{permission}}, foi recusada",
   "swipe_to_continue": "Swipe to continue",
   "swipe_hint": "Swipe Hint",
-  "swipe": "Swipe"
+  "swipe": "Swipe",
+  "location_disclosure_title": "Location Access Required",
+  "location_disclosure_message": "Kandengue Pro collects location data in foreground and background to enable real-time tracking, safety alerts, and emergency SOS features even when the app is closed or not in use."
 }

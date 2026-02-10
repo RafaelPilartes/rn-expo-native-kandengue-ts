@@ -1,10 +1,10 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { Alert } from 'react-native'
 import {
   ImagePickerService,
   ImageValidationRules,
   ImagePickerResult
 } from '@/services/picker/imagePicker'
+import { useAlert } from '@/context/AlertContext'
 import type {
   CameraOptions,
   ImageLibraryOptions
@@ -28,6 +28,7 @@ export const useImagePicker = (): UseImagePickerReturn => {
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const isMounted = useRef(true)
+  const { showAlert } = useAlert()
 
   useEffect(() => {
     return () => {
@@ -74,7 +75,7 @@ export const useImagePicker = (): UseImagePickerReturn => {
           safeSetState(setError as any, msg)
 
           if (!result.cancelled) {
-            Alert.alert('Erro', msg)
+            showAlert('Erro', msg, 'error')
           }
           return null
         }
@@ -91,13 +92,13 @@ export const useImagePicker = (): UseImagePickerReturn => {
         const errorMessage =
           error instanceof Error ? error.message : 'Erro desconhecido'
         safeSetState(setError as any, errorMessage)
-        Alert.alert('Erro', 'Não foi possível processar a imagem')
+        showAlert('Erro', 'Não foi possível processar a imagem', 'error')
         return null
       } finally {
         safeSetState(setIsUploading as any, false)
       }
     },
-    [safeSetState]
+    [safeSetState, showAlert]
   )
 
   const pickImage = useCallback(

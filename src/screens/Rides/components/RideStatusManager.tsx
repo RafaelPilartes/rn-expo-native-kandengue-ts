@@ -25,7 +25,7 @@ interface Props {
   driverDuration?: string // Estimated time
 
   // Arrival/Delivering props
-  currentTime?: number
+  currentTime?: string
   additionalTime?: string
   customerName?: string
   packageInfo?: any
@@ -80,9 +80,7 @@ export const RideStatusManager: React.FC<Props> = ({
       return (
         <RideStatusArrival
           rideStatus={status as any}
-          currentTime={
-            currentTime ? converter.numberToString(currentTime) : '0'
-          }
+          currentTime={currentTime ?? '0'}
           additionalTime={String(additionalTime)}
           customerName={customerName}
         />

@@ -1,120 +1,124 @@
 // src/screens/Ride/components/RideConfirmationFlow.tsx
-import React, { useState } from 'react';
+import React, { useState } from 'react'
 import {
   View,
   Text,
   TouchableOpacity,
   Image,
   Modal,
-  Alert,
-  TextInput,
-} from 'react-native';
+  TextInput
+} from 'react-native'
+import { useAlert } from '@/context/AlertContext'
 import {
   Camera,
   Package,
   CheckCircle,
   X,
-  Image as ImageIcon,
-} from 'lucide-react-native';
-import { useImagePicker } from '@/hooks/useImagePicker';
-import { ImagePickerPresets } from '@/services/picker/imagePickerPresets';
-import { useFileUploadViewModel } from '@/viewModels/FileUploadViewModel';
+  Image as ImageIcon
+} from 'lucide-react-native'
+import { useImagePicker } from '@/hooks/useImagePicker'
+import { ImagePickerPresets } from '@/services/picker/imagePickerPresets'
+import { useFileUploadViewModel } from '@/viewModels/FileUploadViewModel'
 
 interface RideConfirmationFlowProps {
-  visible: boolean;
-  userId: string | null;
-  onClose: () => void;
-  isLoading?: boolean;
+  visible: boolean
+  userId: string | null
+  onClose: () => void
+  isLoading?: boolean
 }
 
 export const RideConfirmationFlow: React.FC<RideConfirmationFlowProps> = ({
   visible,
   onClose,
   userId = 'under',
-  isLoading = false,
+  isLoading = false
 }) => {
   const {
     uploadSomeImageForUser,
     isUploadingSomeImageForUser: isUploadingRideImage,
-    uploadSomeImageForUserError: uploadRideErrorImage,
-  } = useFileUploadViewModel();
+    uploadSomeImageForUserError: uploadRideErrorImage
+  } = useFileUploadViewModel()
 
-  const [currentStep, setCurrentStep] = useState<'photo' | 'otp'>('photo');
-  const [otpCode, setOtpCode] = useState('');
-  const [ridePhoto, setRidePhoto] = useState<string | null>(null);
+  const { showAlert } = useAlert()
 
-  const { takePhoto, isUploading: isPickingImage } = useImagePicker();
+  const [currentStep, setCurrentStep] = useState<'photo' | 'otp'>('photo')
+  const [otpCode, setOtpCode] = useState('')
+  const [ridePhoto, setRidePhoto] = useState<string | null>(null)
+
+  const { takePhoto, isUploading: isPickingImage } = useImagePicker()
 
   const handleTakePhoto = async () => {
     try {
       const imageUri = await takePhoto(
         ImagePickerPresets.GENERAL.config,
-        ImagePickerPresets.GENERAL.validation,
-      );
+        ImagePickerPresets.GENERAL.validation
+      )
 
       if (imageUri) {
-        setRidePhoto(imageUri);
+        setRidePhoto(imageUri)
       }
     } catch (error) {
-      Alert.alert('Erro', 'Não foi possível capturar a foto');
+      showAlert('Erro', 'Não foi possível capturar a foto', 'error')
     }
-  };
+  }
 
   const handleRemovePhoto = () => {
-    setRidePhoto(null);
-  };
+    setRidePhoto(null)
+  }
 
   const handleContinueToOTP = () => {
     if (!ridePhoto) {
-      Alert.alert(
+      showAlert(
         'Atenção',
         'Por favor, tire uma foto da encomenda antes de continuar',
-      );
-      return;
+        'warning'
+      )
+      return
     }
-    setCurrentStep('otp');
-  };
+    setCurrentStep('otp')
+  }
 
   const handleBackToPhoto = () => {
-    setCurrentStep('photo');
-  };
+    setCurrentStep('photo')
+  }
 
   const handleUploadImage = async (): Promise<string> => {
-    if (!ridePhoto) return '';
+    if (!ridePhoto) return ''
 
     try {
       const { url, path } = await uploadSomeImageForUser({
         fileUri: ridePhoto,
         userId: userId || '',
-        imageType: 'ride',
-      });
+        imageType: 'ride'
+      })
 
       if (!url || !path) {
         const errorMsg =
-          uploadRideErrorImage?.message || 'Erro ao carregar ficheiro';
-        console.error('❌ Upload falhou:', errorMsg);
-        Alert.alert('Erro na imagem', errorMsg);
-        throw new Error('Upload inválido');
+          uploadRideErrorImage?.message || 'Erro ao carregar ficheiro'
+        console.error('❌ Upload falhou:', errorMsg)
+        showAlert('Erro na imagem', errorMsg, 'error')
+        throw new Error('Upload inválido')
       }
 
-      console.log('✅ Upload concluído:', url);
-      return url;
-    } catch (err) {
-      console.error('❌ Erro no upload:', err);
-      Alert.alert(
-        'Erro ',
+      console.log('✅ Upload concluído:', url)
+      return url
+    } catch (err: any) {
+      console.error('❌ Erro no upload:', err)
+      showAlert(
+        'Erro',
         'Erro ao carregar ficheiro, tente tirar outra fotografia',
-      );
-      throw err;
+        'error'
+      )
+      throw err
     }
-  };
+  }
 
   const handleClose = () => {
-    setCurrentStep('photo');
-    setOtpCode('');
-    setRidePhoto(null);
-    onClose();
-  };
+    setCurrentStep('photo')
+    setOtpCode('')
+    setRidePhoto(null)
+    onClose()
+  }
 
   // Step 1: Foto da Encomenda
   const renderPhotoStep = () => (
@@ -204,7 +208,7 @@ export const RideConfirmationFlow: React.FC<RideConfirmationFlowProps> = ({
         </View>
       </View>
     </View>
-  );
+  )
 
   // Step 2: Código OTP
   const renderOTPStep = () => (
@@ -291,7 +295,7 @@ export const RideConfirmationFlow: React.FC<RideConfirmationFlowProps> = ({
         </TouchableOpacity>
       </View>
     </View>
-  );
+  )
 
   return (
     <Modal
@@ -304,5 +308,5 @@ export const RideConfirmationFlow: React.FC<RideConfirmationFlowProps> = ({
         {currentStep === 'photo' ? renderPhotoStep() : renderOTPStep()}
       </View>
     </Modal>
-  );
-};
+  )
+}

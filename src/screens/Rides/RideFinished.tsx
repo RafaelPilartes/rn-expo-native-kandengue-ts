@@ -4,7 +4,7 @@ import { View, Text, TouchableOpacity, ScrollView } from 'react-native'
 import { Check, Star, MapPin, Navigation } from 'lucide-react-native'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import ROUTES from '@/constants/routes'
-import { useAppProvider } from '@/providers/AppProvider'
+// import { useAppProvider } from '@/providers/AppProvider'
 import { RideInterface } from '@/interfaces/IRide'
 import { formatMoney } from '@/utils/formattedNumber'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -20,7 +20,7 @@ export default function RideFinishedScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<HomeStackParamList>>()
 
-  const { navigationMainStack, navigationHomeStack } = useAppProvider()
+  // CONST { navigationMainStack, navigationHomeStack } = useAppProvider() // Removed
   const route = useRoute()
   const { rideId, rideDetails } = route.params as RideFinishedScreenRouteParams
 
@@ -116,7 +116,7 @@ export default function RideFinishedScreen() {
             {/* VOLTAR */}
             <TouchableOpacity
               className="flex-1 bg-gray-200 rounded-xl py-4 flex-row items-center justify-center"
-              onPress={() => navigationMainStack.navigate(ROUTES.MainTab.HOME)}
+              onPress={() => (navigation as any).navigate(ROUTES.MainTab.HOME)}
             >
               <Text className="text-gray-800 font-semibold text-base">
                 Voltar ao Início
@@ -144,7 +144,7 @@ export default function RideFinishedScreen() {
           {/* HISTÓRICO */}
           <TouchableOpacity
             className="mt-4"
-            onPress={() => navigationMainStack.navigate(ROUTES.MainTab.HISTORY)}
+            onPress={() => (navigation as any).navigate(ROUTES.MainTab.HISTORY)}
           >
             <Text className="text-primary-200 font-medium">
               Ver histórico de corridas →

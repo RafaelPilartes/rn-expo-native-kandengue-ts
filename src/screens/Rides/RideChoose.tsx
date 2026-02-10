@@ -25,7 +25,7 @@ import { InputField } from '@/components/ui/input/InputField'
 import { SelectField } from '@/components/ui/select/SelectField'
 import { InputTextAreaField } from '@/components/ui/input/InputTextAreaField'
 import { ArticleOptions } from '@/constants/article'
-import { useLocation } from '@/hooks/useLocation'
+import { useMap } from '@/providers/MapProvider'
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
 import { MapPin, Navigation } from 'lucide-react-native'
 
@@ -36,12 +36,14 @@ export default function RideChooseScreen() {
   const {
     location,
     isLoading,
-    requestCurrentLocation,
+    // requestCurrentLocation, // Renamed in MapProvider
+    getCurrentLocation: requestCurrentLocation, // Alias to match existing usage
     error: locationError,
     address,
-    fullAddress,
+    // fullAddress, // MapProvider doesn't have fullAddress, use address
     isGettingAddress
-  } = useLocation()
+  } = useMap()
+  const fullAddress = address // MapProvider address is full/short depending on impl, treat as full.
 
   const [pickup, setPickup] = useState<CustomPlace | null>(null)
   const [dropoff, setDropoff] = useState<CustomPlace | null>(null)

@@ -14,6 +14,8 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { UserRidesProvider } from './context/UserRidesContext'
 import { AppProvider } from './providers/AppProvider'
+import { AlertProvider } from './context/AlertContext'
+import { CustomAlert } from './components/ui/CustomAlert'
 // import { LocationProvider } from './context/LocationContext'
 import React, { useEffect } from 'react'
 import { ThemeProvider } from './providers/ThemeProvider'
@@ -54,12 +56,15 @@ export default function App() {
             <GestureHandlerRootView style={{ flex: 1 }}>
               <BottomSheetModalProvider>
                 <AppProvider>
-                  <UserRidesProvider>
-                    <NetworkProvider>
-                      <StatusBar style="dark" />
-                      <AppRouter />
-                    </NetworkProvider>
-                  </UserRidesProvider>
+                  <AlertProvider>
+                    <UserRidesProvider>
+                      <NetworkProvider>
+                        <StatusBar style="dark" />
+                        <AppRouter />
+                        <CustomAlert />
+                      </NetworkProvider>
+                    </UserRidesProvider>
+                  </AlertProvider>
                 </AppProvider>
               </BottomSheetModalProvider>
             </GestureHandlerRootView>

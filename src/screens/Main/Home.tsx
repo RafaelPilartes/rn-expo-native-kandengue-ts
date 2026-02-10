@@ -4,10 +4,10 @@ import {
   Text,
   Image,
   ScrollView,
-  Alert,
   TouchableOpacity,
   RefreshControl
 } from 'react-native'
+import { useAlert } from '@/context/AlertContext'
 import ServiceCard from '@/components/ui/card/ServiceCard'
 import HomeHeader from '@/components/HomeHeader'
 import { IndicatorIcon } from '@/constants/icons'
@@ -21,36 +21,8 @@ import { Clock, MapPin, Navigation, RefreshCw } from 'lucide-react-native'
 import { useUserRides } from '@/hooks/useUserRides'
 import { RideInterface } from '@/interfaces/IRide'
 import { RideActiveCard } from '@/components/RideActiveCard'
-import { useAppProvider } from '@/providers/AppProvider'
 import { SafeAreaView } from 'react-native-safe-area-context'
-
-const banners = [
-  {
-    id: '1',
-    title: 'Entrega com Confiança',
-    description:
-      'Estafetas verificados, entrega segura e acompanhamento em tempo real.',
-    image: require('@/assets/banner/banner1.png'),
-    action: () => {
-      Alert.alert(
-        'Entrega com Confiança',
-        'Os nossos estafetas são verificados e treinados para garantir entregas rápidas, seguras e rastreáveis em tempo real.'
-      )
-    }
-  },
-  {
-    id: '2',
-    title: 'Rápido & Seguro Sempre',
-    description: 'Tempos médios de entrega entre 15–30 min na sua zona.',
-    image: require('@/assets/banner/banner2.png'),
-    action: () => {
-      Alert.alert(
-        'Rápido & Seguro Sempre',
-        'Na sua área, o tempo médio de entrega varia entre 15 e 30 minutos, dependendo da distância e trânsito.'
-      )
-    }
-  }
-]
+import { useAppProvider } from '@/providers/AppProvider'
 
 const services = [
   {
@@ -84,11 +56,42 @@ export default function HomeScreen() {
     useNavigation<NativeStackNavigationProp<HomeStackParamList>>()
 
   const { user } = useAuthStore()
+  const { showAlert } = useAlert()
   const {
     activeRides,
     isLoading: isLoadingRides,
     refreshUserRides
   } = useUserRides()
+
+  const banners = [
+    {
+      id: '1',
+      title: 'Entrega com Confiança',
+      description:
+        'Estafetas verificados, entrega segura e acompanhamento em tempo real.',
+      image: require('@/assets/banner/banner1.png'),
+      action: () => {
+        showAlert(
+          'Entrega com Confiança',
+          'Os nossos estafetas são verificados e treinados para garantir entregas rápidas, seguras e rastreáveis em tempo real.',
+          'info'
+        )
+      }
+    },
+    {
+      id: '2',
+      title: 'Rápido & Seguro Sempre',
+      description: 'Tempos médios de entrega entre 15–30 min na sua zona.',
+      image: require('@/assets/banner/banner2.png'),
+      action: () => {
+        showAlert(
+          'Rápido & Seguro Sempre',
+          'Na sua área, o tempo médio de entrega varia entre 15 e 30 minutos, dependendo da distância e trânsito.',
+          'info'
+        )
+      }
+    }
+  ]
 
   const { currentUserData, handleNotifications, navigationHomeStack } =
     useAppProvider()
@@ -108,20 +111,20 @@ export default function HomeScreen() {
   }
 
   const handlePressRide = () => {
-    Alert.alert('Corrida', 'No momento não encontra-se disponível')
+    showAlert('Corrida', 'No momento não encontra-se disponível', 'info')
   }
   const handlePressDelivery = () => {
     navigateTo(ROUTES.Rides.HOME)
-    // Alert.alert('Entregas', 'No momento não encontra-se disponível');
+    // showAlert('Entregas', 'No momento não encontra-se disponível', 'info');
   }
   const handlePressPilot = () => {
-    Alert.alert('Piloto', 'No momento não encontra-se disponível')
+    showAlert('Piloto', 'No momento não encontra-se disponível', 'info')
   }
 
   // Abrir mapa para ver localização
   const handleOpenMap = () => {
     if (!currentLocation) {
-      Alert.alert('Atenção', 'Localização não disponível no momento.')
+      showAlert('Atenção', 'Localização não disponível no momento.', 'warning')
       return
     }
 
@@ -157,13 +160,6 @@ export default function HomeScreen() {
   const handleRefresh = async () => {
     await refreshUserRides()
   }
-
-  useEffect(() => {
-    if (currentUserData?.status === 'active') {
-      console.log('🚗 Solicitando localização...')
-      requestCurrentLocation()
-    }
-  }, [currentUserData?.status])
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -342,8 +338,8 @@ export default function HomeScreen() {
                 item.id === '1'
                   ? handlePressDelivery
                   : item.id === '2'
-                  ? handlePressPilot
-                  : handlePressRide
+                    ? handlePressPilot
+                    : handlePressRide
               }
             />
           ))}

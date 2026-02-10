@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Text, View } from 'react-native'
-import MapView, { Marker } from 'react-native-maps'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import PlatformMapView from '@/components/map/MapView'
 
 export default function RideTrackingScreen() {
   const [status, setStatus] = useState('Procurando motoboy...')
@@ -21,21 +21,24 @@ export default function RideTrackingScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <Text className="text-lg font-bold text-center mt-4">{status}</Text>
-      <MapView
+      <PlatformMapView
         style={{ flex: 1, marginTop: 10 }}
-        initialRegion={{
-          latitude: -8.839987,
-          longitude: 13.289437,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05
+        cameraPosition={{
+          coordinates: {
+            latitude: -8.839987,
+            longitude: 13.289437
+          },
+          zoom: 15
         }}
-      >
-        <Marker
-          coordinate={{ latitude: -8.839987, longitude: 13.289437 }}
-          title="Motoboy"
-          description={status}
-        />
-      </MapView>
+        markers={[
+          {
+            id: 'motoboy',
+            coordinates: { latitude: -8.839987, longitude: 13.289437 },
+            title: 'Motoboy',
+            snippet: status
+          }
+        ]}
+      />
     </SafeAreaView>
   )
 }

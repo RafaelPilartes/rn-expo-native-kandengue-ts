@@ -5,9 +5,9 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  Alert
+  ScrollView
 } from 'react-native'
+import { useAlert } from '@/context/AlertContext'
 import {
   Send,
   AlertTriangle,
@@ -19,7 +19,7 @@ import {
   Smartphone
 } from 'lucide-react-native'
 import { useNavigation } from '@react-navigation/native'
-import PageHeader from '@/components/PageHeader'
+import { PageHeader } from '@/components/PageHeader'
 import { useComplaintsViewModel } from '@/viewModels/ComplaintViewModel'
 import { useAuthStore } from '@/storage/store/useAuthStore'
 import { ComplaintEntity } from '@/core/entities/Complaint'
@@ -33,6 +33,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 export default function ComplaintsScreen() {
   const navigation = useNavigation<any>()
   const { user } = useAuthStore()
+  const { showAlert } = useAlert()
   const { createComplaint, isLoadingUpdateComplaint } = useComplaintsViewModel()
 
   const [formData, setFormData] = useState({
@@ -116,22 +117,30 @@ export default function ComplaintsScreen() {
 
   const handleSubmit = async () => {
     if (!user?.id) {
-      Alert.alert('Erro', 'Usuário não identificado. Faça login novamente.')
+      showAlert(
+        'Erro',
+        'Usuário não identificado. Faça login novamente.',
+        'error'
+      )
       return
     }
 
     if (!formData.type) {
-      Alert.alert('Atenção', 'Por favor, selecione o tipo de problema.')
+      showAlert(
+        'Atenção',
+        'Por favor, selecione o tipo de problema.',
+        'warning'
+      )
       return
     }
 
     if (!formData.subject.trim()) {
-      Alert.alert('Atenção', 'Por favor, informe o assunto.')
+      showAlert('Atenção', 'Por favor, informe o assunto.', 'warning')
       return
     }
 
     if (!formData.description.trim()) {
-      Alert.alert('Atenção', 'Por favor, descreva o problema.')
+      showAlert('Atenção', 'Por favor, descreva o problema.', 'warning')
       return
     }
 
@@ -152,16 +161,17 @@ export default function ComplaintsScreen() {
 
       const validation = complaintEntity.validate()
       if (!validation.isValid) {
-        Alert.alert('Erro de Validação', validation.errors.join('\n'))
+        showAlert('Erro de Validação', validation.errors.join('\n'), 'error')
         return
       }
 
       // Enviar para o backend
       await createComplaint.mutateAsync(complaintEntity.toJSON())
 
-      Alert.alert(
+      showAlert(
         'Reclamação Enviada',
         `Sua reclamação foi registrada com sucesso. \n\nTempo estimado para resolução: ${complaintEntity.getEstimatedResolutionTime()}`,
+        'success',
         [
           {
             text: 'OK',
@@ -181,10 +191,11 @@ export default function ComplaintsScreen() {
       })
     } catch (error: any) {
       console.error('Erro ao enviar reclamação:', error)
-      Alert.alert(
+      showAlert(
         'Erro',
         error.message ||
-          'Não foi possível enviar sua reclamação. Tente novamente.'
+          'Não foi possível enviar sua reclamação. Tente novamente.',
+        'error'
       )
     }
   }

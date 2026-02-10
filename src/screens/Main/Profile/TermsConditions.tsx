@@ -1,13 +1,7 @@
 // src/screens/TermsConditionsScreen.tsx
 import React, { useState } from 'react'
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Linking,
-  Alert
-} from 'react-native'
+import { View, Text, ScrollView, TouchableOpacity, Linking } from 'react-native'
+import { useAlert } from '@/context/AlertContext'
 import {
   FileText,
   Shield,
@@ -21,11 +15,12 @@ import {
   ExternalLink
 } from 'lucide-react-native'
 import { useNavigation } from '@react-navigation/native'
-import PageHeader from '@/components/PageHeader'
+import { PageHeader } from '@/components/PageHeader'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function TermsConditionsScreen() {
   const navigation = useNavigation<any>()
+  const { showAlert } = useAlert()
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set()
   )
@@ -44,7 +39,7 @@ export default function TermsConditionsScreen() {
 
   const handleContactLegal = () => {
     Linking.openURL('mailto:legal@kandengueatrevido.com').catch(() =>
-      Alert.alert('Erro', 'Não foi possível abrir o email.')
+      showAlert('Erro', 'Não foi possível abrir o email.', 'error')
     )
   }
 

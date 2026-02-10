@@ -1,11 +1,9 @@
 import * as TaskManager from 'expo-task-manager'
 import * as Location from 'expo-location'
-// import { storage } from '../../utils/storage'; // Assuming mmkv or similar is used, need to check project for storage
-import AsyncStorage from '@react-native-async-storage/async-storage' // Fallback to async storage if storage util not found
 
-export const LOCATION_TASK_NAME = 'BACKGROUND_LOCATION_TASK'
+export const BACKGROUND_LOCATION_TASK = 'BACKGROUND_LOCATION_TASK'
 
-TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
+TaskManager.defineTask(BACKGROUND_LOCATION_TASK, async ({ data, error }) => {
   if (error) {
     console.error('[BackgroundLocationTask] Error:', error)
     return

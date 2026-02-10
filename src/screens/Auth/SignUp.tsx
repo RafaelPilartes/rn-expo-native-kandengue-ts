@@ -9,7 +9,6 @@ import {
   ScrollView,
   Platform,
   Keyboard,
-  Alert,
   Image
 } from 'react-native'
 import { User, Mail, Phone } from 'lucide-react-native'
@@ -23,12 +22,14 @@ import ROUTES from '@/constants/routes'
 import { useTranslation } from 'react-i18next'
 import { LogoRed } from '@/constants/images'
 import { useAuthViewModel } from '@/viewModels/AuthViewModel'
+import { useAlert } from '@/context/AlertContext'
 
 export default function SignUpScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<AuthStackParamList>>()
 
   const { t } = useTranslation(['auth', 'common'])
+  const { showAlert } = useAlert()
 
   const navigateTo = (to: any) => {
     navigation.navigate(to)
@@ -92,7 +93,7 @@ export default function SignUpScreen() {
       })
     } catch (error) {
       console.error('Erro na validação:', error)
-      Alert.alert('Erro', 'Ocorreu um erro ao validar os dados')
+      showAlert('Erro', 'Ocorreu um erro ao validar os dados', 'error')
     }
   }
 

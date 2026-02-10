@@ -22,12 +22,12 @@ import ROUTES from '@/constants/routes'
 import { useTranslation } from 'react-i18next'
 import { LogoRed } from '@/constants/images'
 import { useAuthViewModel } from '@/viewModels/AuthViewModel' // ADICIONAR
-import { Alert } from 'react-native'
 import { mapFirebaseError } from '@/helpers/mapFirebaseError'
 import { useAuthStore } from '@/storage/store/useAuthStore'
 import { useUsersViewModel } from '@/viewModels/UserViewModel'
 import { UserEntity } from '@/core/entities/User'
 import { Image } from 'react-native'
+import { useAlert } from '@/context/AlertContext'
 
 export default function LoginScreen() {
   const navigation =
@@ -42,6 +42,7 @@ export default function LoginScreen() {
   // Hooks principais
   const { login, checkEmailVerification, sendEmailVerification } =
     useAuthViewModel()
+  const { showAlert } = useAlert()
   const { updateUser } = useUsersViewModel()
   const { setUser: zustandLogin, logout: zustandLogout } = useAuthStore()
 
@@ -106,9 +107,11 @@ export default function LoginScreen() {
         console.warn('⚠️ Email não verificado')
 
         // Mostrar alerta mas permitir acesso
-        Alert.alert(
+        // Mostrar alerta mas permitir acesso
+        showAlert(
           'Email não verificado',
           'Seu email ainda não foi verificado. Verifique seu email e clique no link enviado para ativar sua conta.',
+          'warning',
           [
             {
               text: 'Entendi',
@@ -122,12 +125,17 @@ export default function LoginScreen() {
               onPress: async () => {
                 try {
                   await sendEmailVerification.mutateAsync()
-                  Alert.alert(
+                  showAlert(
                     'Verificação reenviada',
-                    `Um novo email foi enviado para ${email}.`
+                    `Um novo email foi enviado para ${email}.`,
+                    'success'
                   )
                 } catch (err) {
-                  Alert.alert('Erro', 'Falha ao reenviar email de verificação.')
+                  showAlert(
+                    'Erro',
+                    'Falha ao reenviar email de verificação.',
+                    'error'
+                  )
                 }
               }
             }
@@ -167,7 +175,7 @@ export default function LoginScreen() {
 
       let errorMessage = error.message || 'Erro ao fazer login'
 
-      Alert.alert('Erro no Login', mapFirebaseError(errorMessage))
+      showAlert('Erro no Login', mapFirebaseError(errorMessage), 'error')
 
       // LIMPAR: senha em caso de erro
       if (error.message.includes('Senha incorreta')) {

@@ -6,9 +6,9 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
-  Alert,
   ActivityIndicator
 } from 'react-native'
+import { useAlert } from '@/context/AlertContext'
 import { Camera, Mail, Phone, User } from 'lucide-react-native'
 import { useNavigation } from '@react-navigation/native'
 import { useAuthStore } from '@/storage/store/useAuthStore'
@@ -17,7 +17,7 @@ import { useUsersViewModel } from '@/viewModels/UserViewModel'
 import { useImagePicker } from '@/hooks/useImagePicker'
 import { ImagePickerPresets } from '@/services/picker/imagePickerPresets'
 import { useFileUploadViewModel } from '@/viewModels/FileUploadViewModel'
-import PageHeader from '@/components/PageHeader'
+import { PageHeader } from '@/components/PageHeader'
 import { InputField } from '@/components/ui/input/InputField'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
@@ -25,6 +25,7 @@ export default function EditProfileScreen() {
   const navigation = useNavigation<any>()
 
   const { user, setUser } = useAuthStore()
+  const { showAlert } = useAlert()
   const { updateUser, fetchOneUserByField } = useUsersViewModel()
   const {
     uploadProfileImage,
@@ -118,7 +119,7 @@ export default function EditProfileScreen() {
       }
     } catch (error) {
       console.error('Erro ao abrir image picker:', error)
-      Alert.alert('Erro', 'Não foi possível abrir a galeria')
+      showAlert('Erro', 'Não foi possível abrir a galeria', 'error')
     }
   }
 
@@ -147,15 +148,15 @@ export default function EditProfileScreen() {
         const errorMsg =
           uploadProfileErrorImage?.message || 'Erro ao carregar ficheiro'
         console.error('❌ Upload falhou:', errorMsg)
-        Alert.alert('Erro', errorMsg)
+        showAlert('Erro', errorMsg, 'error')
         throw new Error('Upload inválido')
       }
 
       console.log('✅ Upload concluído:', url)
       return url
-    } catch (err) {
+    } catch (err: any) {
       console.error('❌ Erro no upload:', err)
-      Alert.alert('Erro', 'Erro ao carregar ficheiro')
+      showAlert('Erro', 'Erro ao carregar ficheiro', 'error')
       throw err
     }
   }
@@ -213,12 +214,14 @@ export default function EditProfileScreen() {
 
       console.log('✅ Perfil atualizado com sucesso!')
 
-      Alert.alert('Sucesso', 'Perfil atualizado com sucesso!', [
+      console.log('✅ Perfil atualizado com sucesso!')
+
+      showAlert('Sucesso', 'Perfil atualizado com sucesso!', 'success', [
         { text: 'OK', onPress: () => navigation.goBack() }
       ])
     } catch (error) {
       console.error('Erro ao atualizar o perfil:', error)
-      Alert.alert('Erro', 'Ocorreu um erro ao atualizar o perfil')
+      showAlert('Erro', 'Ocorreu um erro ao atualizar o perfil', 'error')
     } finally {
       setIsLoading(false)
     }

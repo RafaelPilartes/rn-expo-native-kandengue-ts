@@ -9,11 +9,10 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  Alert,
   Linking
 } from 'react-native'
+import { useAlert } from '@/context/AlertContext'
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
-import { UserInterface } from '@/interfaces/IUser'
 import { RideInterface } from '@/interfaces/IRide'
 import { formatMoney } from '@/utils/formattedNumber'
 
@@ -28,11 +27,14 @@ type Props = {
 
 export const DriverRideSheet = forwardRef<BottomSheetModal, Props>(
   ({ rideData, rideStatus, distance, onCancel, snapPoints }, ref) => {
+    const { showAlert } = useAlert()
+
     const handleCall = () => {
       if (rideData.driver?.phone) {
-        Alert.alert(
+        showAlert(
           'Ligar para entregador',
           `Deseja ligar para ${rideData.driver.phone}?`,
+          'info',
           [
             { text: 'Cancelar', style: 'cancel' },
             {
@@ -43,15 +45,16 @@ export const DriverRideSheet = forwardRef<BottomSheetModal, Props>(
           ]
         )
       } else {
-        Alert.alert('Info', 'Número do entregador não disponível')
+        showAlert('Info', 'Número do entregador não disponível', 'info')
       }
     }
 
     const handleMessage = () => {
       if (rideData.driver?.phone) {
-        Alert.alert(
+        showAlert(
           'Enviar mensagem',
           `Deseja enviar mensagem para ${rideData.driver.phone}?`,
+          'info',
           [
             { text: 'Cancelar', style: 'cancel' },
             {
@@ -62,7 +65,7 @@ export const DriverRideSheet = forwardRef<BottomSheetModal, Props>(
           ]
         )
       } else {
-        Alert.alert('Info', 'Número do entregador não disponível')
+        showAlert('Info', 'Número do entregador não disponível', 'info')
       }
     }
 

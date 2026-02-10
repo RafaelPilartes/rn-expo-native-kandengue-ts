@@ -2,10 +2,8 @@
 import React from 'react'
 import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native'
 import {
-  User,
   Edit,
   HelpCircle,
-  FileText,
   Info,
   Shield,
   Book,
@@ -16,7 +14,7 @@ import { useNavigation } from '@react-navigation/native'
 import ROUTES from '@/constants/routes'
 import { useAuthViewModel } from '@/viewModels/AuthViewModel'
 import { useAuthStore } from '@/storage/store/useAuthStore'
-import PageHeader from '@/components/PageHeader'
+import { PageHeader } from '@/components/PageHeader'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function Profile() {

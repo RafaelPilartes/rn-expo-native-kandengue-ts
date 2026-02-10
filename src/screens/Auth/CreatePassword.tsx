@@ -5,8 +5,7 @@ import {
   Text,
   Keyboard,
   TouchableWithoutFeedback,
-  ScrollView,
-  Alert
+  ScrollView
 } from 'react-native'
 import PrimaryButton from '@/components/ui/button/PrimaryButton'
 import LineGradient from '@/components/LineGradient'
@@ -19,11 +18,13 @@ import { BackButton } from '@/components/ui/button/BackButton'
 import { CreatePasswordProps } from '@/routers/types/props'
 import { useTranslation } from 'react-i18next'
 import { useAuthViewModel } from '@/viewModels/AuthViewModel'
+import { useAlert } from '@/context/AlertContext'
 
 export default function CreatePasswordScreen({ route }: CreatePasswordProps) {
   const navigation =
     useNavigation<NativeStackNavigationProp<AuthStackParamList>>()
   const { t } = useTranslation(['auth', 'common'])
+  const { showAlert } = useAlert()
 
   // Usar o hook de autenticação
   const { register } = useAuthViewModel()
@@ -110,7 +111,7 @@ export default function CreatePasswordScreen({ route }: CreatePasswordProps) {
           'Erro de conexão. Verifique sua internet e tente novamente.'
       }
 
-      Alert.alert('Erro', errorMessage)
+      showAlert('Erro', errorMessage, 'error')
     } finally {
       setIsLoading(false)
     }

@@ -37,6 +37,8 @@
     "settings": "Paramètres",
     "try_again": "Réessayer",
     "allow": "Autoriser",
-    "get_started": "Pour commencer"
+    "get_started": "Pour commencer",
+    "accept": "Accepter",
+    "decline": "Refuser"
   }
 }

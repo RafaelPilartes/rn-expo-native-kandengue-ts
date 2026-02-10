@@ -1,13 +1,6 @@
 // src/screens/Ride/RideSummaryScreen.tsx
 import React, { useEffect, useRef, useState } from 'react'
-import {
-  View,
-  Alert,
-  BackHandler,
-  Vibration,
-  Text,
-  StyleSheet
-} from 'react-native'
+import { View, BackHandler, Vibration } from 'react-native'
 // Replaced react-native-maps with custom RideMapContainer
 // import MapView, { Marker, Polyline } from 'react-native-maps'
 
@@ -45,6 +38,8 @@ import { RideMapContainer } from './components/RideMapContainer'
 import { RideStatusManager } from './components/RideStatusManager'
 import { RideModals } from './components/RideModals'
 import { useMap } from '@/providers/MapProvider'
+import { converter } from '@/utils/converter'
+import { useAlert } from '@/context/AlertContext'
 
 type RideSummaryScreenRouteParams = {
   id: string | undefined
@@ -67,13 +62,13 @@ export default function RideSummaryScreen() {
     receiver
   } = route.params as RideSummaryScreenRouteParams
 
-  const [currentRideId, setCurrentRideId] = useState<string | undefined>(rideId)
   const navigation =
     useNavigation<NativeStackNavigationProp<HomeStackParamList>>()
+  const { showAlert } = useAlert()
 
   // Refs
   // const mapRef = useRef<MapView | null>(null) // Access map via useMap now
-  const { centerOnUser: mapCenterOnUser, setMapRef } = useMap() // Used by MapContainer internally, but maybe we need reference here?
+  const { centerOnUser: mapCenterOnUser } = useMap() // Used by MapContainer internally, but maybe we need reference here?
   // Actually MapProvider manages ref. centerOnUser is exposed.
 
   const bottomSheetRef = useRef<BottomSheetModal>(null)
@@ -97,8 +92,9 @@ export default function RideSummaryScreen() {
     routeCoordsDriver,
     durationDriver,
     // driver,
+    durationMinutes,
 
-    // distanceKm,
+    distanceKm,
     fareDetails,
     rideStatus,
 
@@ -109,7 +105,7 @@ export default function RideSummaryScreen() {
     // ações
     handleCreateRide,
     handleCanceledRide
-  } = useRideSummary(currentRideId)
+  } = useRideSummary(rideId)
 
   // CÁLCULOS TEMPORÁRIOS - Para mostrar antes de criar a corrida
   const {
@@ -161,14 +157,15 @@ export default function RideSummaryScreen() {
   // CRIAR NOVA CORRIDA
   const handleCreateNewRide = async () => {
     if (!user) {
-      Alert.alert('Erro', 'Usuário não autenticado')
+      showAlert('Erro', 'Usuário não autenticado', 'error')
       return
     }
 
     setIsCreatingRide(true)
 
     try {
-      const rideData = {
+      // @ts-expect-error CreateParams type mismatch with pickup.description
+      const rideData: CreateParams = {
         user: user,
         pickup: location.pickup,
         dropoff: location.dropoff,
@@ -178,7 +175,7 @@ export default function RideSummaryScreen() {
         details: {
           item: {
             type: article.type,
-            description: article.description,
+            description: article.description || '', // Ensure string
             quantity: 1,
             size: 'medium' as const
           },
@@ -194,7 +191,7 @@ export default function RideSummaryScreen() {
       const rideCreated = await handleCreateRide(rideData)
 
       if (rideCreated?.id) {
-        setCurrentRideId(rideCreated.id)
+        // setCurrentRideId removed, relying on navigation params
 
         // Navegar para a mesma tela com o ID da corrida
         navigation.dispatch(
@@ -210,7 +207,7 @@ export default function RideSummaryScreen() {
       }
     } catch (error: any) {
       console.error('❌ Erro ao criar corrida:', error)
-      Alert.alert('Erro', error.message || 'Falha ao criar nova corrida')
+      showAlert('Erro', error.message || 'Falha ao criar nova corrida', 'error') // Replaced Alert.alert
     } finally {
       setIsCreatingRide(false)
     }
@@ -219,8 +216,8 @@ export default function RideSummaryScreen() {
   // CANCELAR CORRIDA
   const handleCancelRide = async (reason: string) => {
     try {
-      if (!currentRideId) {
-        Alert.alert('Erro', 'Nenhuma corrida para cancelar')
+      if (!rideId) {
+        showAlert('Erro', 'Nenhuma corrida para cancelar', 'error')
         return
       }
 
@@ -233,7 +230,7 @@ export default function RideSummaryScreen() {
       }, 2000)
     } catch (error: any) {
       console.error('❌ Erro ao cancelar corrida:', error)
-      Alert.alert('Erro', error.message || 'Falha ao cancelar corrida')
+      showAlert('Erro', error.message || 'Falha ao cancelar corrida', 'error')
     }
   }
 
@@ -267,21 +264,26 @@ export default function RideSummaryScreen() {
     const backAction = () => {
       if (!rideId) return
 
-      Alert.alert('Está no meio de uma corrida', 'Deseja realmente sair?', [
-        {
-          text: 'Ficar',
-          onPress: () => null,
-          style: 'cancel'
-        },
-        {
-          text: 'Sair',
-          onPress: () => {
-            if (navigation.canGoBack()) {
-              navigation.replace(ROUTES.HomeStack.HOME)
+      showAlert(
+        'Está no meio de uma corrida',
+        'Deseja realmente sair?',
+        'warning',
+        [
+          {
+            text: 'Ficar',
+            onPress: () => null,
+            style: 'cancel'
+          },
+          {
+            text: 'Sair',
+            onPress: () => {
+              if (navigation.canGoBack()) {
+                navigation.replace(ROUTES.HomeStack.HOME)
+              }
             }
           }
-        }
-      ])
+        ]
+      )
       return true
     }
 
@@ -303,7 +305,7 @@ export default function RideSummaryScreen() {
 
   // Determine Map Props
   const pickupProp =
-    currentRide || !currentRideId
+    currentRide || !rideId
       ? {
           latitude: currentRide?.pickup.latitude ?? location.pickup.latitude,
           longitude: currentRide?.pickup.longitude ?? location.pickup.longitude,
@@ -314,7 +316,7 @@ export default function RideSummaryScreen() {
       : undefined
 
   const dropoffProp =
-    currentRide || !currentRideId
+    currentRide || !rideId
       ? {
           latitude: currentRide?.dropoff.latitude ?? location.dropoff.latitude,
           longitude:
@@ -335,7 +337,7 @@ export default function RideSummaryScreen() {
       : undefined
 
   return (
-    <SafeAreaView className="flex-1 bg-white m-safe">
+    <SafeAreaView className="flex-1 bg-white">
       {/* 1. MAP CONTAINER */}
       <RideMapContainer
         pickup={pickupProp}
@@ -347,7 +349,7 @@ export default function RideSummaryScreen() {
       />
 
       {/* 2. MAIN CONTENT (STATUS MANAGER) */}
-      {!currentRideId ? (
+      {!rideId ? (
         <>
           <RoutePreviewCard
             pickupDescription={location.pickup.name ?? ''}
@@ -360,7 +362,7 @@ export default function RideSummaryScreen() {
 
           <ConfirmRideCard
             price={formatMoney(fareDetailsTemp?.total || 0, 0)}
-            duration={durationTemp}
+            duration={String(durationTemp)}
             distance={distanceTemp}
             isLoading={isCreatingRide}
             onConfirm={handleCreateNewRide}
@@ -371,7 +373,7 @@ export default function RideSummaryScreen() {
         <LoadingCard />
       ) : rideStatus === 'completed' ? (
         <RideCompletedScreen
-          rideId={currentRideId}
+          rideId={rideId}
           rideDetails={currentRide as RideInterface}
         />
       ) : (
@@ -388,21 +390,21 @@ export default function RideSummaryScreen() {
             fareDetails?.total || fareDetailsTemp?.total || 0,
             0
           )}
-          searchStartTime={currentRide?.created_at as any} // Date vs string check
+          searchStartTime={currentRide?.created_at as any}
           onCancel={() => setShowCancelModal(true)}
           onAutoCancel={handleCancelRide}
           onCenterMap={centerOnPickup}
-          duration={duration}
+          duration={durationMinutes}
           driverName={currentRide?.driver?.name}
           driverDuration={durationDriver}
-          currentTime={currentTime}
+          currentTime={currentTime ?? 0}
           additionalTime={String(additionalTime)}
           customerName={
             currentRide?.user?.name || currentRide?.details?.receiver.name
           }
           packageInfo={currentRide?.details?.item}
-          distanceTraveled={distance}
-          distanceTotal={distance}
+          distanceTraveled={distanceKm}
+          distanceTotal={distanceKm}
         />
       )}
 

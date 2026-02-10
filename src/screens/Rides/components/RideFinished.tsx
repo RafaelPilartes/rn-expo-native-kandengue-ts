@@ -6,18 +6,20 @@ import { RideInterface } from '@/interfaces/IRide'
 import { formatMoney } from '@/utils/formattedNumber'
 import { useRoute, useNavigation } from '@react-navigation/native'
 import ROUTES from '@/constants/routes'
-import { useAppProvider } from '@/providers/AppProvider'
+// import { useAppProvider } from '@/providers/AppProvider'
 
 type RideFinishedScreenRoutePros = {
   rideId?: string
   rideDetails: RideInterface
 }
 
+// type RideFinishedScreenRoutePros = { ... } // Leaving types as is
+
 export const RideCompletedScreen: React.FC<RideFinishedScreenRoutePros> = ({
   rideId,
   rideDetails
 }) => {
-  const { navigationMainStack, navigationHomeStack } = useAppProvider()
+  // const { navigationMainStack, navigationHomeStack } = useAppProvider() // Removed
   const navigation = useNavigation()
   const route = useRoute()
 
@@ -33,11 +35,12 @@ export const RideCompletedScreen: React.FC<RideFinishedScreenRoutePros> = ({
     setIsNavigating(true)
     console.log('🔄 Navegando para Home...')
 
-    navigationHomeStack.navigate(ROUTES.HomeStack.HOME)
+    // navigationHomeStack.navigate(ROUTES.HomeStack.HOME)
+    ;(navigation as any).navigate(ROUTES.HomeStack.HOME)
 
     // Reset após navegação
     setTimeout(() => setIsNavigating(false), 1000)
-  }, [isNavigating, navigationMainStack])
+  }, [isNavigating, navigation])
 
   const handleRateRide = useCallback(() => {
     if (isNavigating) return
@@ -45,14 +48,15 @@ export const RideCompletedScreen: React.FC<RideFinishedScreenRoutePros> = ({
     setIsNavigating(true)
     console.log('🔄 Navegando para Rating...')
 
-    navigationHomeStack.navigate(ROUTES.HomeStack.HOME)
+    // navigationHomeStack.navigate(ROUTES.HomeStack.HOME)
+    ;(navigation as any).navigate(ROUTES.HomeStack.HOME)
     // navigationMainStack.navigate(ROUTES.Ride.RIDE_RATING, {
     //   rideId,
     //   rideDetails,
     // });
 
     setTimeout(() => setIsNavigating(false), 1000)
-  }, [isNavigating, navigationHomeStack, rideId, rideDetails])
+  }, [isNavigating, navigation, rideId, rideDetails])
 
   const handleViewHistory = useCallback(() => {
     if (isNavigating) return
@@ -60,10 +64,11 @@ export const RideCompletedScreen: React.FC<RideFinishedScreenRoutePros> = ({
     setIsNavigating(true)
     console.log('🔄 Navegando para Histórico...')
 
-    navigationMainStack.navigate(ROUTES.MainTab.HISTORY)
+    // navigationMainStack.navigate(ROUTES.MainTab.HISTORY)
+    ;(navigation as any).navigate(ROUTES.MainTab.HISTORY)
 
     setTimeout(() => setIsNavigating(false), 1000)
-  }, [isNavigating, navigationMainStack])
+  }, [isNavigating, navigation])
 
   // VERIFICAR SE O COMPONENTE ESTÁ SENDO RENDERIZADO MÚLTIPLAS VEZES
   React.useEffect(() => {

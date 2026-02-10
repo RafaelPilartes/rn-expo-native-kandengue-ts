@@ -30,5 +30,7 @@
   "permission_denied_message": "A permissão para {{permission}}, foi recusada",
   "swipe_to_continue": "Arraste para o lado para continuar",
   "swipe_hint": "Deslize",
-  "swipe": "Deslize"
+  "swipe": "Deslize",
+  "location_disclosure_title": "Acesso à Localização Necessário",
+  "location_disclosure_message": "O Kandengue Pro coleta dados de localização em primeiro plano e em segundo plano para permitir o rastreamento em tempo real, alertas de segurança e recursos de emergência SOS, mesmo quando o aplicativo está fechado ou não está em uso."
 }
