@@ -1,15 +1,20 @@
 import React, { useMemo } from 'react'
 import { View, StyleSheet } from 'react-native'
-import PlatformMapView, {
-  Marker,
-  Polyline
-} from '../../../components/map/MapView'
+import MapView, { Marker, Polyline } from '../../../components/map/MapView'
 import { CustomPlace } from '@/types/places'
 import { LatLngType } from '@/types/latLng'
+import { RideInterface } from '@/interfaces/IRide'
+import { RideStatusType } from '@/types/enum'
 
 interface Props {
-  pickup?: CustomPlace
-  dropoff?: CustomPlace
+  mapRef: React.RefObject<any>
+  location: {
+    pickup?: CustomPlace
+    dropoff?: CustomPlace
+  }
+  currentRide: RideInterface | null
+  rideStatus: RideStatusType
+
   driverLocation?: LatLngType
   routeCoords?: LatLngType[]
   routeCoordsDriver?: LatLngType[]
@@ -17,8 +22,11 @@ interface Props {
 }
 
 export const RideMapContainer: React.FC<Props> = ({
-  pickup,
-  dropoff,
+  mapRef,
+  location,
+  currentRide,
+  rideStatus,
+
   driverLocation,
   routeCoords = [],
   routeCoordsDriver = [],
@@ -27,25 +35,28 @@ export const RideMapContainer: React.FC<Props> = ({
   const markers = useMemo(() => {
     const list: Marker[] = []
 
-    if (pickup) {
+    if (location.pickup) {
       list.push({
         id: 'pickup',
-        coordinates: { latitude: pickup.latitude, longitude: pickup.longitude },
-        title: pickup.name ?? 'Pickup',
-        snippet: pickup.description
-        // icon: require('@/assets/markers/pickup.png'), // TODO: Handle image icons in expo-maps
+        coordinates: {
+          latitude: location.pickup.latitude,
+          longitude: location.pickup.longitude
+        },
+        title: location.pickup.name ?? 'Pickup',
+        snippet: location.pickup.description
+        // icon: require('@/assets/markers/location.plocation.ickup.png'), // TODO: Handle image icons in expo-maps
       })
     }
 
-    if (dropoff) {
+    if (location.dropoff) {
       list.push({
         id: 'dropoff',
         coordinates: {
-          latitude: dropoff.latitude,
-          longitude: dropoff.longitude
+          latitude: location.dropoff.latitude,
+          longitude: location.dropoff.longitude
         },
-        title: dropoff.name ?? 'Dropoff',
-        snippet: dropoff.description
+        title: location.dropoff.name ?? 'Dropoff',
+        snippet: location.dropoff.description
         // icon: require('@/assets/markers/dropoff.png'),
       })
     }
@@ -64,7 +75,7 @@ export const RideMapContainer: React.FC<Props> = ({
     }
 
     return list
-  }, [pickup, dropoff, driverLocation])
+  }, [location.pickup, location.dropoff, driverLocation])
 
   const polylines = useMemo(() => {
     const list: Polyline[] = []
@@ -100,28 +111,31 @@ export const RideMapContainer: React.FC<Props> = ({
   }, [routeCoords, routeCoordsDriver, routeCoordsTemp])
 
   return (
-    <View style={styles.container}>
-      <PlatformMapView
-        style={styles.map}
-        markers={markers}
-        polylines={polylines}
-        // CustomMapView logic for userLocation is not needed here as RideMapContainer is for static/driver view?
-        // If we need to show user location, we pass coordinates.
-        // PlatformMapView supports `showUserLocation`?
-        // No, expo-maps uses `userLocation` prop which is object { coordinates, followUserLocation }.
-      />
-    </View>
+    <MapView
+      ref={mapRef}
+      style={StyleSheet.absoluteFillObject}
+      cameraPosition={{
+        coordinates: {
+          latitude: currentRide
+            ? currentRide.pickup.latitude
+            : location.pickup?.latitude,
+          longitude: currentRide
+            ? currentRide.pickup.longitude
+            : location.pickup?.longitude
+        },
+        zoom: 13
+      }}
+      markers={markers}
+      polylines={polylines}
+      uiSettings={{
+        myLocationButtonEnabled: false
+      }}
+      properties={{
+        isMyLocationEnabled: false,
+        isTrafficEnabled: ['driver_on_the_way', 'picked_up'].includes(
+          rideStatus
+        )
+      }}
+    />
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    overflow: 'hidden',
-    borderRadius: 16
-  },
-  map: {
-    width: '100%',
-    height: '100%'
-  }
-})

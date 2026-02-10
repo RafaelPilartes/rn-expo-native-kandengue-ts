@@ -66,6 +66,8 @@ export default function RideSummaryScreen() {
     useNavigation<NativeStackNavigationProp<HomeStackParamList>>()
   const { showAlert } = useAlert()
 
+  const mapRef = useRef<any>(null)
+
   // Refs
   // const mapRef = useRef<MapView | null>(null) // Access map via useMap now
   const { centerOnUser: mapCenterOnUser } = useMap() // Used by MapContainer internally, but maybe we need reference here?
@@ -136,6 +138,41 @@ export default function RideSummaryScreen() {
       lastPointTracked.latitude,
       lastPointTracked.longitude
     )
+  }
+
+  const centerOnDriver = async () => {
+    if (!currentRide?.driver) {
+      showAlert(
+        'Sem motorista',
+        'Não foi possível obter localização.',
+        'error',
+        [{ text: 'OK' }]
+      )
+      return
+    }
+    if (!currentRide?.driver?.location) {
+      showAlert(
+        'Sem localização',
+        'Não foi possível obter localização.',
+        'error',
+        [{ text: 'OK' }]
+      )
+      return
+    }
+
+    const coords = currentRide?.driver?.location
+
+    if (!coords) {
+      showAlert('Erro', 'Não foi possível obter localização.', 'error', [
+        { text: 'OK' }
+      ])
+      return
+    }
+
+    mapRef.current?.setCameraPosition?.({
+      coordinates: coords,
+      zoom: 15
+    })
   }
 
   // Centralizar no pickup
@@ -303,6 +340,38 @@ export default function RideSummaryScreen() {
     }
   }, [rideStatus])
 
+  // ATUALIZAR REGIÃO DO MAPA BASEADO NO STATUS
+  useEffect(() => {
+    if (!rideId) return
+    if (!mapRef.current || !currentRide?.driver?.location) return
+
+    let targetLocation = location.pickup
+
+    if (rideStatus === 'picked_up' || rideStatus === 'arrived_dropoff') {
+      targetLocation = location.dropoff
+    }
+
+    if (rideStatus === 'driver_on_the_way' || rideStatus === 'arrived_pickup') {
+      targetLocation = currentRide?.driver?.location
+    }
+
+    if (targetLocation) {
+      mapRef.current?.animateToRegion({
+        coordinates: {
+          latitude: targetLocation.latitude,
+          longitude: targetLocation.longitude
+        },
+        latitudeDelta: 0.02,
+        longitudeDelta: 0.02,
+        zoom: 14
+      })
+    }
+
+    if (rideStatus) {
+      Vibration.vibrate(VIBRATION_PATTERN_BOOST)
+    }
+  }, [rideStatus, location, currentRide?.driver?.location])
+
   // Determine Map Props
   const pickupProp =
     currentRide || !rideId
@@ -339,11 +408,17 @@ export default function RideSummaryScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       {/* 1. MAP CONTAINER */}
+
       <RideMapContainer
-        pickup={pickupProp}
-        dropoff={dropoffProp}
-        driverLocation={driverLoc}
+        mapRef={mapRef}
+        currentRide={currentRide || null}
+        location={{
+          pickup: pickupProp,
+          dropoff: dropoffProp
+        }}
+        rideStatus={rideStatus}
         routeCoords={routeCoords}
+        driverLocation={driverLoc}
         routeCoordsTemp={routeCoordsTemp}
         routeCoordsDriver={routeCoordsDriver}
       />
