@@ -465,7 +465,7 @@ export default function RideSummaryScreen() {
             fareDetails?.total || fareDetailsTemp?.total || 0,
             0
           )}
-          searchStartTime={currentRide?.created_at as any}
+          searchStartTime={currentRide?.created_at}
           onCancel={() => setShowCancelModal(true)}
           onAutoCancel={handleCancelRide}
           onCenterMap={centerOnPickup}

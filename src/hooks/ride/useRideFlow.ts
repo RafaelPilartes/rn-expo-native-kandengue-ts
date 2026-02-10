@@ -114,7 +114,7 @@ export function useRideFlow(
   const confirm = async () => {
     try {
       await syncStatusToServer({ status: 'driver_on_the_way' })
-      startTracking()
+      startTracking('RIDE')
 
       console.log('✅ Corrida confirmada - Motorista a caminho')
     } catch (error: any) {
@@ -177,7 +177,7 @@ export function useRideFlow(
         canceledAt: new Date()
       })
 
-      stopTracking()
+      await stopTracking()
 
       console.log('❌ Corrida cancelada:', reason)
     } catch (error: any) {

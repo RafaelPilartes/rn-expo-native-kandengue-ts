@@ -14,7 +14,7 @@ interface Props {
   pickupDescription?: string
   dropoffDescription?: string
   price?: string
-  searchStartTime?: string // or Date?
+  searchStartTime?: Date | undefined
   onCancel?: () => void
   onAutoCancel?: (reason: string) => void
   onCenterMap?: () => void
@@ -60,9 +60,7 @@ export const RideStatusManager: React.FC<Props> = ({
           dropoffDescription={dropoffDescription ?? ''}
           estimatedTime="2-5 min"
           price={price ?? '0'}
-          searchStartTime={
-            searchStartTime ? new Date(searchStartTime) : undefined
-          }
+          searchStartTime={searchStartTime}
           onCancel={onCancel ?? (() => {})}
           onAutoCancel={onAutoCancel ?? (() => {})}
           onCenterMap={onCenterMap ?? (() => {})}

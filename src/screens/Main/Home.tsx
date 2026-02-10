@@ -102,8 +102,7 @@ export default function HomeScreen() {
     requestCurrentLocation,
     error: locationError,
     address,
-    isGettingAddress,
-    fetchAddress
+    isGettingAddress
   } = useLocation()
 
   const navigateTo = (to: any) => {
@@ -134,7 +133,7 @@ export default function HomeScreen() {
   }
 
   const refreshAddress = async () => {
-    await fetchAddress()
+    await requestCurrentLocation()
   }
 
   // Navegar para detalhes da corrida

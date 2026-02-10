@@ -16,11 +16,11 @@ export const useUserState = (): UserStateReturn => {
     user
   )
 
-  // Listener em tempo real para o motorista
+  // Listener em tempo real para o usuário
   useEffect(() => {
     if (!user?.id) return
 
-    console.log('🔹 [useUserState] Iniciando listener de motorista')
+    console.log('🔹 [useUserState] Iniciando listener de usuário')
     const unsubscribeUser = listenUserRealtime(user.id, setCurrentUserData)
 
     return unsubscribeUser
