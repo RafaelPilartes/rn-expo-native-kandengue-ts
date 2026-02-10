@@ -77,13 +77,27 @@ export const LocationProvider: React.FC<{ children: ReactNode }> = ({
   // 1) Permission Request Logic
   // --------------------------------------------------------
   const checkInitialPermissions = async () => {
+    console.log('🔹 [LocationContext] Checking initial permissions...')
     try {
       const { status } = await Location.getForegroundPermissionsAsync()
+      console.log(`🔹 [LocationContext] Initial status: ${status}`)
 
       // Update missingPermission based on current status
-      setMissingPermission(status !== 'granted')
+      const isMissing = status !== 'granted'
+      setMissingPermission(isMissing)
+
+      if (!isMissing) {
+        console.log(
+          '✅ [LocationContext] Permission granted, requesting location...'
+        )
+        // Force initial fetch
+        requestCurrentLocation()
+      }
     } catch (error) {
-      console.warn('Error checking initial location permissions:', error)
+      console.warn(
+        '❌ [LocationContext] Error checking initial location permissions:',
+        error
+      )
       // On error, assume permission is missing to be safe
       setMissingPermission(true)
     } finally {
@@ -114,10 +128,15 @@ export const LocationProvider: React.FC<{ children: ReactNode }> = ({
   }
 
   const requestInternalPermission = async (): Promise<boolean> => {
+    console.log('🛡️ [LocationContext] Requesting internal permission...')
     try {
       // 1. Check current status first
       const { status: existingStatus, canAskAgain } =
         await Location.getForegroundPermissionsAsync()
+
+      console.log(
+        `🛡️ [LocationContext] Existing status: ${existingStatus}, canAskAgain: ${canAskAgain}`
+      )
 
       // 2. If already granted, we are good
       if (existingStatus === 'granted') {
@@ -127,6 +146,7 @@ export const LocationProvider: React.FC<{ children: ReactNode }> = ({
 
       // 3. If denied and cannot ask again (blocked), open settings
       if (existingStatus === 'denied' && !canAskAgain) {
+        console.warn('⚠️ [LocationContext] Permission denied and blocked')
         showAlert(
           'Permissão Negada',
           'A permissão de localização foi negada permanentemente. Por favor, ative nas configurações do app.',
@@ -144,8 +164,11 @@ export const LocationProvider: React.FC<{ children: ReactNode }> = ({
       }
 
       // 4. Request Permission
+      console.log('🛡️ [LocationContext] Requesting foreground permission...')
       const { status: newStatus } =
         await Location.requestForegroundPermissionsAsync()
+
+      console.log(`🛡️ [LocationContext] New status: ${newStatus}`)
 
       if (newStatus !== 'granted') {
         setError('Permissão de localização necessária.')
@@ -156,14 +179,15 @@ export const LocationProvider: React.FC<{ children: ReactNode }> = ({
       setMissingPermission(false)
 
       // 5. Check background permission (optional, separate flow usually)
-      const { status: bgStatus } =
-        await Location.requestBackgroundPermissionsAsync()
-      if (bgStatus !== 'granted') {
-        console.warn('Background permission denied')
-      }
+      // const { status: bgStatus } =
+      //   await Location.requestBackgroundPermissionsAsync()
+      // if (bgStatus !== 'granted') {
+      //   console.warn('Background permission denied')
+      // }
 
       return true
     } catch (e) {
+      console.error('❌ [LocationContext] Error requesting permission:', e)
       setError('Erro ao solicitar permissão.')
       return false
     }
@@ -205,19 +229,38 @@ export const LocationProvider: React.FC<{ children: ReactNode }> = ({
   // 3) Get Current Location (one-time)
   // --------------------------------------------------------
   const requestCurrentLocation = async (): Promise<LatLngType | null> => {
+    console.log('📍 [LocationContext] requestCurrentLocation called')
     setIsLoading(true)
     setError(null)
 
     const ok = await requestInternalPermission()
     if (!ok) {
+      console.warn('⚠️ [LocationContext] Permission not granted')
       setIsLoading(false)
       return null
     }
 
     try {
-      const pos = await Location.getCurrentPositionAsync({
+      console.log('📍 [LocationContext] Asking Expo for current position...')
+      // Add a simple timeout mechanism using Promise.race
+      const locationPromise = Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced
       })
+
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Timeout getting location')), 10000)
+      )
+
+      const pos = (await Promise.race([
+        locationPromise,
+        timeoutPromise
+      ])) as Location.LocationObject
+
+      console.log(
+        '✅ [LocationContext] Position obtained:',
+        pos.coords.latitude,
+        pos.coords.longitude
+      )
 
       const coords = {
         latitude: pos.coords.latitude,
@@ -228,7 +271,7 @@ export const LocationProvider: React.FC<{ children: ReactNode }> = ({
       fetchAddress(coords)
       return coords
     } catch (e: any) {
-      console.warn('Erro getCurrentLocation:', e)
+      console.error('❌ [LocationContext] Error getCurrentLocation:', e)
       setError(e?.message || 'Erro ao capturar localização.')
       return null
     } finally {

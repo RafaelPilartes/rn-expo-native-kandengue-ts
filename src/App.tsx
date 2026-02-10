@@ -21,6 +21,7 @@ import React, { useEffect } from 'react'
 import { ThemeProvider } from './providers/ThemeProvider'
 import { NetworkProvider } from './providers/NetworkProvider'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { LocationProvider } from './context/LocationContext'
 
 const queryClient = new QueryClient()
 
@@ -58,11 +59,13 @@ export default function App() {
                 <AppProvider>
                   <AlertProvider>
                     <UserRidesProvider>
-                      <NetworkProvider>
-                        <StatusBar style="dark" />
-                        <AppRouter />
-                        <CustomAlert />
-                      </NetworkProvider>
+                      <LocationProvider>
+                        <NetworkProvider>
+                          <StatusBar style="dark" />
+                          <AppRouter />
+                          <CustomAlert />
+                        </NetworkProvider>
+                      </LocationProvider>
                     </UserRidesProvider>
                   </AlertProvider>
                 </AppProvider>
