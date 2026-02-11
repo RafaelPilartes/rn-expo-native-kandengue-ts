@@ -23,6 +23,7 @@ import { RideInterface } from '@/interfaces/IRide'
 import { RideActiveCard } from '@/components/RideActiveCard'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useAppProvider } from '@/providers/AppProvider'
+import { useNetwork } from '@/hooks/useNetwork'
 
 const services = [
   {
@@ -55,7 +56,8 @@ export default function HomeScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<HomeStackParamList>>()
 
-  const { user } = useAuthStore()
+  const { isConnected } = useNetwork()
+
   const { showAlert } = useAlert()
   const {
     activeRides,
@@ -113,6 +115,14 @@ export default function HomeScreen() {
     showAlert('Corrida', 'No momento não encontra-se disponível', 'info')
   }
   const handlePressDelivery = () => {
+    if (!isConnected) {
+      showAlert(
+        'Atenção',
+        'Por favor, verifique sua conexão com a internet para poder solicitar uma entrega',
+        'warning'
+      )
+      return
+    }
     navigateTo(ROUTES.Rides.HOME)
     // showAlert('Entregas', 'No momento não encontra-se disponível', 'info');
   }
@@ -133,11 +143,23 @@ export default function HomeScreen() {
   }
 
   const refreshAddress = async () => {
+    if (!isConnected) {
+      showAlert('Atenção', 'Sem conexão com a internet.', 'warning')
+      return
+    }
     await requestCurrentLocation()
   }
 
   // Navegar para detalhes da corrida
   const handleOpenRideDetails = (rideData: RideInterface) => {
+    if (!isConnected) {
+      showAlert(
+        'Atenção',
+        'Por favor, verifique sua conexão com a internet para poder voltar a ver os detalhes da corrida',
+        'warning'
+      )
+      return
+    }
     navigation.navigate(ROUTES.Rides.SUMMARY, {
       id: rideData.id,
       location: {
@@ -157,6 +179,10 @@ export default function HomeScreen() {
 
   // Atualizar lista de corridas
   const handleRefresh = async () => {
+    if (!isConnected) {
+      showAlert('Atenção', 'Sem conexão com a internet.', 'warning')
+      return
+    }
     await refreshUserRides()
   }
 
@@ -175,7 +201,10 @@ export default function HomeScreen() {
         contentContainerStyle={{ paddingBottom: 42 }}
       >
         {/* Header */}
-        <HomeHeader user={user} onNotifications={handleNotifications} />
+        <HomeHeader
+          user={currentUserData}
+          onNotifications={handleNotifications}
+        />
 
         {/* Seção de Localização */}
         <View className="mx-5 px-4 py-3 bg-white rounded-2xl border border-gray-200">

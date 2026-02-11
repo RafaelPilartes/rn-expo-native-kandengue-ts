@@ -1,202 +1,186 @@
-// src/components/RideItem.tsx
-import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+// src/screens/Main/History/components/RideItem.tsx
+import React, { memo } from 'react'
+import { View, Text, TouchableOpacity } from 'react-native'
 import {
-  ArrowRight,
   Bike,
   Car,
   Package,
+  Calendar,
   Clock,
-  MapPin,
-  User,
-  LucideIcon,
-} from 'lucide-react-native';
-import StatusTag from './StatusTag';
-import { RideInterface } from '@/interfaces/IRide';
-import { formatCurrency } from '@/utils/formatCurrency';
-import { formatFullDate } from '@/utils/formatDate';
+  Navigation
+} from 'lucide-react-native'
+import StatusTag from './StatusTag'
+import { RideInterface } from '@/interfaces/IRide'
+import { formatCurrency } from '@/utils/formatCurrency'
+import { formatFullDate } from '@/utils/formatDate'
+import Animated, { FadeInDown } from 'react-native-reanimated'
 
 type Props = {
-  item: RideInterface;
-  onPress?: () => void;
-};
-
-// Definir a interface para o config de ícones
-interface IconConfig {
-  icon: LucideIcon;
-  color: string;
-  bgColor: string;
+  item: RideInterface
+  onPress?: (item: RideInterface) => void
+  index?: number
 }
 
-// Mapeamento de tipos com tipo seguro
-const iconConfig: Record<string, IconConfig> = {
-  motorcycle: { icon: Bike, color: '#DC2626', bgColor: 'bg-red-100' },
-  car: { icon: Car, color: '#2563EB', bgColor: 'bg-blue-100' },
-  delivery: { icon: Package, color: '#059669', bgColor: 'bg-green-100' },
-  bicycle: { icon: Bike, color: '#D97706', bgColor: 'bg-amber-100' },
-};
+// Icon Config
+const iconConfig: Record<string, any> = {
+  motorcycle: {
+    icon: Bike,
+    color: '#DC2626',
+    bg: 'bg-red-50',
+    border: 'border-red-100'
+  },
+  car: {
+    icon: Car,
+    color: '#2563EB',
+    bg: 'bg-blue-50',
+    border: 'border-blue-100'
+  },
+  delivery: {
+    icon: Package,
+    color: '#059669',
+    bg: 'bg-emerald-50',
+    border: 'border-emerald-100'
+  },
+  bicycle: {
+    icon: Bike,
+    color: '#D97706',
+    bg: 'bg-amber-50',
+    border: 'border-amber-100'
+  },
+  default: {
+    icon: Car,
+    color: '#6B7280',
+    bg: 'bg-gray-50',
+    border: 'border-gray-100'
+  }
+}
 
-// Tipo para as labels
 const typeLabels: Record<string, string> = {
   motorcycle: 'Moto',
   car: 'Carro',
   delivery: 'Entrega',
-  bicycle: 'Bicicleta',
-};
+  bicycle: 'Bicicleta'
+}
 
-export default function RideItem({ item, onPress }: Props) {
-  // Renderizar ícone baseado no tipo de corrida com cores temáticas
-  const renderIconeType = () => {
-    // Usar type assertion ou fallback seguro
-    const rideType = item.type as keyof typeof iconConfig;
-    const config = iconConfig[rideType] || iconConfig.car;
-    const IconComponent = config.icon;
+const formatDuration = (minutes: number) => {
+  if (minutes < 60) return `${minutes} min`
+  const hours = Math.floor(minutes / 60)
+  const mins = minutes % 60
+  return `${hours}h ${mins > 0 ? `${mins}m` : ''}`
+}
 
-    return (
-      <View className={`p-3 mr-3 bg-slate-100 rounded-full ${config.bgColor}`}>
-        <IconComponent size={20} color={config.color} />
-      </View>
-    );
-  };
+function RideItemComponent({ item, onPress, index = 0 }: Props) {
+  const rideType = (item.type || 'car') as keyof typeof iconConfig
+  const config = iconConfig[rideType] || iconConfig.default
+  const Icon = config.icon
 
-  // Formatar data da corrida
-  const formatRideDate = (date: Date | undefined) => {
-    if (!date) return 'Data não disponível';
-    return formatFullDate(date, 'dd MMM yyyy - HH:mm');
-  };
-
-  // Formatar duração
-  const formatDuration = (minutes: number) => {
-    if (minutes < 60) {
-      return `${minutes} min`;
-    } else {
-      const hours = Math.floor(minutes / 60);
-      const mins = minutes % 60;
-      return `${hours}h ${mins > 0 ? `${mins}min` : ''}`.trim();
-    }
-  };
-
-  // Formatar distância
-  const formatDistance = (km: number) => {
-    return `${km} km`;
-  };
-
-  // Obter label do tipo de corrida de forma segura
-  const getTypeLabel = () => {
-    const rideType = item.type as keyof typeof typeLabels;
-    return typeLabels[rideType] || 'Carro';
-  };
+  const handlePress = () => {
+    onPress?.(item)
+  }
 
   return (
-    <TouchableOpacity
-      className="bg-white mx-4 my-2 rounded-2xl shadow-lg border border-gray-100"
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
-      {/* Header com tipo e status */}
-      <View className="flex-row justify-between items-center p-4 border-b border-gray-100">
-        <View className="flex-row items-center">
-          {renderIconeType()}
-          <View className="ml-3">
-            <Text className="text-sm font-semibold text-gray-900 capitalize">
-              {getTypeLabel()}
-            </Text>
-            <Text className="text-xs text-gray-500">
-              {formatRideDate(item.created_at)}
-            </Text>
-          </View>
-        </View>
-        <StatusTag status={item.status} />
-      </View>
-
-      {/* Conteúdo principal */}
-      <View className="w-full p-4">
-        {/* Origem e Destino */}
-        <View className="w-full mb-4 flex-col items-start justify-between">
-          <View className="flex-row">
-            <MapPin size={16} color="#EF4444" className="mt-0.5 mr-2" />
-            <View className="">
-              <Text className="text-xs text-gray-500 mb-1">Origem</Text>
-              <Text
-                className="text-sm font-medium text-gray-900"
-                numberOfLines={2}
-              >
-                {item.pickup.name}
-              </Text>
+    <Animated.View entering={FadeInDown.delay(index * 100).springify()}>
+      <TouchableOpacity
+        className="bg-white mx-5 mb-4 rounded-3xl shadow-sm shadow-slate-200 border border-slate-100 overflow-hidden"
+        onPress={handlePress}
+        activeOpacity={0.7}
+      >
+        {/* Header Section */}
+        <View className="flex-row justify-between items-center p-4 bg-slate-50/50 border-b border-slate-100">
+          <View className="flex-row items-center gap-3">
+            <View
+              className={`w-10 h-10 rounded-full items-center justify-center ${config.bg} border ${config.border}`}
+            >
+              <Icon size={20} color={config.color} />
             </View>
-          </View>
-
-          <View className="flex-row">
-            <MapPin size={16} color="#10B981" className="mt-0.5 mr-2" />
-            <View className="">
-              <Text className="text-xs text-gray-500 mb-1">Destino</Text>
-              <Text
-                className="text-sm font-medium text-gray-900"
-                numberOfLines={2}
-              >
-                {item.dropoff.name}
+            <View>
+              <Text className="text-base font-bold text-slate-800 capitalize">
+                {typeLabels[rideType] || 'Corrida'}
               </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Informações da corrida */}
-        <View className="flex-row justify-between items-center">
-          <View className="flex-row items-center gap-2">
-            {/* Duração */}
-            <View className="flex-row items-center">
-              <Clock size={14} color="#6B7280" />
-              <Text className="text-xs text-gray-600 ml-1">
-                {formatDuration(item.duration)}
-              </Text>
-            </View>
-
-            {/* Distância */}
-            <View className="flex-row items-center">
-              <View className="w-1 h-1 bg-gray-400 rounded-full mr-1" />
-              <Text className="text-xs text-gray-600">
-                {formatDistance(item.distance)}
-              </Text>
-            </View>
-
-            {/* Estafeta (se disponível) */}
-            {item.driver && (
-              <View className="flex-row items-center">
-                <User size={14} color="#6B7280" />
-                <Text
-                  className="text-xs text-gray-600 ml-1 capitalize"
-                  numberOfLines={1}
-                >
-                  {item.driver.name?.split(' ')[0]}{' '}
-                  {item.driver.name?.split(' ')[1]}
+              <View className="flex-row items-center mt-0.5">
+                <Calendar size={12} color="#94A3B8" className="mr-1" />
+                <Text className="text-xs text-slate-500 font-medium">
+                  {formatFullDate(item.created_at, 'dd MMM yyyy - HH:mm')}
                 </Text>
               </View>
-            )}
+            </View>
           </View>
-
-          {/* Preço */}
-          <View className="items-end">
-            <Text className="text-lg font-bold text-gray-900">
-              {formatCurrency(item.fare?.total || 0)}
-            </Text>
-          </View>
+          <StatusTag status={item.status} />
         </View>
 
-        {/* Indicador de corrida em andamento */}
-        {(item.status === 'pending' || item.status === 'driver_on_the_way') && (
-          <View className="mt-2 p-2 bg-amber-50 rounded-lg border border-amber-200">
-            <Text className="text-xs text-amber-700 text-center font-medium">
-              ⏳{' '}
-              {item.status === 'driver_on_the_way'
-                ? 'Motorista a caminho'
-                : 'Aguardando motorista'}
-            </Text>
-          </View>
-        )}
-      </View>
+        {/* Route Section */}
+        <View className="p-5">
+          {/* Route Visualizer */}
+          <View className="flex-row relative">
+            {/* Timeline Line */}
+            <View className="items-center mr-4 pt-1.5">
+              <View className="w-2.5 h-2.5 rounded-full bg-slate-300" />
+              <View className="w-[1px] flex-1 bg-slate-200 my-1" />
+              <View className="w-2.5 h-2.5 rounded-sm bg-slate-800" />
+            </View>
 
-      {/* Footer sutil */}
-      <View className="h-1 bg-gradient-to-r from-blue-500 to-green-500 rounded-b-2xl" />
-    </TouchableOpacity>
-  );
+            <View className="flex-1 gap-6">
+              {/* Pickup */}
+              <View>
+                <Text className="text-[10px] font-bold text-slate-400 tracking-wider mb-0.5">
+                  ORIGEM
+                </Text>
+                <Text
+                  className="text-sm font-semibold text-slate-700 leading-5"
+                  numberOfLines={1}
+                >
+                  {item.pickup.name}
+                </Text>
+                <Text className="text-sm text-slate-500 leading-5">
+                  {item.pickup.description}
+                </Text>
+              </View>
+
+              {/* Dropoff */}
+              <View>
+                <Text className="text-[10px] font-bold text-slate-400 tracking-wider mb-0.5">
+                  DESTINO
+                </Text>
+                <Text
+                  className="text-sm font-semibold text-slate-700 leading-5"
+                  numberOfLines={1}
+                >
+                  {item.dropoff.name}
+                </Text>
+                <Text className="text-sm text-slate-500 leading-5">
+                  {item.dropoff.description}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Footer Info */}
+          <View className="flex-row justify-between items-end mt-6 pt-4 border-t border-slate-50 dashed">
+            <View className="flex-row gap-4">
+              <View className="flex-row items-center bg-slate-50 px-2 py-1 rounded-md">
+                <Clock size={14} color="#64748B" className="mr-1.5" />
+                <Text className="text-xs font-semibold text-slate-600">
+                  {formatDuration(item.duration)}
+                </Text>
+              </View>
+              <View className="flex-row items-center bg-slate-50 px-2 py-1 rounded-md">
+                <Navigation size={14} color="#64748B" className="mr-1.5" />
+                <Text className="text-xs font-semibold text-slate-600">
+                  {item.distance.toFixed(1)} km
+                </Text>
+              </View>
+            </View>
+
+            <View className="flex-row items-center">
+              <Text className="text-lg font-extrabold text-slate-900">
+                {formatCurrency(item.fare?.total || 0)}
+              </Text>
+            </View>
+          </View>
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
+  )
 }
+
+export default memo(RideItemComponent)

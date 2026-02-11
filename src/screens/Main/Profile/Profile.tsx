@@ -48,9 +48,6 @@ export default function Profile() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Header */}
-      <PageHeader title="Minha Conta" canGoBack={false} />
-
       <ScrollView className="flex-1">
         {/* User Info */}
         <View className="items-center py-6 bg-white mb-3 rounded-b-3xl">

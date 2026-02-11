@@ -22,6 +22,7 @@ import { ThemeProvider } from './providers/ThemeProvider'
 import { NetworkProvider } from './providers/NetworkProvider'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { LocationProvider } from './context/LocationContext'
+import { NetworkStatusBanner } from './components/NetworkStatusBanner'
 
 const queryClient = new QueryClient()
 
@@ -62,6 +63,7 @@ export default function App() {
                       <LocationProvider>
                         <NetworkProvider>
                           <StatusBar style="dark" />
+                          <NetworkStatusBanner />
                           <AppRouter />
                           <CustomAlert />
                         </NetworkProvider>

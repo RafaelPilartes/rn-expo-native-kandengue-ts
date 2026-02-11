@@ -2,20 +2,19 @@
 import React, { useCallback, useRef, useState, useEffect } from 'react'
 import { View, SectionList, Text, ActivityIndicator } from 'react-native'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 // Components
 import RideItem from './components/RideItem'
 import RideDetailsBottomSheet from './components/RideDetailsSheetModal'
+import { PageHeader } from '@/components/PageHeader'
+import { BaseLoadingPage } from '@/components/loadingPage'
 
 // Hooks e Types
-import { useRidesViewModel } from '@/viewModels/RideViewModel'
 import { useAuthStore } from '@/storage/store/useAuthStore'
 import { RideInterface } from '@/interfaces/IRide'
-import { BaseLoadingPage } from '@/components/loadingPage'
 import { toDate } from '@/utils/formatDate'
 import { useUserRides } from '@/context/UserRidesContext'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { PageHeader } from '@/components/PageHeader'
 import { useAppProvider } from '@/providers/AppProvider'
 
 type Section = {
@@ -175,10 +174,11 @@ export default function History() {
         <SectionList
           sections={sections}
           keyExtractor={item => item.id as string}
-          renderItem={({ item }) => (
+          renderItem={({ item, index }) => (
             <RideItem
               item={item}
-              onPress={() => handlePresentModalPress(item)}
+              index={index}
+              onPress={handlePresentModalPress}
             />
           )}
           renderSectionHeader={({ section: { title } }) => (
@@ -188,6 +188,7 @@ export default function History() {
           )}
           contentContainerStyle={{ paddingBottom: 75 }}
           showsVerticalScrollIndicator={false}
+          stickySectionHeadersEnabled={false}
           // ⬇️ Pull to refresh
           refreshing={isRefreshing}
           onRefresh={handleRefresh}
