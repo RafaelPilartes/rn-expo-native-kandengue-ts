@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react'
-import { View, Text, TouchableOpacity, Alert } from 'react-native'
+import React from 'react'
+import { View, Text, TouchableOpacity } from 'react-native'
 import PlatformMapView, { Marker } from '@/components/map/MapView'
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -8,7 +8,6 @@ import { Package } from 'lucide-react-native'
 import { BackButton } from '@/components/ui/button/BackButton'
 import { MapError } from '@/components/map/MapError'
 import { useMap } from '@/providers/MapProvider'
-// import { useAppProvider } from '@/providers/AppProvider' // Removed
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { AddressDisplay } from './components/Display/AddressDisplay'
 import { MyLocationButton } from './components/Buttons/MyLocationButton'
@@ -39,16 +38,6 @@ export default function RideHomeScreen() {
     },
     zoom: 15
   }
-
-  // Effect to center on user when location becomes available
-  useEffect(() => {
-    if (location) {
-      // centerOnUser() // MapProvider handles centering if we want updates?
-      // Or we rely on 'followUserLocation' prop if available?
-      // expo-maps has `userLocation={{ coordinates, followUserLocation: true }}`?
-      // MapProvider implementation of centerOnUser uses `setCameraPosition`.
-    }
-  }, [location])
 
   // Retry handler
   const handleRetry = async () => {
@@ -83,7 +72,7 @@ export default function RideHomeScreen() {
 
   // UI principal
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-white p-safe">
       {/* Top bar */}
       <View className="absolute top-safe left-0 right-0 z-10">
         <AddressDisplay
