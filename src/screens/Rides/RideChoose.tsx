@@ -143,6 +143,18 @@ export default function RideChooseScreen() {
       return
     }
 
+    // Debug: Check each field individually
+    console.log('📍 Validation checks:', {
+      hasPickup: !!pickup,
+      hasDropoff: !!dropoff,
+      hasReceiverName: !!receiverName,
+      hasReceiverPhone: !!receiverPhone,
+      pickupValue: pickup,
+      dropoffValue: dropoff,
+      receiverNameValue: receiverName,
+      receiverPhoneValue: receiverPhone
+    })
+
     if (!pickup || !dropoff || !receiverName || !receiverPhone) {
       showAlert(
         'Dados inválidos',
@@ -151,6 +163,7 @@ export default function RideChooseScreen() {
       return
     }
 
+    console.log('✅ handleConfirm - All validations passed')
     navigation.navigate(ROUTES.Rides.SUMMARY, {
       location: { pickup, dropoff },
       receiver: { name: receiverName, phone: receiverPhone },

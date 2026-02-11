@@ -1,8 +1,8 @@
 import Constants from 'expo-constants'
 
-export const APP_VERSION = '1.0.0'
-export const BUILD_NUMBER = '1'
-export const LAST_UPDATE = '13 Nov 2025'
+export const APP_VERSION = '1.0.1'
+export const BUILD_NUMBER = '8'
+export const LAST_UPDATE = '13 Fev 2026'
 export const SITE_URL = 'https://kandengueatrevido.ao'
 export const DEVELOPER_SITE = 'https://rafaelpilartes.com'
 

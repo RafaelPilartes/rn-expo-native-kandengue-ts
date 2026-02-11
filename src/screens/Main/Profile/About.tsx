@@ -66,7 +66,7 @@ export default function AboutScreen() {
   }
 
   const stats = [
-    { icon: Users, value: '2.5K+', label: 'Usuários Ativos' },
+    { icon: Users, value: '1.5K+', label: 'Usuários Ativos' },
     { icon: MapPin, value: '5+', label: 'Cidades' },
     { icon: Star, value: '4.8', label: 'Avaliação' },
     { icon: Award, value: '99%', label: 'Entregas no Prazo' }
@@ -97,15 +97,15 @@ export default function AboutScreen() {
 
       <ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
         {/* Hero Section */}
-        <View className="bg-primary-200 px-6 py-8">
+        <View className="bg-gray-100 px-6 py-8">
           <View className="items-center">
             <View className="w-20 h-20 bg-white rounded-2xl items-center justify-center mb-4">
               <Info size={40} color="#E0212D" />
             </View>
-            <Text className="text-3xl font-bold text-white text-center">
+            <Text className="text-3xl font-bold text-gray-900 text-center">
               Kandengue Atrevido
             </Text>
-            <Text className="text-white/90 text-lg text-center mt-2">
+            <Text className="text-gray-900/90 text-lg text-center mt-2">
               Conectando pessoas, simplificando entregas
             </Text>
           </View>
