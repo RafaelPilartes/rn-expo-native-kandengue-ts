@@ -173,7 +173,9 @@ function RideItemComponent({ item, onPress, index = 0 }: Props) {
 
             <View className="flex-row items-center">
               <Text className="text-lg font-extrabold text-slate-900">
-                {formatCurrency(item.fare?.total || 0)}
+                {formatCurrency(
+                  item.status === 'canceled' ? 0 : item.fare?.total || 0
+                )}
               </Text>
             </View>
           </View>

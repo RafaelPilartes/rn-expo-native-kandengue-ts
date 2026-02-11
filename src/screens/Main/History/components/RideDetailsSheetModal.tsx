@@ -1,5 +1,5 @@
 // src/screens/Main/History/components/RideDetailsSheetModal.tsx
-import React, { forwardRef, useMemo, memo } from 'react'
+import React, { forwardRef, useMemo, memo, useCallback } from 'react'
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
@@ -30,6 +30,19 @@ const RideDetailsSheetModal = forwardRef<
   BottomSheetModal,
   RideDetailsSheetModalProps
 >(({ selectedRide, snapPoints, onChange }, ref) => {
+  // Memoize displayed fare
+  const displayedFare = useMemo(
+    () =>
+      selectedRide?.status === 'canceled' ? 0 : selectedRide?.fare?.total || 0,
+    [selectedRide?.status, selectedRide?.fare?.total]
+  )
+
+  // Memoize ride type
+  const rideType = useMemo(
+    () => selectedRide?.type || 'car',
+    [selectedRide?.type]
+  )
+
   // Memoize backdrop to prevent rerenders
   const renderBackdrop = useMemo(
     () => (props: any) => (
@@ -43,9 +56,9 @@ const RideDetailsSheetModal = forwardRef<
     []
   )
 
-  // Helper to get ride icon
-  const getRideIcon = (type: string) => {
-    switch (type) {
+  // Memoized helper to get ride icon
+  const rideIcon = useMemo(() => {
+    switch (rideType) {
       case 'motorcycle':
         return <Bike size={24} color="#DC2626" />
       case 'delivery':
@@ -55,11 +68,11 @@ const RideDetailsSheetModal = forwardRef<
       default:
         return <Car size={24} color="#2563EB" />
     }
-  }
+  }, [rideType])
 
-  // Helper to get ride icon bg
-  const getRideIconBg = (type: string) => {
-    switch (type) {
+  // Memoized helper to get ride icon bg
+  const rideIconBg = useMemo(() => {
+    switch (rideType) {
       case 'motorcycle':
         return 'bg-red-50'
       case 'delivery':
@@ -69,13 +82,13 @@ const RideDetailsSheetModal = forwardRef<
       default:
         return 'bg-blue-50'
     }
-  }
+  }, [rideType])
 
-  const handleCallDriver = () => {
+  const handleCallDriver = useCallback(() => {
     if (selectedRide?.driver?.phone) {
       Linking.openURL(`tel:${selectedRide.driver.phone}`)
     }
-  }
+  }, [selectedRide?.driver?.phone])
 
   if (!selectedRide) return null
 
@@ -99,9 +112,9 @@ const RideDetailsSheetModal = forwardRef<
           <View className="flex-row justify-between items-start mb-4">
             <View className="flex-row items-center gap-3">
               <View
-                className={`w-12 h-12 rounded-2xl items-center justify-center ${getRideIconBg(selectedRide.type || 'car')}`}
+                className={`w-12 h-12 rounded-2xl items-center justify-center ${rideIconBg}`}
               >
-                {getRideIcon(selectedRide.type || 'car')}
+                {rideIcon}
               </View>
               <View>
                 <Text className="text-xl font-bold text-slate-900">
@@ -124,7 +137,7 @@ const RideDetailsSheetModal = forwardRef<
               Valor Total
             </Text>
             <Text className="text-3xl font-extrabold text-slate-900">
-              {formatCurrency(selectedRide.fare?.total || 0)}
+              {formatCurrency(displayedFare)}
             </Text>
           </View>
         </View>
@@ -262,12 +275,13 @@ const RideDetailsSheetModal = forwardRef<
           </Text>
           <View className="bg-slate-50 p-4 rounded-2xl space-y-3">
             <View className="flex-row justify-between">
-              <Text className="text-slate-500">Tarifa Base</Text>
+              <Text className="text-slate-500">Preço da Corrida</Text>
               <Text className="text-slate-800 font-medium">
-                {formatCurrency(selectedRide.fare?.breakdown?.base_fare || 0)}
+                {formatCurrency(displayedFare)}
+                {/* {formatCurrency(selectedRide.fare?.breakdown?.base_fare || 0)} */}
               </Text>
             </View>
-            <View className="flex-row justify-between">
+            {/* <View className="flex-row justify-between">
               <Text className="text-slate-500">
                 Distância ({selectedRide.distance} km)
               </Text>
@@ -276,7 +290,7 @@ const RideDetailsSheetModal = forwardRef<
                   selectedRide.fare?.breakdown?.distance_cost || 0
                 )}
               </Text>
-            </View>
+            </View> */}
 
             {/* Separator */}
             <View className="h-[1px] bg-slate-200 my-1" />
@@ -284,7 +298,7 @@ const RideDetailsSheetModal = forwardRef<
             <View className="flex-row justify-between items-center pt-1">
               <Text className="text-slate-900 font-bold text-lg">Total</Text>
               <Text className="text-slate-900 font-bold text-lg">
-                {formatCurrency(selectedRide.fare?.total || 0)}
+                {formatCurrency(displayedFare)}
               </Text>
             </View>
           </View>
