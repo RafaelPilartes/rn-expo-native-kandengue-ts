@@ -33,6 +33,7 @@ import { CancelRideModal } from './components/Modals/CancelRideModal'
 import { RideEstimationView } from './components/Views/RideEstimationView'
 import { RideTrackingView } from './components/Views/RideTrackingView'
 import { RideInterface } from '@/interfaces/IRide'
+import { useNetwork } from '@/hooks/useNetwork'
 
 type RideSummaryScreenRouteParams = {
   id: string | undefined
@@ -47,6 +48,7 @@ type RideSummaryScreenRouteParams = {
 export default function RideSummaryScreen() {
   const route = useRoute()
   const { user } = useAuthStore()
+  const { isConnected } = useNetwork()
 
   const {
     id: rideId,
@@ -137,6 +139,15 @@ export default function RideSummaryScreen() {
 
   // Create Ride Callback
   const handleCreateNewRide = useCallback(async () => {
+    if (!isConnected) {
+      showAlert(
+        'Atenção',
+        'Por favor, verifique sua conexão com a internet para poder solicitar uma entrega',
+        'warning'
+      )
+      return
+    }
+
     if (!user) {
       showAlert('Erro', 'Usuário não autenticado', 'error')
       return
@@ -206,6 +217,15 @@ export default function RideSummaryScreen() {
   // Cancel Ride Callback
   const handleCancelRide = useCallback(
     async (reason: string) => {
+      if (!isConnected) {
+        showAlert(
+          'Atenção',
+          'Por favor, verifique sua conexão com a internet para poder cancelar a entrega',
+          'warning'
+        )
+        return
+      }
+
       try {
         if (!rideId) {
           showAlert('Erro', 'Nenhuma corrida para cancelar', 'error')

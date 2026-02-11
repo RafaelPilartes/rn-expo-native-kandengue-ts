@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect } from 'react'
 import { View, Text, TouchableOpacity, Alert } from 'react-native'
 import PlatformMapView, { Marker } from '@/components/map/MapView'
 import { useNavigation } from '@react-navigation/native'
@@ -6,12 +6,12 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import ROUTES from '@/constants/routes'
 import { Package } from 'lucide-react-native'
 import { BackButton } from '@/components/ui/button/BackButton'
-import { AddressDisplay } from './components/AddressDisplay'
-import { MyLocationButton } from './components/MyLocationButton'
 import { MapError } from '@/components/map/MapError'
 import { useMap } from '@/providers/MapProvider'
 // import { useAppProvider } from '@/providers/AppProvider' // Removed
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { AddressDisplay } from './components/Display/AddressDisplay'
+import { MyLocationButton } from './components/Buttons/MyLocationButton'
 
 export default function RideHomeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<any>>()

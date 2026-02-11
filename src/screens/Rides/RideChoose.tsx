@@ -2,15 +2,15 @@ import React, { useEffect, useRef, useState } from 'react'
 import {
   View,
   Text,
-  TouchableWithoutFeedback,
   KeyboardAvoidingView,
   Keyboard,
   Platform,
   ActivityIndicator,
   TouchableOpacity,
-  ScrollView,
   TextInput,
-  FlatList
+  FlatList,
+  ScrollView,
+  TouchableWithoutFeedback
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation } from '@react-navigation/native'
@@ -38,6 +38,7 @@ import { useMap } from '@/providers/MapProvider'
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
 import { ArticleOptions } from '@/constants/article'
 import { useAlert } from '@/context/AlertContext'
+import { useNetwork } from '@/hooks/useNetwork'
 
 export default function RideChooseScreen() {
   const navigation =
@@ -49,6 +50,8 @@ export default function RideChooseScreen() {
     getCurrentLocation: requestCurrentLocation,
     address
   } = useMap()
+
+  const { isConnected } = useNetwork()
 
   const [pickup, setPickup] = useState<CustomPlace | null>(null)
   const [dropoff, setDropoff] = useState<CustomPlace | null>(null)
@@ -75,6 +78,7 @@ export default function RideChooseScreen() {
   // Refs
   const pickupRef = useRef<any>(null)
   const dropoffRef = useRef<any>(null)
+  const flatListRef = useRef<FlatList>(null)
 
   useEffect(() => {
     if (dropoff) {
@@ -130,6 +134,15 @@ export default function RideChooseScreen() {
   }
 
   const handleConfirm = () => {
+    if (!isConnected) {
+      showAlert(
+        'Atenção',
+        'Por favor, verifique sua conexão com a internet para poder solicitar uma entrega',
+        'warning'
+      )
+      return
+    }
+
     if (!pickup || !dropoff || !receiverName || !receiverPhone) {
       showAlert(
         'Dados inválidos',
@@ -150,6 +163,7 @@ export default function RideChooseScreen() {
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         {/* Header */}
         <View className="px-5 pb-4 flex-row items-center z-10 bg-gray-50">
@@ -163,239 +177,249 @@ export default function RideChooseScreen() {
         </View>
 
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <FlatList
-            data={[]}
-            renderItem={null}
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{ paddingBottom: 120 }}
-            showsVerticalScrollIndicator={false}
-            ListHeaderComponent={
-              <View className="flex-1 px-5 pt-2">
-                {/* Route Card */}
-                <Animated.View
-                  entering={FadeInDown.delay(100).duration(500)}
-                  className="bg-white rounded-3xl p-5 shadow-sm shadow-gray-200 mb-6"
-                  style={{ zIndex: 50 }} // Ensure list floats above
-                >
-                  <View className="flex-row">
-                    {/* Visual Route Line */}
-                    <View className="items-center mr-4 mt-4">
-                      <View className="w-3 h-3 rounded-full bg-green-500 ring-4 ring-green-100" />
-                      <View className="w-[2px] h-12 bg-gray-200 my-1" />
-                      <View className="w-3 h-3 bg-red-500 rounded-sm ring-4 ring-red-100" />
-                    </View>
-
-                    {/* Inputs Container */}
-                    <View className="flex-1 gap-4">
-                      {/* Pickup Input */}
-                      <View className="relative" style={{ zIndex: 100 }}>
-                        <Text className="text-xs font-medium text-gray-400 mb-1 ml-1">
-                          DE ONDE?
-                        </Text>
-                        <View
-                          className={`bg-gray-50 rounded-xl border ${activeInput === 'pickup' ? 'border-green-500 bg-white' : 'border-gray-100'}`}
-                        >
-                          <GooglePlacesAutocomplete
-                            ref={pickupRef}
-                            placeholder="Local de coleta"
-                            onPress={(data, details = null) =>
-                              handleSelectPlace(
-                                data,
-                                details,
-                                setPickup,
-                                setShowPickupList,
-                                () => dropoffRef.current?.focus()
-                              )
-                            }
-                            query={{
-                              key: GOOGLE_API_KEY,
-                              language: 'pt-BR',
-                              components: 'country:ao'
-                            }}
-                            fetchDetails={true}
-                            styles={cleanGoogleStyles}
-                            textInputProps={{
-                              onFocus: () => {
-                                setActiveInput('pickup')
-                                setShowPickupList(true)
-                              },
-                              onBlur: () => {
-                                setActiveInput(null)
-                                setShowPickupList(false)
-                              },
-                              placeholderTextColor: '#9ca3af'
-                            }}
-                            enablePoweredByContainer={false}
-                            debounce={300}
-                            listViewDisplayed={showPickupList}
-                            onTimeout={() => setShowPickupList(false)}
-                          />
-                          {/* Current Location Quick Action */}
-                          {!pickup && activeInput === 'pickup' && (
-                            <TouchableOpacity
-                              onPress={fetchCurrentLocation}
-                              className="absolute right-3 top-3"
-                            >
-                              {isLoading ? (
-                                <ActivityIndicator
-                                  size="small"
-                                  color="#10b981"
-                                />
-                              ) : (
-                                <Navigation size={18} color="#10b981" />
-                              )}
-                            </TouchableOpacity>
-                          )}
-                        </View>
-                      </View>
-
-                      {/* Dropoff Input */}
-                      <View className="relative" style={{ zIndex: 90 }}>
-                        <Text className="text-xs font-medium text-gray-400 mb-1 ml-1">
-                          PARA ONDE?
-                        </Text>
-                        <View
-                          className={`bg-gray-50 rounded-xl border ${activeInput === 'dropoff' ? 'border-red-500 bg-white' : 'border-gray-100'}`}
-                        >
-                          <GooglePlacesAutocomplete
-                            ref={dropoffRef}
-                            placeholder="Local de entrega"
-                            onPress={(data, details = null) =>
-                              handleSelectPlace(
-                                data,
-                                details,
-                                setDropoff,
-                                setShowDropoffList
-                              )
-                            }
-                            query={{
-                              key: GOOGLE_API_KEY,
-                              language: 'pt-BR',
-                              components: 'country:ao'
-                            }}
-                            fetchDetails={true}
-                            styles={cleanGoogleStyles}
-                            textInputProps={{
-                              onFocus: () => {
-                                setActiveInput('dropoff')
-                                setShowDropoffList(true)
-                              },
-                              onBlur: () => {
-                                setActiveInput(null)
-                                setShowDropoffList(false)
-                              },
-                              placeholderTextColor: '#9ca3af'
-                            }}
-                            enablePoweredByContainer={false}
-                            debounce={300}
-                            listViewDisplayed={showDropoffList}
-                            onTimeout={() => setShowDropoffList(false)}
-                          />
-                        </View>
-                      </View>
-                    </View>
-                  </View>
-                </Animated.View>
-
-                {/* Details Section (Appears after dropoff selected) */}
-                {showDetails && (
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <FlatList
+              ref={flatListRef}
+              data={[]}
+              renderItem={null}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{ paddingBottom: 280 }}
+              showsVerticalScrollIndicator={false}
+              ListHeaderComponent={
+                <View className="flex-1 px-5 pt-2">
+                  {/* Route Card */}
                   <Animated.View
-                    entering={FadeInUp.springify().damping(15)}
-                    className="gap-4"
-                    style={{ zIndex: 10 }} // Lower zIndex
+                    entering={FadeInDown.delay(100).duration(500)}
+                    className="bg-white rounded-3xl p-5 shadow-sm shadow-gray-200 mb-6"
+                    style={{ zIndex: 50 }} // Ensure list floats above
                   >
-                    {/* Receiver Info */}
-                    <View className="bg-white rounded-3xl p-5 shadow-sm shadow-gray-200">
-                      <View className="flex-row items-center mb-4">
-                        <View className="w-8 h-8 rounded-full bg-blue-50 items-center justify-center mr-3">
-                          <User size={16} color="#3b82f6" />
-                        </View>
-                        <Text className="text-base font-bold text-gray-800">
-                          Destinatário
-                        </Text>
+                    <View className="flex-row">
+                      {/* Visual Route Line */}
+                      <View className="items-center mr-4 mt-4">
+                        <View className="w-3 h-3 rounded-full bg-green-500 ring-4 ring-green-100" />
+                        <View className="w-[2px] h-12 bg-gray-200 my-1" />
+                        <View className="w-3 h-3 bg-red-500 rounded-sm ring-4 ring-red-100" />
                       </View>
 
-                      <View className="gap-3">
-                        <View className="flex-row items-center bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
-                          <User size={18} color="#9ca3af" className="mr-3" />
-                          <TextInput
-                            placeholder="Nome completo"
-                            value={receiverName}
-                            onChangeText={setReceiverName}
-                            className="flex-1 text-gray-800 font-medium"
-                            placeholderTextColor="#9ca3af"
-                          />
-                        </View>
-                        <View className="flex-row items-center bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
-                          <Phone size={18} color="#9ca3af" className="mr-3" />
-                          <TextInput
-                            placeholder="Telefone"
-                            value={receiverPhone}
-                            onChangeText={setReceiverPhone}
-                            keyboardType="phone-pad"
-                            className="flex-1 text-gray-800 font-medium"
-                            placeholderTextColor="#9ca3af"
-                          />
-                        </View>
-                      </View>
-                    </View>
-
-                    {/* Package Info */}
-                    <View className="bg-white rounded-3xl p-5 shadow-sm shadow-gray-200">
-                      <View className="flex-row items-center mb-4">
-                        <View className="w-8 h-8 rounded-full bg-orange-50 items-center justify-center mr-3">
-                          <Package size={16} color="#f97316" />
-                        </View>
-                        <Text className="text-base font-bold text-gray-800">
-                          Encomenda
-                        </Text>
-                      </View>
-
-                      <View className="gap-3">
-                        {/* Article Type Selector (Simple Horizontal Scroll) */}
-                        <ScrollView
-                          horizontal
-                          showsHorizontalScrollIndicator={false}
-                          className="mb-2"
-                        >
-                          {ArticleOptions.map(opt => (
-                            <TouchableOpacity
-                              key={opt.value}
-                              onPress={() => setArticleType(opt.value)}
-                              className={`mr-2 px-4 py-2 rounded-full border ${articleType === opt.value ? 'bg-gray-900 border-gray-900' : 'bg-white border-gray-200'}`}
-                            >
-                              <Text
-                                className={`font-medium ${articleType === opt.value ? 'text-white' : 'text-gray-600'}`}
+                      {/* Inputs Container */}
+                      <View className="flex-1 gap-4">
+                        {/* Pickup Input */}
+                        <View className="relative" style={{ zIndex: 100 }}>
+                          <Text className="text-xs font-medium text-gray-400 mb-1 ml-1">
+                            DE ONDE?
+                          </Text>
+                          <View
+                            className={`bg-gray-50 rounded-xl border ${activeInput === 'pickup' ? 'border-green-500 bg-white' : 'border-gray-100'}`}
+                          >
+                            <GooglePlacesAutocomplete
+                              ref={pickupRef}
+                              placeholder="Local de coleta"
+                              onPress={(data, details = null) =>
+                                handleSelectPlace(
+                                  data,
+                                  details,
+                                  setPickup,
+                                  setShowPickupList,
+                                  () => dropoffRef.current?.focus()
+                                )
+                              }
+                              query={{
+                                key: GOOGLE_API_KEY,
+                                language: 'pt-BR',
+                                components: 'country:ao'
+                              }}
+                              fetchDetails={true}
+                              styles={cleanGoogleStyles}
+                              textInputProps={{
+                                onFocus: () => {
+                                  setActiveInput('pickup')
+                                  setShowPickupList(true)
+                                },
+                                onBlur: () => {
+                                  setActiveInput(null)
+                                  setShowPickupList(false)
+                                },
+                                placeholderTextColor: '#9ca3af'
+                              }}
+                              enablePoweredByContainer={false}
+                              debounce={300}
+                              listViewDisplayed={showPickupList}
+                              onTimeout={() => setShowPickupList(false)}
+                            />
+                            {/* Current Location Quick Action */}
+                            {!pickup && activeInput === 'pickup' && (
+                              <TouchableOpacity
+                                onPress={fetchCurrentLocation}
+                                className="absolute right-3 top-3"
                               >
-                                {opt.label}
-                              </Text>
-                            </TouchableOpacity>
-                          ))}
-                        </ScrollView>
+                                {isLoading ? (
+                                  <ActivityIndicator
+                                    size="small"
+                                    color="#10b981"
+                                  />
+                                ) : (
+                                  <Navigation size={18} color="#10b981" />
+                                )}
+                              </TouchableOpacity>
+                            )}
+                          </View>
+                        </View>
 
-                        <View className="flex-row items-start bg-gray-50 rounded-xl px-4 py-3 border border-gray-100 h-24">
-                          <FileText
-                            size={18}
-                            color="#9ca3af"
-                            className="mr-3 mt-1"
-                          />
-                          <TextInput
-                            placeholder="O que estamos levando? (Detalhes)"
-                            value={description}
-                            onChangeText={setDescription}
-                            multiline
-                            className="flex-1 text-gray-800 font-medium leading-5"
-                            placeholderTextColor="#9ca3af"
-                            textAlignVertical="top"
-                          />
+                        {/* Dropoff Input */}
+                        <View className="relative" style={{ zIndex: 90 }}>
+                          <Text className="text-xs font-medium text-gray-400 mb-1 ml-1">
+                            PARA ONDE?
+                          </Text>
+                          <View
+                            className={`bg-gray-50 rounded-xl border ${activeInput === 'dropoff' ? 'border-red-500 bg-white' : 'border-gray-100'}`}
+                          >
+                            <GooglePlacesAutocomplete
+                              ref={dropoffRef}
+                              placeholder="Local de entrega"
+                              onPress={(data, details = null) =>
+                                handleSelectPlace(
+                                  data,
+                                  details,
+                                  setDropoff,
+                                  setShowDropoffList
+                                )
+                              }
+                              query={{
+                                key: GOOGLE_API_KEY,
+                                language: 'pt-BR',
+                                components: 'country:ao'
+                              }}
+                              fetchDetails={true}
+                              styles={cleanGoogleStyles}
+                              textInputProps={{
+                                onFocus: () => {
+                                  setActiveInput('dropoff')
+                                  setShowDropoffList(true)
+                                },
+                                onBlur: () => {
+                                  setActiveInput(null)
+                                  setShowDropoffList(false)
+                                },
+                                placeholderTextColor: '#9ca3af'
+                              }}
+                              enablePoweredByContainer={false}
+                              debounce={300}
+                              listViewDisplayed={showDropoffList}
+                              onTimeout={() => setShowDropoffList(false)}
+                            />
+                          </View>
                         </View>
                       </View>
                     </View>
                   </Animated.View>
-                )}
-              </View>
-            }
-          />
+
+                  {/* Details Section (Appears after dropoff selected) */}
+                  {showDetails && (
+                    <Animated.View
+                      entering={FadeInUp.springify().damping(15)}
+                      className="gap-4"
+                      style={{ zIndex: 10 }} // Lower zIndex
+                    >
+                      {/* Receiver Info */}
+                      <View className="bg-white rounded-3xl p-5 shadow-sm shadow-gray-200">
+                        <View className="flex-row items-center mb-4">
+                          <View className="w-8 h-8 rounded-full bg-blue-50 items-center justify-center mr-3">
+                            <User size={16} color="#3b82f6" />
+                          </View>
+                          <Text className="text-base font-bold text-gray-800">
+                            Destinatário
+                          </Text>
+                        </View>
+
+                        <View className="gap-3">
+                          <View className="flex-row items-center bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
+                            <User size={18} color="#9ca3af" className="mr-3" />
+                            <TextInput
+                              placeholder="Nome completo"
+                              value={receiverName}
+                              onChangeText={setReceiverName}
+                              className="flex-1 text-gray-800 font-medium"
+                              placeholderTextColor="#9ca3af"
+                            />
+                          </View>
+                          <View className="flex-row items-center bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
+                            <Phone size={18} color="#9ca3af" className="mr-3" />
+                            <TextInput
+                              placeholder="Telefone"
+                              value={receiverPhone}
+                              onChangeText={setReceiverPhone}
+                              keyboardType="phone-pad"
+                              className="flex-1 text-gray-800 font-medium"
+                              placeholderTextColor="#9ca3af"
+                            />
+                          </View>
+                        </View>
+                      </View>
+
+                      {/* Package Info */}
+                      <View className="bg-white rounded-3xl p-5 shadow-sm shadow-gray-200">
+                        <View className="flex-row items-center mb-4">
+                          <View className="w-8 h-8 rounded-full bg-orange-50 items-center justify-center mr-3">
+                            <Package size={16} color="#f97316" />
+                          </View>
+                          <Text className="text-base font-bold text-gray-800">
+                            Encomenda
+                          </Text>
+                        </View>
+
+                        <View className="gap-3">
+                          {/* Article Type Selector (Simple Horizontal Scroll) */}
+                          <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            className="mb-2"
+                          >
+                            {ArticleOptions.map(opt => (
+                              <TouchableOpacity
+                                key={opt.value}
+                                onPress={() => setArticleType(opt.value)}
+                                className={`mr-2 px-4 py-2 rounded-full border ${articleType === opt.value ? 'bg-gray-900 border-gray-900' : 'bg-white border-gray-200'}`}
+                              >
+                                <Text
+                                  className={`font-medium ${articleType === opt.value ? 'text-white' : 'text-gray-600'}`}
+                                >
+                                  {opt.label}
+                                </Text>
+                              </TouchableOpacity>
+                            ))}
+                          </ScrollView>
+
+                          <View className="flex-row items-start bg-gray-50 rounded-xl px-4 py-3 border border-gray-100 h-24">
+                            <FileText
+                              size={18}
+                              color="#9ca3af"
+                              className="mr-3 mt-1"
+                            />
+                            <TextInput
+                              placeholder="O que estamos levando? (Detalhes)"
+                              value={description}
+                              onChangeText={setDescription}
+                              multiline
+                              className="flex-1 text-gray-800 font-medium leading-5"
+                              placeholderTextColor="#9ca3af"
+                              textAlignVertical="top"
+                              onFocus={() => {
+                                setTimeout(() => {
+                                  flatListRef.current?.scrollToEnd({
+                                    animated: true
+                                  })
+                                }, 300)
+                              }}
+                            />
+                          </View>
+                        </View>
+                      </View>
+                    </Animated.View>
+                  )}
+                </View>
+              }
+            />
+          </TouchableWithoutFeedback>
         </TouchableWithoutFeedback>
 
         {/* Floating Confirm Bar */}
