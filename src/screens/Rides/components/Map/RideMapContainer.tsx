@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { View, StyleSheet } from 'react-native'
-import MapView, { Marker, Polyline } from '../../../components/map/MapView'
+import MapView, { Marker, Polyline } from '../../../../components/map/MapView'
 import { CustomPlace } from '@/types/places'
 import { LatLngType } from '@/types/latLng'
 import { RideInterface } from '@/interfaces/IRide'
