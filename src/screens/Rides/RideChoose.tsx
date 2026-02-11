@@ -2,32 +2,42 @@ import React, { useEffect, useRef, useState } from 'react'
 import {
   View,
   Text,
-  TextInput,
   TouchableWithoutFeedback,
   KeyboardAvoidingView,
   Keyboard,
   Platform,
   ActivityIndicator,
+  TouchableOpacity,
+  ScrollView,
+  TextInput,
   FlatList
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import axios from 'axios'
+import Animated, {
+  FadeInDown,
+  FadeInUp,
+  SlideInDown
+} from 'react-native-reanimated'
+import {
+  Navigation,
+  ArrowLeft,
+  User,
+  Phone,
+  Package,
+  FileText,
+  ArrowRight
+} from 'lucide-react-native'
 
 import ROUTES from '@/constants/routes'
-import { BackButton } from '@/components/ui/button/BackButton'
 import { GOOGLE_API_KEY } from '@/constants/keys'
-import PrimaryButton from '@/components/ui/button/PrimaryButton'
 import { CustomPlace } from '@/types/places'
 import { HomeStackParamList } from '@/types/navigation'
-import { InputField } from '@/components/ui/input/InputField'
-import { SelectField } from '@/components/ui/select/SelectField'
-import { InputTextAreaField } from '@/components/ui/input/InputTextAreaField'
-import { ArticleOptions } from '@/constants/article'
 import { useMap } from '@/providers/MapProvider'
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
-import { MapPin, Navigation } from 'lucide-react-native'
+import { ArticleOptions } from '@/constants/article'
+import { useAlert } from '@/context/AlertContext'
 
 export default function RideChooseScreen() {
   const navigation =
@@ -36,35 +46,45 @@ export default function RideChooseScreen() {
   const {
     location,
     isLoading,
-    // requestCurrentLocation, // Renamed in MapProvider
-    getCurrentLocation: requestCurrentLocation, // Alias to match existing usage
-    error: locationError,
-    address,
-    // fullAddress, // MapProvider doesn't have fullAddress, use address
-    isGettingAddress
+    getCurrentLocation: requestCurrentLocation,
+    address
   } = useMap()
-  const fullAddress = address // MapProvider address is full/short depending on impl, treat as full.
 
   const [pickup, setPickup] = useState<CustomPlace | null>(null)
   const [dropoff, setDropoff] = useState<CustomPlace | null>(null)
 
+  // -- LOGIC FROM WORKING VERSION --
   const [showPickupList, setShowPickupList] = useState(false)
   const [showDropoffList, setShowDropoffList] = useState(false)
 
-  // Refs para controlar os componentes
-  const pickupRef = useRef<any>(null)
-  const dropoffRef = useRef<any>(null)
+  // UI States (for border coloring)
+  const [activeInput, setActiveInput] = useState<'pickup' | 'dropoff' | null>(
+    null
+  )
 
-  // Novos campos
+  const [showDetails, setShowDetails] = useState(false)
+
+  // Form Data
   const [receiverName, setReceiverName] = useState('')
   const [receiverPhone, setReceiverPhone] = useState('')
   const [articleType, setArticleType] = useState('Documentos')
   const [description, setDescription] = useState('')
 
+  const { showAlert } = useAlert()
+
+  // Refs
+  const pickupRef = useRef<any>(null)
+  const dropoffRef = useRef<any>(null)
+
+  useEffect(() => {
+    if (dropoff) {
+      setShowDetails(true)
+    }
+  }, [dropoff])
+
   const fetchCurrentLocation = async () => {
     try {
       await requestCurrentLocation()
-
       if (location && address) {
         const currentPlace: CustomPlace = {
           description: address,
@@ -73,24 +93,20 @@ export default function RideChooseScreen() {
           latitude: location.latitude,
           longitude: location.longitude
         }
-
         setPickup(currentPlace)
-
-        // Preencher o input com o endereço atual
-        if (pickupRef.current) {
-          pickupRef.current.setAddressText(address)
-        }
+        pickupRef.current?.setAddressText(address)
       }
     } catch (error) {
       console.error('Erro ao obter localização atual:', error)
     }
   }
 
-  const handleSelectPlace = async (
+  const handleSelectPlace = (
     data: any,
     details: any | null,
     setter: React.Dispatch<React.SetStateAction<CustomPlace | null>>,
-    setShowList: React.Dispatch<React.SetStateAction<boolean>>
+    setShowList: React.Dispatch<React.SetStateAction<boolean>>,
+    nextFieldFocus?: () => void
   ) => {
     if (details) {
       const { lat, lng } = details.geometry.location
@@ -102,26 +118,25 @@ export default function RideChooseScreen() {
         longitude: lng
       }
       setter(place)
-
-      // Fecha a lista de sugestões
       setShowList(false)
-
-      // Esconde o teclado
+      setActiveInput(null)
       Keyboard.dismiss()
+
+      if (nextFieldFocus) {
+        // Optional: auto-focus next field
+        setTimeout(nextFieldFocus, 300)
+      }
     }
   }
 
   const handleConfirm = () => {
-    if (!pickup || !dropoff || !receiverName || !receiverPhone) return
-
-    console.log('Confirma entrega:', {
-      pickup,
-      dropoff,
-      receiverName,
-      receiverPhone,
-      articleType,
-      description
-    })
+    if (!pickup || !dropoff || !receiverName || !receiverPhone) {
+      showAlert(
+        'Dados inválidos',
+        'Por favor, preencha todos os campos obrigatórios.'
+      )
+      return
+    }
 
     navigation.navigate(ROUTES.Rides.SUMMARY, {
       location: { pickup, dropoff },
@@ -130,237 +145,281 @@ export default function RideChooseScreen() {
     })
   }
 
-  const clearPickup = () => {
-    setPickup(null)
-    if (pickupRef.current) {
-      pickupRef.current.setAddressText('')
-    }
-  }
-
-  const clearDropoff = () => {
-    setDropoff(null)
-    if (dropoffRef.current) {
-      dropoffRef.current.setAddressText('')
-    }
-  }
-
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      {/* Conteúdo */}
+    <SafeAreaView className="flex-1 bg-gray-50 py-safe">
       <KeyboardAvoidingView
-        className="flex-1 bg-white"
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
+        className="flex-1"
       >
-        {/* Top bar */}
-        <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200">
-          <BackButton className="mr-3" iconColor="black" />
-          <Text className="text-2xl font-semibold text-gray-800">
-            Solicitar Entrega
-          </Text>
-          <View className="w-8" />
+        {/* Header */}
+        <View className="px-5 pb-4 flex-row items-center z-10 bg-gray-50">
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            className="w-10 h-10 bg-white rounded-full items-center justify-center shadow-sm mr-4"
+          >
+            <ArrowLeft size={20} color="#1f2937" />
+          </TouchableOpacity>
+          <Text className="text-xl font-bold text-gray-900">Nova Entrega</Text>
         </View>
 
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <FlatList
             data={[]}
             renderItem={null}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{ paddingBottom: 120 }}
+            showsVerticalScrollIndicator={false}
             ListHeaderComponent={
-              <View className="flex-1 px-5 py-6">
-                {/* Detalhes de coleta */}
-                <View className="flex-col">
-                  <Text className="w-full text-base font-semibold py-2 px-4 mb-3 text-gray-600 bg-gray-200 rounded-lg">
-                    Detalhes de coleta
-                  </Text>
+              <View className="flex-1 px-5 pt-2">
+                {/* Route Card */}
+                <Animated.View
+                  entering={FadeInDown.delay(100).duration(500)}
+                  className="bg-white rounded-3xl p-5 shadow-sm shadow-gray-200 mb-6"
+                  style={{ zIndex: 50 }} // Ensure list floats above
+                >
+                  <View className="flex-row">
+                    {/* Visual Route Line */}
+                    <View className="items-center mr-4 mt-4">
+                      <View className="w-3 h-3 rounded-full bg-green-500 ring-4 ring-green-100" />
+                      <View className="w-[2px] h-12 bg-gray-200 my-1" />
+                      <View className="w-3 h-3 bg-red-500 rounded-sm ring-4 ring-red-100" />
+                    </View>
 
-                  {/* Input Coleta */}
-                  <View className="mb-4">
-                    <Text className="text-sm font-semibold text-gray-700 mb-2">
-                      Endereço de Coleta
-                    </Text>
-
-                    <GooglePlacesAutocomplete
-                      ref={pickupRef}
-                      placeholder="Digite o local de coleta"
-                      onPress={(data, details = null) =>
-                        handleSelectPlace(
-                          data,
-                          details,
-                          setPickup,
-                          setShowPickupList
-                        )
-                      }
-                      query={{
-                        key: GOOGLE_API_KEY,
-                        language: 'pt-BR',
-                        components: 'country:ao' // Angola
-                      }}
-                      fetchDetails={true}
-                      styles={googleStyles}
-                      textInputProps={{
-                        placeholderTextColor: '#9ca3af',
-                        clearButtonMode: 'while-editing',
-                        onFocus: () => setShowPickupList(true),
-                        onBlur: () => setShowPickupList(false)
-                      }}
-                      enablePoweredByContainer={false}
-                      debounce={300}
-                      listViewDisplayed={showPickupList}
-                      // Fechar lista quando texto estiver vazio
-                      onTimeout={() => setShowPickupList(false)}
-                    />
-
-                    {/* Localização atual */}
-                    <TouchableWithoutFeedback onPress={fetchCurrentLocation}>
-                      <View className="flex-row items-center mt-2">
-                        {isLoading ? (
-                          <>
-                            <ActivityIndicator size="small" color="#3b82f6" />
-                            <Text className="ml-2 text-blue-600 text-sm">
-                              Buscando localização...
-                            </Text>
-                          </>
-                        ) : (
-                          <>
-                            <Navigation size={16} color="#3b82f6" />
-                            <Text className="ml-2 text-blue-600 text-sm font-medium">
-                              Usar minha localização atual
-                            </Text>
-                          </>
-                        )}
+                    {/* Inputs Container */}
+                    <View className="flex-1 gap-4">
+                      {/* Pickup Input */}
+                      <View className="relative" style={{ zIndex: 100 }}>
+                        <Text className="text-xs font-medium text-gray-400 mb-1 ml-1">
+                          DE ONDE?
+                        </Text>
+                        <View
+                          className={`bg-gray-50 rounded-xl border ${activeInput === 'pickup' ? 'border-green-500 bg-white' : 'border-gray-100'}`}
+                        >
+                          <GooglePlacesAutocomplete
+                            ref={pickupRef}
+                            placeholder="Local de coleta"
+                            onPress={(data, details = null) =>
+                              handleSelectPlace(
+                                data,
+                                details,
+                                setPickup,
+                                setShowPickupList,
+                                () => dropoffRef.current?.focus()
+                              )
+                            }
+                            query={{
+                              key: GOOGLE_API_KEY,
+                              language: 'pt-BR',
+                              components: 'country:ao'
+                            }}
+                            fetchDetails={true}
+                            styles={cleanGoogleStyles}
+                            textInputProps={{
+                              onFocus: () => {
+                                setActiveInput('pickup')
+                                setShowPickupList(true)
+                              },
+                              onBlur: () => {
+                                setActiveInput(null)
+                                setShowPickupList(false)
+                              },
+                              placeholderTextColor: '#9ca3af'
+                            }}
+                            enablePoweredByContainer={false}
+                            debounce={300}
+                            listViewDisplayed={showPickupList}
+                            onTimeout={() => setShowPickupList(false)}
+                          />
+                          {/* Current Location Quick Action */}
+                          {!pickup && activeInput === 'pickup' && (
+                            <TouchableOpacity
+                              onPress={fetchCurrentLocation}
+                              className="absolute right-3 top-3"
+                            >
+                              {isLoading ? (
+                                <ActivityIndicator
+                                  size="small"
+                                  color="#10b981"
+                                />
+                              ) : (
+                                <Navigation size={18} color="#10b981" />
+                              )}
+                            </TouchableOpacity>
+                          )}
+                        </View>
                       </View>
-                    </TouchableWithoutFeedback>
-                  </View>
-                </View>
 
-                {/* Detalhes de entrega */}
-                <View className="flex-col">
-                  <Text className="w-full text-base font-semibold py-2 px-4 mb-3 text-gray-600 bg-gray-200 rounded-lg">
-                    Detalhes de entrega
-                  </Text>
-
-                  {/* Input Entrega */}
-                  <View className="mb-4">
-                    <Text className="text-sm font-semibold text-gray-700 mb-2">
-                      Endereço de Entrega
-                    </Text>
-
-                    <GooglePlacesAutocomplete
-                      ref={dropoffRef}
-                      placeholder="Digite o local de entrega"
-                      onPress={(data, details = null) =>
-                        handleSelectPlace(
-                          data,
-                          details,
-                          setDropoff,
-                          setShowDropoffList
-                        )
-                      }
-                      query={{
-                        key: GOOGLE_API_KEY,
-                        language: 'pt-BR',
-                        components: 'country:ao' // Angola
-                      }}
-                      fetchDetails={true}
-                      styles={googleStyles}
-                      textInputProps={{
-                        placeholderTextColor: '#9ca3af',
-                        clearButtonMode: 'while-editing',
-                        onFocus: () => setShowDropoffList(true),
-                        onBlur: () => setShowDropoffList(false)
-                      }}
-                      enablePoweredByContainer={false}
-                      debounce={300}
-                      listViewDisplayed={showDropoffList}
-                      // Fechar lista quando texto estiver vazio
-                      onTimeout={() => setShowDropoffList(false)}
-                    />
-                  </View>
-
-                  {/* Nome e telefone do receptor */}
-                  <View className="w-full flex-row justify-between gap-2 mb-4">
-                    {/* Nome do receptor */}
-                    <View className="flex-1">
-                      <InputField
-                        label={'Nome do Receptor'}
-                        value={receiverName}
-                        onChangeText={setReceiverName}
-                        placeholder={'Digite o nome'}
-                      />
-                    </View>
-
-                    {/* Número do receptor */}
-                    <View className="flex-1">
-                      <InputField
-                        label={'Número do Receptor'}
-                        value={receiverPhone}
-                        onChangeText={setReceiverPhone}
-                        keyboardType="phone-pad"
-                        placeholder={'Digite o número'}
-                      />
+                      {/* Dropoff Input */}
+                      <View className="relative" style={{ zIndex: 90 }}>
+                        <Text className="text-xs font-medium text-gray-400 mb-1 ml-1">
+                          PARA ONDE?
+                        </Text>
+                        <View
+                          className={`bg-gray-50 rounded-xl border ${activeInput === 'dropoff' ? 'border-red-500 bg-white' : 'border-gray-100'}`}
+                        >
+                          <GooglePlacesAutocomplete
+                            ref={dropoffRef}
+                            placeholder="Local de entrega"
+                            onPress={(data, details = null) =>
+                              handleSelectPlace(
+                                data,
+                                details,
+                                setDropoff,
+                                setShowDropoffList
+                              )
+                            }
+                            query={{
+                              key: GOOGLE_API_KEY,
+                              language: 'pt-BR',
+                              components: 'country:ao'
+                            }}
+                            fetchDetails={true}
+                            styles={cleanGoogleStyles}
+                            textInputProps={{
+                              onFocus: () => {
+                                setActiveInput('dropoff')
+                                setShowDropoffList(true)
+                              },
+                              onBlur: () => {
+                                setActiveInput(null)
+                                setShowDropoffList(false)
+                              },
+                              placeholderTextColor: '#9ca3af'
+                            }}
+                            enablePoweredByContainer={false}
+                            debounce={300}
+                            listViewDisplayed={showDropoffList}
+                            onTimeout={() => setShowDropoffList(false)}
+                          />
+                        </View>
+                      </View>
                     </View>
                   </View>
+                </Animated.View>
 
-                  {/* Tipo de artigo */}
-                  <View className="mb-4">
-                    <SelectField
-                      label="Tipo de artigo"
-                      placeholder="Selecione o tipo de artigo"
-                      value={articleType}
-                      onSelect={setArticleType}
-                      options={ArticleOptions}
-                    />
-                  </View>
+                {/* Details Section (Appears after dropoff selected) */}
+                {showDetails && (
+                  <Animated.View
+                    entering={FadeInUp.springify().damping(15)}
+                    className="gap-4"
+                    style={{ zIndex: 10 }} // Lower zIndex
+                  >
+                    {/* Receiver Info */}
+                    <View className="bg-white rounded-3xl p-5 shadow-sm shadow-gray-200">
+                      <View className="flex-row items-center mb-4">
+                        <View className="w-8 h-8 rounded-full bg-blue-50 items-center justify-center mr-3">
+                          <User size={16} color="#3b82f6" />
+                        </View>
+                        <Text className="text-base font-bold text-gray-800">
+                          Destinatário
+                        </Text>
+                      </View>
 
-                  {/* Descrição */}
-                  <View className="mb-4">
-                    <InputTextAreaField
-                      label="Detalhes do artigo"
-                      placeholder="Escreva aqui detalhes do artigo..."
-                      value={description}
-                      onChangeText={setDescription}
-                    />
-                  </View>
-                </View>
+                      <View className="gap-3">
+                        <View className="flex-row items-center bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
+                          <User size={18} color="#9ca3af" className="mr-3" />
+                          <TextInput
+                            placeholder="Nome completo"
+                            value={receiverName}
+                            onChangeText={setReceiverName}
+                            className="flex-1 text-gray-800 font-medium"
+                            placeholderTextColor="#9ca3af"
+                          />
+                        </View>
+                        <View className="flex-row items-center bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
+                          <Phone size={18} color="#9ca3af" className="mr-3" />
+                          <TextInput
+                            placeholder="Telefone"
+                            value={receiverPhone}
+                            onChangeText={setReceiverPhone}
+                            keyboardType="phone-pad"
+                            className="flex-1 text-gray-800 font-medium"
+                            placeholderTextColor="#9ca3af"
+                          />
+                        </View>
+                      </View>
+                    </View>
+
+                    {/* Package Info */}
+                    <View className="bg-white rounded-3xl p-5 shadow-sm shadow-gray-200">
+                      <View className="flex-row items-center mb-4">
+                        <View className="w-8 h-8 rounded-full bg-orange-50 items-center justify-center mr-3">
+                          <Package size={16} color="#f97316" />
+                        </View>
+                        <Text className="text-base font-bold text-gray-800">
+                          Encomenda
+                        </Text>
+                      </View>
+
+                      <View className="gap-3">
+                        {/* Article Type Selector (Simple Horizontal Scroll) */}
+                        <ScrollView
+                          horizontal
+                          showsHorizontalScrollIndicator={false}
+                          className="mb-2"
+                        >
+                          {ArticleOptions.map(opt => (
+                            <TouchableOpacity
+                              key={opt.value}
+                              onPress={() => setArticleType(opt.value)}
+                              className={`mr-2 px-4 py-2 rounded-full border ${articleType === opt.value ? 'bg-gray-900 border-gray-900' : 'bg-white border-gray-200'}`}
+                            >
+                              <Text
+                                className={`font-medium ${articleType === opt.value ? 'text-white' : 'text-gray-600'}`}
+                              >
+                                {opt.label}
+                              </Text>
+                            </TouchableOpacity>
+                          ))}
+                        </ScrollView>
+
+                        <View className="flex-row items-start bg-gray-50 rounded-xl px-4 py-3 border border-gray-100 h-24">
+                          <FileText
+                            size={18}
+                            color="#9ca3af"
+                            className="mr-3 mt-1"
+                          />
+                          <TextInput
+                            placeholder="O que estamos levando? (Detalhes)"
+                            value={description}
+                            onChangeText={setDescription}
+                            multiline
+                            className="flex-1 text-gray-800 font-medium leading-5"
+                            placeholderTextColor="#9ca3af"
+                            textAlignVertical="top"
+                          />
+                        </View>
+                      </View>
+                    </View>
+                  </Animated.View>
+                )}
               </View>
             }
-            keyboardShouldPersistTaps="handled"
           />
         </TouchableWithoutFeedback>
 
-        {/* Botão Confirmar */}
-        <View className="px-6 pb-6 pt-4 bg-white border-t border-gray-200">
-          <PrimaryButton
-            disabled={!pickup || !dropoff || !receiverName || !receiverPhone}
-            label={'Confirmar Entrega'}
+        {/* Floating Confirm Bar */}
+        <Animated.View
+          entering={SlideInDown.duration(400)}
+          className="absolute bottom-0 left-0 right-0 bg-white px-5 pt-4 pb-8 border-t border-gray-100 rounded-t-3xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]"
+          style={{ elevation: 10 }}
+        >
+          <TouchableOpacity
             onPress={handleConfirm}
-          />
-
-          {/* Resumo da entrega */}
-          {(pickup || dropoff) && (
-            <View className="mt-3 p-3 bg-gray-50 rounded-lg">
-              <Text className="text-gray-700 text-sm font-medium mb-2">
-                Resumo da Entrega:
-              </Text>
-              {pickup && (
-                <Text className="text-gray-600 text-xs">
-                  📍 <Text className="font-medium">De:</Text> {pickup.name}
-                </Text>
-              )}
-              {dropoff && (
-                <Text className="text-gray-600 text-xs mt-1">
-                  🎯 <Text className="font-medium">Para:</Text> {dropoff.name}
-                </Text>
-              )}
-            </View>
-          )}
-        </View>
+            className={`w-full py-4 rounded-2xl items-center flex-row justify-center bg-primary-200 `}
+          >
+            <Text className={`text-lg font-bold mr-2 text-white`}>
+              Confirmar Pedido
+            </Text>
+            <ArrowRight size={20} color="white" />
+          </TouchableOpacity>
+        </Animated.View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   )
 }
 
-const googleStyles = {
+const cleanGoogleStyles = {
   container: {
     flex: 0,
     marginBottom: 1
@@ -368,41 +427,49 @@ const googleStyles = {
   textInputContainer: {
     backgroundColor: 'transparent',
     borderTopWidth: 0,
-    borderBottomWidth: 0
+    borderBottomWidth: 0,
+    paddingHorizontal: 0,
+    paddingVertical: 0
   },
   textInput: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 100,
+    backgroundColor: 'transparent',
+    borderRadius: 0,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    fontSize: 14,
-    height: 48
+    fontSize: 16,
+    color: '#1f2937',
+    fontWeight: '500',
+    height: 48,
+    marginTop: 0,
+    marginLeft: 0,
+    marginRight: 0,
+    marginBottom: 0
   },
   listView: {
     backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#e5e7eb',
-    borderRadius: 12,
+    borderColor: '#f3f4f6',
+    borderRadius: 16,
     marginTop: 8,
-    elevation: 3,
+    elevation: 4,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 4
+    shadowRadius: 12,
+    position: 'absolute',
+    top: 50,
+    left: 0,
+    right: 0,
+    zIndex: 1000
   },
   row: {
-    backgroundColor: '#fff',
-    padding: 13,
+    padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6'
+    borderBottomColor: '#f9fafb'
   },
   description: {
-    fontSize: 14,
-    color: '#374151'
-  },
-  poweredContainer: {
-    display: 'none'
+    fontSize: 15,
+    color: '#374151',
+    fontWeight: '400'
   }
 }
