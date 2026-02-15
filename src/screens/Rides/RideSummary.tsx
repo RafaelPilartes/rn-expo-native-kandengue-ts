@@ -34,6 +34,7 @@ import { RideEstimationView } from './components/Views/RideEstimationView'
 import { RideTrackingView } from './components/Views/RideTrackingView'
 import { RideInterface } from '@/interfaces/IRide'
 import { useNetwork } from '@/hooks/useNetwork'
+import { useMap } from '@/providers/MapProvider'
 
 type RideSummaryScreenRouteParams = {
   id: string | undefined
@@ -61,7 +62,7 @@ export default function RideSummaryScreen() {
     useNavigation<NativeStackNavigationProp<HomeStackParamList>>()
   const { showAlert } = useAlert()
 
-  const mapRef = useRef<any>(null)
+  const { centerOnPoint, mapRef } = useMap()
 
   const bottomSheetRef = useRef<BottomSheetModal>(null)
 
@@ -132,9 +133,7 @@ export default function RideSummaryScreen() {
 
   // Center on Pickup Callback
   const centerOnPickup = useCallback(async () => {
-    // Logic handled by MapProvider or local map ref if exposed.
-    // For now we assume mapProvider allows us to center.
-    // mapRef.current?.animateToRegion(...)
+    await centerOnPoint(location.pickup)
   }, [])
 
   // Create Ride Callback

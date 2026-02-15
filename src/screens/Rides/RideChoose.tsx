@@ -34,22 +34,17 @@ import ROUTES from '@/constants/routes'
 import { GOOGLE_API_KEY } from '@/constants/keys'
 import { CustomPlace } from '@/types/places'
 import { HomeStackParamList } from '@/types/navigation'
-import { useMap } from '@/providers/MapProvider'
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
 import { ArticleOptions } from '@/constants/article'
 import { useAlert } from '@/context/AlertContext'
 import { useNetwork } from '@/hooks/useNetwork'
+import { useLocation } from '@/context/LocationContext'
 
 export default function RideChooseScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<HomeStackParamList>>()
 
-  const {
-    location,
-    isLoading,
-    getCurrentLocation: requestCurrentLocation,
-    address
-  } = useMap()
+  const { location, isLoading, requestCurrentLocation, address } = useLocation()
 
   const { isConnected } = useNetwork()
 

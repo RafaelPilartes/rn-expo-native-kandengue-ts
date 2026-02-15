@@ -11,6 +11,7 @@ import { useMap } from '@/providers/MapProvider'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { AddressDisplay } from './components/Display/AddressDisplay'
 import { MyLocationButton } from './components/Buttons/MyLocationButton'
+import { useLocation } from '@/context/LocationContext'
 
 export default function RideHomeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<any>>()
@@ -18,17 +19,14 @@ export default function RideHomeScreen() {
   const handleGoBack = () => navigation.goBack()
 
   // Use MapProvider context
+  const { isLoading, centerOnUser, mapRef, handleMapReady } = useMap()
   const {
     location,
-    isLoading,
-    getCurrentLocation,
-    centerOnUser,
+    requestCurrentLocation,
     error: locationError,
     address,
-    isGettingAddress,
-    mapRef,
-    handleMapReady
-  } = useMap()
+    isGettingAddress
+  } = useLocation()
 
   // Initial camera position centered on Luanda if no location
   const initialCamera = {
@@ -41,7 +39,7 @@ export default function RideHomeScreen() {
 
   // Retry handler
   const handleRetry = async () => {
-    await getCurrentLocation()
+    await requestCurrentLocation()
     await centerOnUser()
   }
 

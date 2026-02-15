@@ -14,7 +14,6 @@ import { UserInterface } from '@/interfaces/IUser'
 import UpdateAppScreen from '@/screens/UpdateApp'
 import { AppConfigInfo } from '@/constants/config'
 import { useAlert } from '@/context/AlertContext'
-import { MapProvider } from '@/providers/MapProvider'
 
 const Stack = createNativeStackNavigator()
 
@@ -305,14 +304,12 @@ export default function AppRouter() {
   // RENDER
   // =========================================================
   return (
-    <MapProvider>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {!canAccessApp ? (
-          <Stack.Screen name="Auth" component={AuthRouter} />
-        ) : (
-          <Stack.Screen name="Main" component={TabRouter} />
-        )}
-      </Stack.Navigator>
-    </MapProvider>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {!canAccessApp ? (
+        <Stack.Screen name="Auth" component={AuthRouter} />
+      ) : (
+        <Stack.Screen name="Main" component={TabRouter} />
+      )}
+    </Stack.Navigator>
   )
 }
