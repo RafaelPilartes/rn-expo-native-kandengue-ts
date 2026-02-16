@@ -85,17 +85,11 @@
         "expo-build-properties",
         {
           "ios": {
-            "useFrameworks": "static",
-            "extraPods": [
-              {
-                "name": "React-Core",
-                "modular_headers": false
-              }
-            ],
-            "deploymentTarget": "15.1"
+            "useFrameworks": "static"
           }
         }
-      ]
+      ],
+      "./plugins/withNonModularHeaders.js"
     ]
   }
 }
