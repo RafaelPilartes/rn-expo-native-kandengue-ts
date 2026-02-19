@@ -17,7 +17,7 @@
       "googleServicesFile": "./firebase/GoogleService-Info.plist",
       "bundleIdentifier": "com.kandengueatrevido.ride",
       "infoPlist": {
-        "UIBackgroundModes": ["location", "location"],
+        "UIBackgroundModes": ["location", "fetch", "remote-notification"],
         "NSLocationWhenInUseUsageDescription": "This app requires access to your location to provide navigation and nearby services.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs background location access to keep tracking your rides even when the app is closed.",
         "NSLocationAlwaysUsageDescription": "This app requires background location access to function properly.",
@@ -26,12 +26,8 @@
         "NSPhotoLibraryUsageDescription": "Photo library access is required to upload or select images.",
         "NSPhotoLibraryAddUsageDescription": "The app needs permission to save images to your library.",
         "NSContactsUsageDescription": "Contacts access is required to allow selecting contacts from your device.",
-        "NSBluetoothAlwaysUsageDescription": "Bluetooth is required for connectivity features.",
-        "NSBluetoothPeripheralUsageDescription": "Bluetooth access is required to interact with nearby devices.",
-        "NSCalendarsUsageDescription": "Calendar access is required for scheduling features.",
-        "NSRemindersUsageDescription": "Reminders access is needed for task scheduling.",
         "NSUserTrackingUsageDescription": "Tracking permission is needed for analytics and personalized experience.",
-        "NSSpeechRecognitionUsageDescription": "Speech recognition is required to support voice features.",
+        "NSUserNotificationUsageDescription": "Notifications permission is needed for push notifications.",
         "ITSAppUsesNonExemptEncryption": false
       },
       "config": {
@@ -85,11 +81,11 @@
         "expo-build-properties",
         {
           "ios": {
-            "useFrameworks": "static"
+            "useFrameworks": "static",
+            "buildReactNativeFromSource": true
           }
         }
-      ],
-      "./plugins/withNonModularHeaders.js"
+      ]
     ]
   }
 }

@@ -209,7 +209,7 @@ Consulte nossa Política de Privacidade completa.`
             return (
               <View key={section.id} className="mb-3">
                 <TouchableOpacity
-                  className="bg-white rounded-2xl shadow-sm p-5"
+                  className="bg-white rounded-2xl p-5"
                   onPress={() => toggleSection(section.id)}
                 >
                   <View className="flex-row justify-between items-start">
@@ -257,7 +257,7 @@ Consulte nossa Política de Privacidade completa.`
         {/* Contato Legal */}
         <View className="px-6 mt-6">
           <TouchableOpacity
-            className="bg-white rounded-2xl shadow p-5 flex-row items-center justify-between"
+            className="bg-white rounded-2xl p-5 flex-row items-center justify-between"
             onPress={handleContactLegal}
           >
             <View>

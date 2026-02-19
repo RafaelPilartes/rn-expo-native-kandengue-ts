@@ -138,7 +138,7 @@ export default function HelpScreen() {
           <View className="gap-3">
             <TouchableOpacity
               onPress={handleWhatsApp}
-              className="flex-row items-center bg-white rounded-xl shadow-sm border border-gray-100 p-4 active:bg-gray-50"
+              className="flex-row items-center bg-white rounded-xl border border-gray-100 p-4 active:bg-gray-50"
             >
               <View className="w-10 h-10 bg-green-50 rounded-full items-center justify-center border border-green-100">
                 <MessageCircle size={20} color="#10B981" />
@@ -152,7 +152,7 @@ export default function HelpScreen() {
 
             <TouchableOpacity
               onPress={handleCall}
-              className="flex-row items-center bg-white rounded-xl shadow-sm border border-gray-100 p-4 active:bg-gray-50"
+              className="flex-row items-center bg-white rounded-xl border border-gray-100 p-4 active:bg-gray-50"
             >
               <View className="w-10 h-10 bg-blue-50 rounded-full items-center justify-center border border-blue-100">
                 <Phone size={20} color="#3B82F6" />
@@ -165,7 +165,7 @@ export default function HelpScreen() {
 
             <TouchableOpacity
               onPress={handleEmail}
-              className="flex-row items-center bg-white rounded-xl shadow-sm border border-gray-100 p-4 active:bg-gray-50"
+              className="flex-row items-center bg-white rounded-xl border border-gray-100 p-4 active:bg-gray-50"
             >
               <View className="w-10 h-10 bg-gray-50 rounded-full items-center justify-center border border-gray-100">
                 <Mail size={20} color="#6B7280" />
@@ -217,7 +217,7 @@ export default function HelpScreen() {
                 </Text>
               </View>
 
-              <View className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <View className="bg-white rounded-xl border border-gray-100 overflow-hidden">
                 {category.questions.map((faq, index) => (
                   <TouchableOpacity
                     key={faq.id}

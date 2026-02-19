@@ -113,7 +113,7 @@ export default function AboutScreen() {
 
         {/* Stats */}
         <View className="px-6 -mt-6">
-          <View className="bg-white rounded-2xl shadow-lg p-6">
+          <View className="bg-white rounded-2xl p-6">
             <View className="flex-row flex-wrap justify-between">
               {stats.map((stat, index) => {
                 const IconComponent = stat.icon
@@ -136,7 +136,7 @@ export default function AboutScreen() {
         {/* Nossa História */}
         <View className="px-6 mt-6">
           <TouchableOpacity
-            className="bg-white rounded-2xl shadow p-6"
+            className="bg-white rounded-2xl p-6"
             onPress={() => toggleSection('story')}
           >
             <View className="flex-row justify-between items-center">
@@ -172,7 +172,7 @@ export default function AboutScreen() {
         {/* Nossa Missão */}
         <View className="px-6 mt-4">
           <TouchableOpacity
-            className="bg-white rounded-2xl shadow p-6"
+            className="bg-white rounded-2xl p-6"
             onPress={() => toggleSection('mission')}
           >
             <View className="flex-row justify-between items-center">
@@ -220,7 +220,7 @@ export default function AboutScreen() {
 
         {/* Informações Técnicas */}
         <View className="px-6 mt-4">
-          <View className="bg-white rounded-2xl shadow p-6">
+          <View className="bg-white rounded-2xl p-6">
             <Text className="text-xl font-bold text-gray-900 mb-4">
               Informações do App
             </Text>
@@ -253,7 +253,7 @@ export default function AboutScreen() {
 
         {/* Links Rápidos */}
         <View className="px-6 mt-4">
-          <View className="bg-white rounded-2xl shadow p-6">
+          <View className="bg-white rounded-2xl p-6">
             <Text className="text-xl font-bold text-gray-900 mb-4">
               Links Úteis
             </Text>

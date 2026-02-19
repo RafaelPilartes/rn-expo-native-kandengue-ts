@@ -224,7 +224,7 @@ export default function ComplaintsScreen() {
                   onPress={() => handleTypeSelect(type.id)}
                 >
                   <View
-                    className={`bg-white rounded-xl p-3 border-2 ${
+                    className={`bg-white rounded-xl p-3 border ${
                       isSelected
                         ? 'border-primary-200 bg-primary-50'
                         : 'border-gray-200'
@@ -262,7 +262,7 @@ export default function ComplaintsScreen() {
               setFormData(prev => ({ ...prev, subject: text }))
             }
             placeholder="Resuma o problema em poucas palavras"
-            className="bg-white rounded-xl p-4 text-gray-800 shadow border border-gray-200"
+            className="bg-white rounded-xl p-4 text-gray-800 border border-gray-200"
             maxLength={100}
           />
 
@@ -289,7 +289,7 @@ export default function ComplaintsScreen() {
             multiline
             numberOfLines={6}
             textAlignVertical="top"
-            className="bg-white rounded-xl p-4 text-gray-800 shadow border border-gray-200 min-h-[140px]"
+            className="bg-white rounded-xl p-4 text-gray-800 border border-gray-200 min-h-[140px]"
             maxLength={1000}
           />
 
@@ -318,7 +318,7 @@ export default function ComplaintsScreen() {
                   onPress={() => handlePrioritySelect(priority.id)}
                 >
                   <View
-                    className={`rounded-xl p-3 border-2 ${
+                    className={`rounded-xl p-3 border ${
                       isSelected
                         ? `${priority.color.split(' ')[0]} border-${
                             priority.color.split(' ')[2]
@@ -359,7 +359,7 @@ export default function ComplaintsScreen() {
                   onPress={() => handleContactSelect(option.id)}
                 >
                   <View
-                    className={`rounded-xl p-3 border-2 ${
+                    className={`rounded-xl p-3 border ${
                       isSelected
                         ? 'bg-primary-50 border-primary-200'
                         : 'bg-white border-gray-200'
@@ -415,7 +415,7 @@ export default function ComplaintsScreen() {
             !formData.subject.trim() ||
             !formData.description.trim()
           }
-          className={`rounded-xl py-4 flex-row justify-center items-center shadow-lg ${
+          className={`rounded-xl py-4 flex-row justify-center items-center ${
             isLoadingUpdateComplaint ||
             !formData.type ||
             !formData.subject.trim() ||

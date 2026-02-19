@@ -150,12 +150,12 @@ const RideDetailsSheetModal = forwardRef<
             {/* Timeline Visual */}
             <View className="items-center mr-4 pt-1.5 h-full absolute left-0 top-0 bottom-0 z-10">
               <View
-                className="w-4 h-4 rounded-full bg-white border-4 border-slate-300 shadow-sm"
+                className="w-4 h-4 rounded-full bg-white border-4 border-slate-300"
                 style={{ elevation: 2 }}
               />
               <View className="w-0.5 flex-1 bg-slate-200 my-1 min-h-[40px]" />
               <View
-                className="w-4 h-4 rounded-sm bg-slate-800 border-2 border-white shadow-sm"
+                className="w-4 h-4 rounded-sm bg-slate-800 border-2 border-white"
                 style={{ elevation: 2 }}
               />
             </View>
@@ -196,7 +196,7 @@ const RideDetailsSheetModal = forwardRef<
             Detalhes da Viagem
           </Text>
           <View className="flex-row gap-4">
-            <View className="flex-1 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+            <View className="flex-1 bg-white p-4 rounded-2xl border border-slate-100">
               <View className="w-8 h-8 bg-blue-50 rounded-full items-center justify-center mb-2">
                 <Clock size={16} color="#3B82F6" />
               </View>
@@ -208,7 +208,7 @@ const RideDetailsSheetModal = forwardRef<
               </Text>
             </View>
 
-            <View className="flex-1 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+            <View className="flex-1 bg-white p-4 rounded-2xl border border-slate-100">
               <View className="w-8 h-8 bg-emerald-50 rounded-full items-center justify-center mb-2">
                 <Navigation size={16} color="#10B981" />
               </View>

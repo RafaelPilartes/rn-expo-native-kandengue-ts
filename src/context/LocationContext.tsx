@@ -118,7 +118,10 @@ export const LocationProvider: React.FC<{ children: ReactNode }> = ({
 
   const handleAcceptDisclosure = async () => {
     setShowDisclosure(false)
-    await requestInternalPermission()
+    // Wait for modal to close (iOS fix)
+    setTimeout(async () => {
+      await requestInternalPermission()
+    }, 500)
   }
 
   const handleDeclineDisclosure = () => {

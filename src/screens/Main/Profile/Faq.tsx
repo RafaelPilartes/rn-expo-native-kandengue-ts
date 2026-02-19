@@ -299,7 +299,7 @@ Processo:
       <ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
         {/* Search Bar */}
         <View className="px-6 pt-6">
-          <View className="bg-white rounded-2xl shadow-sm flex-row items-center px-4 py-3">
+          <View className="bg-white rounded-2xl flex-row items-center px-4 py-3">
             <Search size={20} color="#6B7280" />
             <TextInput
               value={searchQuery}
@@ -366,7 +366,7 @@ Processo:
               return (
                 <View key={faq.id} className="mb-3">
                   <TouchableOpacity
-                    className="bg-white rounded-2xl shadow-sm p-5"
+                    className="bg-white rounded-2xl  p-5"
                     onPress={() => toggleItem(faq.id)}
                   >
                     <View className="flex-row justify-between items-start">
@@ -393,7 +393,7 @@ Processo:
               )
             })
           ) : (
-            <View className="bg-white rounded-2xl shadow-sm p-8 items-center">
+            <View className="bg-white rounded-2xl  p-8 items-center">
               <HelpCircle size={48} color="#9CA3AF" />
               <Text className="text-gray-500 text-lg font-medium mt-3 text-center">
                 Nenhum resultado encontrado

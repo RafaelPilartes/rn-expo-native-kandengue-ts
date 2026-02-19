@@ -174,7 +174,7 @@ Tempo de resposta: Até 30 dias úteis`
 
       <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
         {/* Header Section */}
-        <View className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+        <View className="bg-white rounded-2xl p-6 mb-6">
           <View className="flex-row items-center mb-4">
             <Shield size={32} color="#E0212D" />
             <View className="ml-4 flex-1">
@@ -220,7 +220,7 @@ Tempo de resposta: Até 30 dias úteis`
           return (
             <View key={section.id} className="mb-4">
               <TouchableOpacity
-                className="bg-white rounded-2xl shadow-sm p-5"
+                className="bg-white rounded-2xl p-5"
                 onPress={() => toggleSection(section.id)}
               >
                 <View className="flex-row justify-between items-start">

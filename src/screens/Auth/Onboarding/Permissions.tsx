@@ -139,7 +139,10 @@ const Permissions = () => {
 
   const handleAcceptLocationDisclosure = async () => {
     setShowLocationDisclosure(false)
-    await processPermissionRequest('location')
+    // Wait for modal to close (iOS fix)
+    setTimeout(async () => {
+      await processPermissionRequest('location')
+    }, 500)
   }
 
   const handleDeclineLocationDisclosure = () => {
@@ -198,12 +201,13 @@ const Permissions = () => {
   }
 
   // 🔹 Verificar se pode continuar (todas as permissões foram tratadas)
-  const canContinue = permissions.every(
-    permission =>
-      permission.status !== 'pending' &&
-      permission.status !== 'denied' &&
-      permission.status !== 'blocked'
-  )
+  const canContinue = true
+  // const canContinue = permissions.every(
+  //   permission =>
+  //     permission.status !== 'pending' &&
+  //     permission.status !== 'denied' &&
+  //     permission.status !== 'blocked'
+  // )
 
   // 🔹 Obter ícone baseado no status
   const getStatusIcon = (status: PermissionStatus) => {
@@ -265,7 +269,7 @@ const Permissions = () => {
             buttonLabel={
               permission.status === 'denied' || permission.status === 'blocked'
                 ? t('common:buttons.try_again')
-                : t('common:buttons.allow')
+                : t('common:buttons.continue')
             }
           />
         ))}
@@ -275,7 +279,7 @@ const Permissions = () => {
         className="mb-8"
         label={t('common:buttons.continue')}
         onPress={goToNextStep}
-        disabled={!canContinue || isLoading}
+        disabled={isLoading}
         loading={isLoading}
       />
 
