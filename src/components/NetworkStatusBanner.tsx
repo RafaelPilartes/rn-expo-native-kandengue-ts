@@ -5,15 +5,13 @@ import { WifiOff } from 'lucide-react-native'
 import Animated, {
   useAnimatedStyle,
   withTiming,
-  useSharedValue,
-  withSequence,
-  withDelay
+  useSharedValue
 } from 'react-native-reanimated'
 import { useNetwork } from '@/hooks/useNetwork'
 
 export const NetworkStatusBanner: React.FC = () => {
   const { isConnected, isInternetReachable } = useNetwork()
-
+  const insets = useSafeAreaInsets()
   const [visible, setVisible] = useState(false)
 
   // Opacity for smooth fade in/out
@@ -56,10 +54,30 @@ export const NetworkStatusBanner: React.FC = () => {
 
   return (
     <Animated.View
-      style={animatedStyle}
-      className="bg-red-600 pt-6 pb-4 items-center w-full"
+      style={[
+        {
+          position: 'absolute',
+          top: insets.top + 8,
+          left: 16,
+          right: 16,
+          zIndex: 9999, // Ensure it's on top
+          backgroundColor: '#EF4444', // Red-500
+          borderRadius: 12,
+          padding: 12,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          shadowColor: '#2424244b',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.15,
+          shadowRadius: 3.84,
+          elevation: 5
+        },
+        animatedStyle
+      ]}
     >
-      <Text className="text-white font-bold text-base mt-4">
+      <WifiOff size={20} color="white" style={{ marginRight: 8 }} />
+      <Text style={{ color: 'white', fontWeight: '600', fontSize: 14 }}>
         Sem conexão com a internet
       </Text>
     </Animated.View>
