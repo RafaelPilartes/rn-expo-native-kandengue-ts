@@ -26,7 +26,7 @@
         "NSPhotoLibraryUsageDescription": "Photo library access is required to upload or select images.",
         "NSPhotoLibraryAddUsageDescription": "The app needs permission to save images to your library.",
         "NSContactsUsageDescription": "Contacts access is required to allow selecting contacts from your device.",
-        "NSUserTrackingUsageDescription": "Tracking permission is needed for analytics and personalized experience.",
+
         "NSUserNotificationUsageDescription": "Notifications permission is needed for push notifications.",
         "ITSAppUsesNonExemptEncryption": false
       },
