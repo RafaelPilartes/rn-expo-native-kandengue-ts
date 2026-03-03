@@ -363,7 +363,7 @@ export const LocationProvider: React.FC<{ children: ReactNode }> = ({
           longitude: pos.coords.longitude
         }
         setLocation(coords)
-        fetchAddress(coords)
+        // fetchAddress(coords) // REMOVIDO para reduzir custos. O cache do googleApi.ts e chamadas específicas tratarão isso.
       }
     )
 
