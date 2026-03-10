@@ -124,12 +124,6 @@ export const LocationProvider: React.FC<{ children: ReactNode }> = ({
     }, 500)
   }
 
-  const handleDeclineDisclosure = () => {
-    setShowDisclosure(false)
-    // User explicitly declined disclosure
-    setMissingPermission(true)
-  }
-
   const requestInternalPermission = async (): Promise<boolean> => {
     console.log('🛡️ [LocationContext] Requesting internal permission...')
     try {
@@ -554,7 +548,6 @@ export const LocationProvider: React.FC<{ children: ReactNode }> = ({
       <LocationDisclosureModal
         visible={showDisclosure}
         onAccept={handleAcceptDisclosure}
-        onDecline={handleDeclineDisclosure}
       />
     </LocationContext.Provider>
   )

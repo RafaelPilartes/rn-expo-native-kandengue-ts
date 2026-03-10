@@ -28,8 +28,7 @@
         "NSContactsUsageDescription": "Contacts access is required to allow selecting contacts from your device.",
 
         "NSUserNotificationUsageDescription": "Notifications permission is needed for push notifications.",
-        "ITSAppUsesNonExemptEncryption": false,
-        "NSUserTrackingUsageDescription": "This app requires tracking permission to provide secure authentication and push notifications via Firebase. We do not share your data with third-party advertising entities."
+        "ITSAppUsesNonExemptEncryption": false
       },
       "config": {
         "googleMapsApiKey": "AIzaSyCcaxxnCRThBiRzzjF4SHO-yo6qtV8q7iM"
@@ -78,7 +77,6 @@
       "@react-native-firebase/app",
       "@react-native-firebase/auth",
       "expo-maps",
-      "expo-tracking-transparency",
       [
         "expo-build-properties",
         {

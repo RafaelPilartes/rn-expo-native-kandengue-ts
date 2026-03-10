@@ -7,13 +7,11 @@ import PrimaryButton from '@/components/ui/button/PrimaryButton'
 interface LocationDisclosureModalProps {
   visible: boolean
   onAccept: () => void
-  onDecline: () => void
 }
 
 const LocationDisclosureModal = ({
   visible,
-  onAccept,
-  onDecline
+  onAccept
 }: LocationDisclosureModalProps) => {
   const { t } = useTranslation(['onboarding', 'common'])
 
@@ -22,7 +20,7 @@ const LocationDisclosureModal = ({
       animationType="slide"
       transparent={true}
       visible={visible}
-      onRequestClose={onDecline}
+      onRequestClose={onAccept}
     >
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
@@ -45,15 +43,9 @@ const LocationDisclosureModal = ({
 
           <View style={styles.buttonContainer}>
             <PrimaryButton
-              label={t('common:buttons.accept')}
+              label={t('common:buttons.continue')}
               onPress={onAccept}
               variant="primary"
-              className="w-full mb-3"
-            />
-            <PrimaryButton
-              label={t('common:buttons.decline')}
-              onPress={onDecline}
-              variant="outline"
               className="w-full"
             />
           </View>

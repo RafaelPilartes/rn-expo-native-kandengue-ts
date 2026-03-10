@@ -160,10 +160,6 @@ const Permissions = () => {
     }, 500)
   }
 
-  const handleDeclineLocationDisclosure = () => {
-    setShowLocationDisclosure(false)
-  }
-
   // 🔹 Feedback visual quando permissão é concedida
   const showPermissionGrantedFeedback = (permissionId: string) => {
     // Feedback visual será mostrado através do ícone no PermissionCard
@@ -298,7 +294,6 @@ const Permissions = () => {
       <LocationDisclosureModal
         visible={showLocationDisclosure}
         onAccept={handleAcceptLocationDisclosure}
-        onDecline={handleDeclineLocationDisclosure}
       />
     </View>
   )

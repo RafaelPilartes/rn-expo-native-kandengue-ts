@@ -24,8 +24,6 @@ import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { LocationProvider } from './context/LocationContext'
 import { NetworkStatusBanner } from './components/NetworkStatusBanner'
 import { MapProvider } from './providers/MapProvider'
-import { requestTrackingPermissionsAsync } from 'expo-tracking-transparency'
-import { Platform } from 'react-native'
 
 const queryClient = new QueryClient()
 
@@ -48,15 +46,6 @@ export default function App() {
 
   useEffect(() => {
     const init = async () => {
-      if (Platform.OS === 'ios') {
-        try {
-          console.log('Solicitando permissão de rastreamento (ATT)...')
-          const { status } = await requestTrackingPermissionsAsync()
-          console.log('Status ATT:', status)
-        } catch (error) {
-          console.log('Erro ao solicitar ATT:', error)
-        }
-      }
       await StoragePrepareApp()
     }
     init()
