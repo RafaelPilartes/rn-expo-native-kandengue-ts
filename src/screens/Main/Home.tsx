@@ -184,6 +184,12 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
+      {/* Fixed Header */}
+      <HomeHeader
+        user={currentUserData}
+        onNotifications={handleNotifications}
+      />
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -196,11 +202,6 @@ export default function HomeScreen() {
         }
         contentContainerStyle={{ paddingBottom: 42 }}
       >
-        {/* Header */}
-        <HomeHeader
-          user={currentUserData}
-          onNotifications={handleNotifications}
-        />
 
         {/* Seção de Localização */}
         <View className="mx-5 px-4 py-3 bg-white rounded-2xl border border-gray-200">

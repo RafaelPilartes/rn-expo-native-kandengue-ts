@@ -37,10 +37,10 @@ export default function ServiceCard({
       onPress={onPress}
       activeOpacity={0.7}
       style={[
-        styles.shadow,
+        // styles.shadow,
         { borderLeftWidth: 3, borderLeftColor: borderColor }
       ]}
-      className="bg-white rounded-3xl overflow-hidden border border-slate-100"
+      className="bg-white rounded-3xl overflow-hidden border border-slate-200"
     >
       <View className="flex-row min-h-[140px]">
         {/* Content Left */}
