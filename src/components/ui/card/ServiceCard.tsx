@@ -1,46 +1,93 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
-import { ArrowRight } from '@/constants/icons';
+import React from 'react'
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  ImageSourcePropType
+} from 'react-native'
+import { ArrowRight } from 'lucide-react-native'
 
 type ServiceCardProps = {
-  title: string;
-  description: string;
-  image: any;
-  color: string;
-  imageStyle: string;
-  onPress?: () => void;
-};
+  title: string
+  description: string
+  image: ImageSourcePropType
+  badgeText?: string
+  badgeVariant?: 'active' | 'soon'
+  onPress?: () => void
+}
 
 export default function ServiceCard({
   title,
   description,
   image,
-  color,
-  imageStyle,
-  onPress,
+  badgeText = 'Disponível',
+  badgeVariant = 'active',
+  onPress
 }: ServiceCardProps) {
+  const badgeBg = badgeVariant === 'active' ? 'bg-primary-100' : 'bg-slate-100'
+  const badgeTextColor =
+    badgeVariant === 'active' ? 'text-primary-200' : 'text-slate-400'
+
+  const borderColor = badgeVariant === 'active' ? '#e0212d' : '#CBD5E1'
+
   return (
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.7}
-      className="bg-white border border-gray-200 flex-row items-center justify-center mt-6 rounded-3xl"
+      style={[
+        styles.shadow,
+        { borderLeftWidth: 3, borderLeftColor: borderColor }
+      ]}
+      className="bg-white rounded-3xl overflow-hidden border border-slate-100"
     >
-      <View className=" w-full flex-1 flex-col">
-        <View
-          className={`${color} w-full h-20 items-start justify-center rounded-tl-3xl rounded-br-3xl`}
-        >
-          <Image source={image} className={imageStyle} resizeMode="contain" />
+      <View className="flex-row min-h-[140px]">
+        {/* Content Left */}
+        <View className="flex-1 p-5 justify-between">
+          {/* Badge */}
+          <View className="flex-row">
+            <View className={`px-2.5 py-1 rounded-full ${badgeBg}`}>
+              <Text className={`text-xs font-semibold ${badgeTextColor}`}>
+                {badgeText}
+              </Text>
+            </View>
+          </View>
+
+          {/* Text */}
+          <View className="mt-3">
+            <Text className="text-lg font-bold text-slate-900 mb-1">
+              {title}
+            </Text>
+            <Text className="text-sm text-slate-500 leading-5">
+              {description}
+            </Text>
+          </View>
+
+          {/* CTA */}
+          <View className="flex-row items-center mt-3">
+            <Text className="text-sm font-semibold text-slate-900 mr-1">
+              Solicitar
+            </Text>
+            <ArrowRight size={14} color="#0F172A" />
+          </View>
         </View>
 
-        <View className="flex-1 h-20 flex justify-center p-4">
-          <Text className="text-lg font-semibold">{title}</Text>
-          <Text className="text-sm text-gray-500 mt-1">{description}</Text>
+        {/* Illustration Right */}
+        <View className="w-[130px] items-center justify-center">
+          <Image source={image} className="w-28 h-28" resizeMode="contain" />
         </View>
-      </View>
-
-      <View className="p-8">
-        <ArrowRight size={28} color="black" />
       </View>
     </TouchableOpacity>
-  );
+  )
 }
+
+const styles = StyleSheet.create({
+  shadow: {
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    elevation: 2
+  }
+})

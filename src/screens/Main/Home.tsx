@@ -13,7 +13,7 @@ import PromoBottomSheet from '@/components/ui/modal/PromoBottomSheet'
 import type { BannerData } from '@/components/ui/modal/PromoBottomSheet'
 import ServiceCard from '@/components/ui/card/ServiceCard'
 import HomeHeader from '@/components/HomeHeader'
-import { IndicatorIcon } from '@/constants/icons'
+
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { HomeStackParamList } from '@/types/navigation'
@@ -27,6 +27,7 @@ import { RideActiveCard } from '@/components/RideActiveCard'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useAppProvider } from '@/providers/AppProvider'
 import { useNetwork } from '@/hooks/useNetwork'
+import { IndicatorIcon } from '@/constants/icons'
 
 const services = [
   {
@@ -34,25 +35,17 @@ const services = [
     title: 'Entregas',
     description: 'Envie pacotes com facilidade e rapidez',
     image: require('@/assets/images/illustration/box.png'),
-    color: 'bg-primary-200',
-    imageStyle: 'w-[8rem] h-auto ml-12 mb-16'
+    badgeText: 'Disponível',
+    badgeVariant: 'active' as const
   },
   {
     id: '2',
     title: 'Piloto',
-    description: 'Viagens ágil em motas ',
+    description: 'Viagens ágeis em motas',
     image: require('@/assets/images/illustration/moto-boy.png'),
-    color: 'bg-gray-200',
-    imageStyle: 'w-[12rem] h-auto ml-10 mb-20'
+    badgeText: 'Em breve',
+    badgeVariant: 'soon' as const
   }
-  // {
-  //   id: '3',
-  //   title: 'Corrida',
-  //   description: 'Viagens rápidas e seguras de carro',
-  //   image: require('@/assets/images/illustration/car.png'),
-  //   color: 'bg-gray-200',
-  //   imageStyle: 'w-[13rem] h-44 ml-8 mb-[4rem]',
-  // },
 ]
 
 export default function HomeScreen() {
@@ -346,24 +339,30 @@ export default function HomeScreen() {
           </View>
         )}
 
-        {/* Localização atual */}
-        <View className="flex-row items-center px-10 mt-6">
-          <IndicatorIcon size={18} color="red" />
-          <Text className="font-semibold ml-2 text-lg text-gray-700">
-            Veja os nossos serviços
-          </Text>
+        {/* Seção de Serviços */}
+        <View className="flex-row items-start px-5 mt-6">
+          <View className="mt-1">
+            <IndicatorIcon size={18} color="red" />
+          </View>
+          <View className="ml-2">
+            <Text className="text-lg font-bold text-slate-900">
+              Nossos Serviços
+            </Text>
+            <Text className="text-sm text-slate-500 mb-4">
+              Escolha o que precisa
+            </Text>
+          </View>
         </View>
 
-        {/* Serviços */}
-        <View className="px-10 mt-8 mb-12 flex flex-col gap-8">
+        <View className="px-5 mb-12 gap-4">
           {services.map(item => (
             <ServiceCard
               key={item.id}
               title={item.title}
               description={item.description}
               image={item.image}
-              color={item.color}
-              imageStyle={item.imageStyle}
+              badgeText={item.badgeText}
+              badgeVariant={item.badgeVariant}
               onPress={
                 item.id === '1'
                   ? handlePressDelivery
