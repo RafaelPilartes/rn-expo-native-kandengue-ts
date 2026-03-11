@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef, useCallback, useState } from 'react'
 import {
   View,
   Text,
@@ -8,6 +8,9 @@ import {
   RefreshControl
 } from 'react-native'
 import { useAlert } from '@/context/AlertContext'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import PromoBottomSheet from '@/components/ui/modal/PromoBottomSheet'
+import type { BannerData } from '@/components/ui/modal/PromoBottomSheet'
 import ServiceCard from '@/components/ui/card/ServiceCard'
 import HomeHeader from '@/components/HomeHeader'
 import { IndicatorIcon } from '@/constants/icons'
@@ -65,33 +68,33 @@ export default function HomeScreen() {
     refreshUserRides
   } = useUserRides()
 
-  const banners = [
+  const promoSheetRef = useRef<BottomSheetModal>(null)
+  const [selectedBanner, setSelectedBanner] = useState<BannerData | null>(null)
+
+  const handleBannerPress = useCallback((banner: BannerData) => {
+    setSelectedBanner(banner)
+    setTimeout(() => promoSheetRef.current?.present(), 50)
+  }, [])
+
+  const banners: BannerData[] = [
     {
       id: '1',
       title: 'Entrega com Confiança',
       description:
         'Estafetas verificados, entrega segura e acompanhamento em tempo real.',
       image: require('@/assets/banner/banner1.png'),
-      action: () => {
-        showAlert(
-          'Entrega com Confiança',
-          'Os nossos estafetas são verificados e treinados para garantir entregas rápidas, seguras e rastreáveis em tempo real.',
-          'info'
-        )
-      }
+      details:
+        'Os nossos estafetas são verificados e treinados para garantir entregas rápidas, seguras e rastreáveis em tempo real. Acompanhe cada passo da sua encomenda diretamente pelo app.',
+      ctaLabel: 'Solicitar entrega'
     },
     {
       id: '2',
       title: 'Rápido & Seguro Sempre',
       description: 'Tempos médios de entrega entre 15–30 min na sua zona.',
       image: require('@/assets/banner/banner2.png'),
-      action: () => {
-        showAlert(
-          'Rápido & Seguro Sempre',
-          'Na sua área, o tempo médio de entrega varia entre 15 e 30 minutos, dependendo da distância e trânsito.',
-          'info'
-        )
-      }
+      details:
+        'Na sua área, o tempo médio de entrega varia entre 15 e 30 minutos, dependendo da distância e trânsito. Garantimos sempre a segurança do seu pacote.',
+      ctaLabel: 'Ver estimativa'
     }
   ]
 
@@ -298,11 +301,10 @@ export default function HomeScreen() {
           {banners.map(banner => (
             <TouchableOpacity
               key={banner.id}
-              onPress={banner.action}
+              onPress={() => handleBannerPress(banner)}
               activeOpacity={0.8}
             >
               <Image
-                key={banner.id}
                 source={banner.image}
                 className="w-72 h-36 mr-3 rounded-xl"
                 resizeMode="cover"
@@ -375,6 +377,9 @@ export default function HomeScreen() {
       </ScrollView>
 
       {/* Bottom Tabs já ficam no seu router principal */}
+
+      {/* Promo Bottom Sheet */}
+      <PromoBottomSheet ref={promoSheetRef} banner={selectedBanner} />
     </SafeAreaView>
   )
 }
