@@ -25,47 +25,47 @@ export default function NotificationsScreen() {
 
   // Mock data - substituir com dados reais
   const notifications: NotificationItem[] = [
-    {
-      id: 'n1',
-      title: 'Nova corrida concluída',
-      message:
-        'Sua viagem de carro foi finalizada com sucesso. Ganhos: AOA 2.500',
-      time: 'Há 5 min',
-      isRead: false,
-      type: 'ride'
-    },
-    {
-      id: 'n2',
-      title: 'Promoção disponível',
-      message: 'Ganhe 20% de bónus nas próximas 5 entregas hoje!',
-      time: 'Há 1 hora',
-      isRead: false,
-      type: 'promo'
-    },
-    {
-      id: 'n3',
-      title: 'Documento aprovado',
-      message: 'Sua carta de condução foi verificada e aprovada.',
-      time: 'Há 3 horas',
-      isRead: true,
-      type: 'system'
-    },
-    {
-      id: 'n4',
-      title: 'Atualização disponível',
-      message: 'Nova versão do app com melhorias de desempenho.',
-      time: 'Ontem',
-      isRead: true,
-      type: 'info'
-    },
-    {
-      id: 'n5',
-      title: 'Meta atingida! 🎉',
-      message: 'Você completou 50 corridas esta semana. Parabéns!',
-      time: '2 dias atrás',
-      isRead: true,
-      type: 'system'
-    }
+    // {
+    //   id: 'n1',
+    //   title: 'Nova corrida concluída',
+    //   message:
+    //     'Sua viagem de carro foi finalizada com sucesso. Ganhos: AOA 2.500',
+    //   time: 'Há 5 min',
+    //   isRead: false,
+    //   type: 'ride'
+    // },
+    // {
+    //   id: 'n2',
+    //   title: 'Promoção disponível',
+    //   message: 'Ganhe 20% de bónus nas próximas 5 entregas hoje!',
+    //   time: 'Há 1 hora',
+    //   isRead: false,
+    //   type: 'promo'
+    // },
+    // {
+    //   id: 'n3',
+    //   title: 'Documento aprovado',
+    //   message: 'Sua carta de condução foi verificada e aprovada.',
+    //   time: 'Há 3 horas',
+    //   isRead: true,
+    //   type: 'system'
+    // },
+    // {
+    //   id: 'n4',
+    //   title: 'Atualização disponível',
+    //   message: 'Nova versão do app com melhorias de desempenho.',
+    //   time: 'Ontem',
+    //   isRead: true,
+    //   type: 'info'
+    // },
+    // {
+    //   id: 'n5',
+    //   title: 'Meta atingida! 🎉',
+    //   message: 'Você completou 50 corridas esta semana. Parabéns!',
+    //   time: '2 dias atrás',
+    //   isRead: true,
+    //   type: 'system'
+    // }
   ]
 
   const getIconByType = (type: string) => {

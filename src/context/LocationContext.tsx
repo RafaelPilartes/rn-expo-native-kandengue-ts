@@ -238,20 +238,50 @@ export const LocationProvider: React.FC<{ children: ReactNode }> = ({
     }
 
     try {
-      console.log('📍 [LocationContext] Asking Expo for current position...')
-      // Add a simple timeout mechanism using Promise.race
-      const locationPromise = Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced
+      // 1) Fast path: try last known position (instant, no GPS needed)
+      const lastKnown = await Location.getLastKnownPositionAsync({
+        maxAge: 60000, // Accept positions up to 60s old
+        requiredAccuracy: 100 // Within 100m is good enough
       })
 
-      const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('Timeout getting location')), 10000)
-      )
+      if (lastKnown) {
+        console.log(
+          '⚡ [LocationContext] Using cached last known position:',
+          lastKnown.coords.latitude,
+          lastKnown.coords.longitude
+        )
+        const coords = {
+          latitude: lastKnown.coords.latitude,
+          longitude: lastKnown.coords.longitude
+        }
+        setLocation(coords)
+        fetchAddress(coords)
+        return coords
+      }
 
-      const pos = (await Promise.race([
-        locationPromise,
-        timeoutPromise
-      ])) as Location.LocationObject
+      // 2) No cache — get fresh position with Low accuracy (faster GPS fix)
+      console.log('📍 [LocationContext] No cached position, requesting fresh GPS fix...')
+
+      const getFreshPosition = async (
+        accuracy: Location.Accuracy,
+        timeoutMs: number
+      ): Promise<Location.LocationObject> => {
+        const locationPromise = Location.getCurrentPositionAsync({ accuracy })
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error(`Timeout (${timeoutMs}ms)`)), timeoutMs)
+        )
+        return Promise.race([locationPromise, timeoutPromise]) as Promise<Location.LocationObject>
+      }
+
+      let pos: Location.LocationObject
+
+      try {
+        pos = await getFreshPosition(Location.Accuracy.Low, 15000)
+      } catch {
+        // 3) Final fallback: Lowest accuracy with extended timeout
+        console.warn('⚠️ [LocationContext] Low accuracy timed out, trying Lowest...')
+        pos = await getFreshPosition(Location.Accuracy.Lowest, 20000)
+      }
 
       console.log(
         '✅ [LocationContext] Position obtained:',

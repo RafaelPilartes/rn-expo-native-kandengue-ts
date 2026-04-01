@@ -80,35 +80,71 @@ export const RideMapContainer: React.FC<Props> = ({
   const polylines = useMemo(() => {
     const list: Polyline[] = []
 
-    if (routeCoordsTemp.length > 0) {
-      list.push({
-        id: 'routeTemp',
-        coordinates: routeCoordsTemp,
-        color: '#10B981',
-        width: 4
-      })
+    // Stationary states: no routes, focus on markers
+    const stationaryStatuses: RideStatusType[] = [
+      'arrived_pickup',
+      'arrived_dropoff',
+      'completed',
+      'canceled'
+    ]
+
+    if (stationaryStatuses.includes(rideStatus)) {
+      return list
     }
 
-    if (routeCoords.length > 0) {
-      list.push({
-        id: 'route',
-        coordinates: routeCoords,
-        color: '#10B981',
-        width: 4
-      })
-    }
+    switch (rideStatus) {
+      // Preview: full route pickup → dropoff (light green)
+      case 'idle':
+      case 'pending': {
+        if (routeCoords.length > 0) {
+          list.push({
+            id: 'routePreview',
+            coordinates: routeCoords,
+            color: '#86EFAC',
+            width: 4
+          })
+        }
+        // Also show temp route if available (e.g. summary preview)
+        if (routeCoordsTemp.length > 0) {
+          list.push({
+            id: 'routeTemp',
+            coordinates: routeCoordsTemp,
+            color: '#86EFAC',
+            width: 4
+          })
+        }
+        break
+      }
 
-    if (routeCoordsDriver.length > 0) {
-      list.push({
-        id: 'routeDriver',
-        coordinates: routeCoordsDriver,
-        color: '#007AFF',
-        width: 5
-      })
+      // Driver heading to pickup (blue)
+      case 'driver_on_the_way': {
+        if (routeCoordsDriver.length > 0) {
+          list.push({
+            id: 'routeDriverToPickup',
+            coordinates: routeCoordsDriver,
+            color: '#3B82F6',
+            width: 5
+          })
+        }
+        break
+      }
+
+      // Driver heading to dropoff (green)
+      case 'picked_up': {
+        if (routeCoordsDriver.length > 0) {
+          list.push({
+            id: 'routeDriverToDropoff',
+            coordinates: routeCoordsDriver,
+            color: '#10B981',
+            width: 5
+          })
+        }
+        break
+      }
     }
 
     return list
-  }, [routeCoords, routeCoordsDriver, routeCoordsTemp])
+  }, [routeCoords, routeCoordsDriver, routeCoordsTemp, rideStatus])
 
   return (
     <MapView

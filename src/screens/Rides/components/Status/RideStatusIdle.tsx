@@ -239,7 +239,7 @@ export const RideStatusIdle: React.FC<RideStatusIdleProps> = ({
           {/* Rota */}
           <View className="bg-blue-50 p-3 rounded-lg">
             <Text className="text-gray-800 font-semibold text-sm mb-2">
-              📍 Rota da Entrega
+              Rota da Entrega
             </Text>
             <View className="gap-2">
               <View className="flex-row items-start">
@@ -260,24 +260,6 @@ export const RideStatusIdle: React.FC<RideStatusIdleProps> = ({
                   {dropoffDescription}
                 </Text>
               </View>
-            </View>
-          </View>
-
-          {/* Dicas */}
-          <View className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
-            <Text className="text-yellow-800 text-sm font-semibold mb-1">
-              💡 Prepare-se para a entrega:
-            </Text>
-            <View className="space-y-1">
-              <Text className="text-yellow-700 text-xs">
-                • Tenha o pacote pronto para recolha
-              </Text>
-              <Text className="text-yellow-700 text-xs">
-                • Esteja disponível no local
-              </Text>
-              <Text className="text-yellow-700 text-xs">
-                • Mantenha o telefone acessível
-              </Text>
             </View>
           </View>
 
@@ -319,8 +301,8 @@ export const RideStatusIdle: React.FC<RideStatusIdleProps> = ({
           {elapsedTime < 90
             ? '⏱️ Buscando o melhor entregador para você...'
             : elapsedTime < 150
-            ? '🔄 Ampliando a busca na sua região...'
-            : '📞 Poucos entregadores disponíveis. Pedimos paciência.'}
+              ? '🔄 Ampliando a busca na sua região...'
+              : '📞 Poucos entregadores disponíveis. Pedimos paciência.'}
         </Text>
       </View>
 

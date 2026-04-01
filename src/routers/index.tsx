@@ -54,17 +54,18 @@ export default function AppRouter() {
     const hasEmail = !!(user.email && user.email.length)
     const hasName = !!(user.name && user.name.length)
     const isActive = user.status ? user.status !== 'banned' : true
-    const isVerified = user.email_verified ?? true
+    // MUDANÇA TEMPORÁRIA: Permitir login sem verificação de email
+    const isVerified = true // user.email_verified ?? true
 
     if (!hasEmail || !hasName) {
       console.log('❌ Dados do user incompletos')
       return false
     }
 
-    if (!isVerified) {
-      console.log('❌ Email não verificado')
-      return false
-    }
+    // if (!isVerified) {
+    //   console.log('❌ Email não verificado')
+    //   return false
+    // }
 
     if (!isActive) {
       console.log('❌ User com status não ativo')
@@ -99,7 +100,7 @@ export default function AppRouter() {
           )
         }
 
-        const isValid = isUserValidForApp(currentUser) && !!isEmailVerified
+        const isValid = isUserValidForApp(currentUser) // && !!isEmailVerified
 
         if (isValid) {
           // sincroniza Zustand apenas se necessário

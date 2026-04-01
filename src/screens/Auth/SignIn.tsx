@@ -101,51 +101,50 @@ export default function LoginScreen() {
       console.log('✅ Login bem-sucedido para', user.email)
 
       // 2️⃣ Verificar se email foi validado
-      const isEmailVerified = await checkEmailVerification.mutateAsync()
+      // const isEmailVerified = await checkEmailVerification.mutateAsync()
 
-      if (!isEmailVerified) {
-        console.warn('⚠️ Email não verificado')
+      // if (!isEmailVerified) {
+      //   console.warn('⚠️ Email não verificado')
 
-        // Mostrar alerta mas permitir acesso
-        // Mostrar alerta mas permitir acesso
-        showAlert(
-          'Email não verificado',
-          'Seu email ainda não foi verificado. Verifique seu email e clique no link enviado para ativar sua conta.',
-          'warning',
-          [
-            {
-              text: 'Entendi',
-              onPress: () => {
-                // Navegar para a tela principal mesmo com email não verificado
-                navigation.replace(ROUTES.AuthStack.WELCOME)
-              }
-            },
-            {
-              text: 'Reenviar Verificação',
-              onPress: async () => {
-                try {
-                  await sendEmailVerification.mutateAsync()
-                  showAlert(
-                    'Verificação reenviada',
-                    `Um novo email foi enviado para ${email}.`,
-                    'success'
-                  )
-                } catch (err) {
-                  showAlert(
-                    'Erro',
-                    'Falha ao reenviar email de verificação.',
-                    'error'
-                  )
-                }
-              }
-            }
-          ]
-        )
+      //   // Mostrar alerta mas permitir acesso
+      //   showAlert(
+      //     'Email não verificado',
+      //     'Seu email ainda não foi verificado. Verifique seu email e clique no link enviado para ativar sua conta.',
+      //     'warning',
+      //     [
+      //       {
+      //         text: 'Entendi',
+      //         onPress: () => {
+      //           // Navegar para a tela principal mesmo com email não verificado
+      //           navigation.replace(ROUTES.AuthStack.WELCOME)
+      //         }
+      //       },
+      //       {
+      //         text: 'Reenviar Verificação',
+      //         onPress: async () => {
+      //           try {
+      //             await sendEmailVerification.mutateAsync()
+      //             showAlert(
+      //               'Verificação reenviada',
+      //               `Um novo email foi enviado para ${email}.`,
+      //               'success'
+      //             )
+      //           } catch (err) {
+      //             showAlert(
+      //               'Erro',
+      //               'Falha ao reenviar email de verificação.',
+      //               'error'
+      //             )
+      //           }
+      //         }
+      //       }
+      //     ]
+      //   )
 
-        // Faz logout até o email ser verificado
-        zustandLogout()
-        return
-      }
+      //   // Faz logout até o email ser verificado
+      //   zustandLogout()
+      //   return
+      // }
 
       // 3️⃣ Atualiza campo email_verified no Firestore
       try {

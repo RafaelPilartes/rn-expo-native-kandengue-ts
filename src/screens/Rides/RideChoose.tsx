@@ -12,7 +12,7 @@ import {
   ScrollView,
   TouchableWithoutFeedback
 } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import Animated, {
@@ -22,6 +22,7 @@ import Animated, {
 } from 'react-native-reanimated'
 import {
   Navigation,
+  Crosshair,
   ArrowLeft,
   User,
   Phone,
@@ -39,17 +40,23 @@ import { ArticleOptions } from '@/constants/article'
 import { useAlert } from '@/context/AlertContext'
 import { useNetwork } from '@/hooks/useNetwork'
 import { useLocation } from '@/context/LocationContext'
+import { getAddressFromCoords } from '@/services/google/googleApi'
 
 export default function RideChooseScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<HomeStackParamList>>()
+  const insets = useSafeAreaInsets()
 
-  const { location, isLoading, requestCurrentLocation, address } = useLocation()
+  const { requestCurrentLocation } = useLocation()
 
   const { isConnected } = useNetwork()
 
   const [pickup, setPickup] = useState<CustomPlace | null>(null)
   const [dropoff, setDropoff] = useState<CustomPlace | null>(null)
+
+  // Independent loading state for each location button
+  const [loadingPickupLocation, setLoadingPickupLocation] = useState(false)
+  const [loadingDropoffLocation, setLoadingDropoffLocation] = useState(false)
 
   // -- LOGIC FROM WORKING VERSION --
   const [showPickupList, setShowPickupList] = useState(false)
@@ -81,22 +88,52 @@ export default function RideChooseScreen() {
     }
   }, [dropoff])
 
-  const fetchCurrentLocation = async () => {
+  const fetchCurrentLocationFor = async (target: 'pickup' | 'dropoff') => {
+    const setLoading =
+      target === 'pickup' ? setLoadingPickupLocation : setLoadingDropoffLocation
+    const setter = target === 'pickup' ? setPickup : setDropoff
+    const ref = target === 'pickup' ? pickupRef : dropoffRef
+
+    setLoading(true)
     try {
-      await requestCurrentLocation()
-      if (location && address) {
-        const currentPlace: CustomPlace = {
-          description: address,
-          place_id: `current_location_${Date.now()}`,
-          name: 'Minha Localização',
-          latitude: location.latitude,
-          longitude: location.longitude
-        }
-        setPickup(currentPlace)
-        pickupRef.current?.setAddressText(address)
+      const coords = await requestCurrentLocation()
+      if (!coords) return
+
+      // Reverse geocode to get real place_id, name, and address
+      const result = await getAddressFromCoords(
+        coords.latitude,
+        coords.longitude
+      )
+
+      let description = `${coords.latitude}, ${coords.longitude}`
+      let placeId = `current_${target}_${Date.now()}`
+      let name = 'Minha Localização'
+
+      if (typeof result !== 'string') {
+        description = result.addr || description
+        placeId = result.placeId || placeId
+        name = result.district || result.shortAddr || name
+      }
+
+      const currentPlace: CustomPlace = {
+        description,
+        place_id: placeId,
+        name,
+        latitude: coords.latitude,
+        longitude: coords.longitude
+      }
+
+      setter(currentPlace)
+      ref.current?.setAddressText(currentPlace.description)
+
+      // Auto-focus next field if pickup
+      if (target === 'pickup') {
+        setTimeout(() => dropoffRef.current?.focus(), 300)
       }
     } catch (error) {
-      console.error('Erro ao obter localização atual:', error)
+      console.error(`Erro ao obter localização para ${target}:`, error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -167,7 +204,7 @@ export default function RideChooseScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50 py-safe">
+    <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
@@ -201,21 +238,39 @@ export default function RideChooseScreen() {
                     className="bg-white rounded-3xl p-5 shadow-sm shadow-gray-200 mb-6"
                     style={{ zIndex: 50 }} // Ensure list floats above
                   >
-                    <View className="flex-row">
-                      {/* Visual Route Line */}
-                      <View className="items-center mr-4 mt-4">
-                        <View className="w-3 h-3 rounded-full bg-green-500 ring-4 ring-green-100" />
-                        <View className="w-[2px] h-12 bg-gray-200 my-1" />
-                        <View className="w-3 h-3 bg-red-500 rounded-sm ring-4 ring-red-100" />
-                      </View>
+                    <View className="flex-col">
+                      {/* Pickup Row */}
+                      <View
+                        className="flex-row relative"
+                        style={{ zIndex: 100 }}
+                      >
+                        <View className="items-center mr-4 mt-8 w-4 relative z-10">
+                          <View className="w-4 h-4 rounded-full bg-white border-4 border-green-500 shadow-sm" />
+                        </View>
+                        {/* Connecting Line */}
+                        <View className="absolute top-[44px] left-[7px] w-[2px] bg-gray-200 z-0 bottom-0" />
 
-                      {/* Inputs Container */}
-                      <View className="flex-1 gap-4">
-                        {/* Pickup Input */}
-                        <View className="relative" style={{ zIndex: 100 }}>
-                          <Text className="text-xs font-medium text-gray-400 mb-1 ml-1">
-                            DE ONDE?
-                          </Text>
+                        <View className="flex-1 pb-4">
+                          {/* Pickup Input */}
+                          <View className="flex-row items-center justify-between mb-1 ml-1 mr-1">
+                            <Text className="text-xs font-medium text-gray-400">
+                              DE ONDE?
+                            </Text>
+                            <TouchableOpacity
+                              onPress={() => fetchCurrentLocationFor('pickup')}
+                              disabled={loadingPickupLocation}
+                              className="flex-row items-center px-2 py-1 rounded-lg bg-green-50 active:bg-green-100"
+                            >
+                              {loadingPickupLocation ? (
+                                <ActivityIndicator size={12} color="#10b981" />
+                              ) : (
+                                <Crosshair size={12} color="#10b981" />
+                              )}
+                              <Text className="text-[11px] font-semibold text-green-600 ml-1">
+                                Minha localização
+                              </Text>
+                            </TouchableOpacity>
+                          </View>
                           <View
                             className={`bg-gray-50 rounded-xl border ${activeInput === 'pickup' ? 'border-green-500 bg-white' : 'border-gray-100'}`}
                           >
@@ -254,30 +309,40 @@ export default function RideChooseScreen() {
                               listViewDisplayed={showPickupList}
                               onTimeout={() => setShowPickupList(false)}
                             />
-                            {/* Current Location Quick Action */}
-                            {!pickup && activeInput === 'pickup' && (
-                              <TouchableOpacity
-                                onPress={fetchCurrentLocation}
-                                className="absolute right-3 top-3"
-                              >
-                                {isLoading ? (
-                                  <ActivityIndicator
-                                    size="small"
-                                    color="#10b981"
-                                  />
-                                ) : (
-                                  <Navigation size={18} color="#10b981" />
-                                )}
-                              </TouchableOpacity>
-                            )}
                           </View>
                         </View>
+                      </View>
 
-                        {/* Dropoff Input */}
-                        <View className="relative" style={{ zIndex: 90 }}>
-                          <Text className="text-xs font-medium text-gray-400 mb-1 ml-1">
-                            PARA ONDE?
-                          </Text>
+                      {/* Dropoff Row */}
+                      <View
+                        className="flex-row relative"
+                        style={{ zIndex: 90 }}
+                      >
+                        <View className="items-center mr-4 mt-8 w-4 relative z-10">
+                          <View className="w-4 h-4 rounded-sm bg-white border-4 border-red-500 shadow-sm" />
+                        </View>
+
+                        <View className="flex-1">
+                          {/* Dropoff Input */}
+                          <View className="flex-row items-center justify-between mb-1 ml-1 mr-1">
+                            <Text className="text-xs font-medium text-gray-400">
+                              PARA ONDE?
+                            </Text>
+                            <TouchableOpacity
+                              onPress={() => fetchCurrentLocationFor('dropoff')}
+                              disabled={loadingDropoffLocation}
+                              className="flex-row items-center px-2 py-1 rounded-lg bg-red-50 active:bg-red-100"
+                            >
+                              {loadingDropoffLocation ? (
+                                <ActivityIndicator size={12} color="#ef4444" />
+                              ) : (
+                                <Crosshair size={12} color="#ef4444" />
+                              )}
+                              <Text className="text-[11px] font-semibold text-red-500 ml-1">
+                                Minha localização
+                              </Text>
+                            </TouchableOpacity>
+                          </View>
                           <View
                             className={`bg-gray-50 rounded-xl border ${activeInput === 'dropoff' ? 'border-red-500 bg-white' : 'border-gray-100'}`}
                           >
@@ -397,7 +462,7 @@ export default function RideChooseScreen() {
                             ))}
                           </ScrollView>
 
-                          <View className="flex-row items-start bg-gray-50 rounded-xl px-4 py-3 border border-gray-100 h-24">
+                          <View className="flex-row bg-gray-50 rounded-xl px-4 py-3 border border-gray-100 h-24">
                             <FileText
                               size={18}
                               color="#9ca3af"
@@ -408,9 +473,9 @@ export default function RideChooseScreen() {
                               value={description}
                               onChangeText={setDescription}
                               multiline
-                              className="flex-1 text-gray-800 font-medium leading-5"
+                              className="flex-1 text-gray-800 font-medium p-0 m-0"
+                              style={{ paddingTop: 0, paddingBottom: 0, textAlignVertical: 'top', height: '100%' }}
                               placeholderTextColor="#9ca3af"
-                              textAlignVertical="top"
                               onFocus={() => {
                                 setTimeout(() => {
                                   flatListRef.current?.scrollToEnd({
@@ -433,8 +498,11 @@ export default function RideChooseScreen() {
         {/* Floating Confirm Bar */}
         <Animated.View
           entering={SlideInDown.duration(400)}
-          className="absolute bottom-0 left-0 right-0 bg-white px-5 pt-4 pb-8 border-t border-gray-100 rounded-t-3xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]"
-          style={{ elevation: 10 }}
+          className="absolute bottom-0 left-0 right-0 bg-white px-5 pt-4 border-t border-gray-100 rounded-t-3xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]"
+          style={{
+            elevation: 10,
+            paddingBottom: Math.max(insets.bottom + 16, 28)
+          }}
         >
           <TouchableOpacity
             onPress={handleConfirm}

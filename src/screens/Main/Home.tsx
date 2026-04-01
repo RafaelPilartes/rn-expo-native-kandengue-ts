@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback, useState } from 'react'
+import React, { useRef, useCallback, useState } from 'react'
 import {
   View,
   Text,
@@ -18,7 +18,6 @@ import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { HomeStackParamList } from '@/types/navigation'
 import ROUTES from '@/constants/routes'
-import { useAuthStore } from '@/storage/store/useAuthStore'
 import { useLocation } from '@/hooks/useLocation'
 import { Clock, MapPin, Navigation, RefreshCw } from 'lucide-react-native'
 import { useUserRides } from '@/hooks/useUserRides'
@@ -69,6 +68,20 @@ export default function HomeScreen() {
     setTimeout(() => promoSheetRef.current?.present(), 50)
   }, [])
 
+  const handleBannerCta = useCallback(
+    (action: string) => {
+      promoSheetRef.current?.dismiss()
+
+      // Small delay to let the bottom sheet close gracefully before navigating
+      setTimeout(() => {
+        if (action === 'delivery' || action === 'estimate') {
+          handlePressDelivery()
+        }
+      }, 300)
+    },
+    [promoSheetRef]
+  )
+
   const banners: BannerData[] = [
     {
       id: '1',
@@ -78,7 +91,8 @@ export default function HomeScreen() {
       image: require('@/assets/banner/banner1.png'),
       details:
         'Os nossos estafetas são verificados e treinados para garantir entregas rápidas, seguras e rastreáveis em tempo real. Acompanhe cada passo da sua encomenda diretamente pelo app.',
-      ctaLabel: 'Solicitar entrega'
+      ctaLabel: 'Solicitar entrega',
+      onCtaPress: () => handleBannerCta('delivery')
     },
     {
       id: '2',
@@ -87,7 +101,8 @@ export default function HomeScreen() {
       image: require('@/assets/banner/banner2.png'),
       details:
         'Na sua área, o tempo médio de entrega varia entre 15 e 30 minutos, dependendo da distância e trânsito. Garantimos sempre a segurança do seu pacote.',
-      ctaLabel: 'Ver estimativa'
+      ctaLabel: 'Ver estimativa',
+      onCtaPress: () => handleBannerCta('estimate')
     }
   ]
 
@@ -202,7 +217,6 @@ export default function HomeScreen() {
         }
         contentContainerStyle={{ paddingBottom: 42 }}
       >
-
         {/* Seção de Localização */}
         <View className="mx-5 px-4 py-3 bg-white rounded-2xl border border-gray-200">
           <View className="flex-row items-start justify-between">

@@ -168,7 +168,7 @@ export default function RideSummaryScreen() {
             type: article.type,
             description: article.description || '', // Ensure string
             quantity: 1,
-            size: 'medium' as const
+            size: 'medio' as const
           },
           receiver: {
             name: receiver.name,
@@ -216,6 +216,9 @@ export default function RideSummaryScreen() {
   // Cancel Ride Callback
   const handleCancelRide = useCallback(
     async (reason: string) => {
+      // Close modal immediately
+      setShowCancelModal(false)
+
       if (!isConnected) {
         showAlert(
           'Atenção',
@@ -232,18 +235,17 @@ export default function RideSummaryScreen() {
         }
 
         await handleCanceledRide(reason)
-        setShowCancelModal(false)
 
         // Navegar de volta
         setTimeout(() => {
           if (navigation.canGoBack()) navigation.goBack()
-        }, 2000)
+        }, 1500)
       } catch (error: any) {
         console.error('❌ Erro ao cancelar corrida:', error)
         showAlert('Erro', error.message || 'Falha ao cancelar corrida', 'error')
       }
     },
-    [rideId, handleCanceledRide, navigation, showAlert]
+    [rideId, handleCanceledRide, navigation, showAlert, isConnected]
   )
 
   // CONTROLAR BOTTOM SHEET
@@ -315,35 +317,6 @@ export default function RideSummaryScreen() {
     }
   }, [rideStatus, rideId])
 
-  // ATUALIZAR REGIÃO DO MAPA BASEADO NO STATUS
-  useEffect(() => {
-    if (!rideId) return
-    if (!mapRef.current || !currentRide?.driver?.location) return
-
-    let targetLocation = location.pickup
-
-    if (rideStatus === 'picked_up' || rideStatus === 'arrived_dropoff') {
-      targetLocation = location.dropoff
-    }
-
-    if (rideStatus === 'driver_on_the_way' || rideStatus === 'arrived_pickup') {
-      targetLocation = currentRide?.driver?.location
-    }
-
-    if (targetLocation) {
-      mapRef.current?.animateToRegion({
-        coordinates: {
-          latitude: targetLocation.latitude,
-          longitude: targetLocation.longitude
-        },
-        latitudeDelta: 0.02,
-        longitudeDelta: 0.02,
-        zoom: 14
-      })
-    }
-
-    // Moved vibration log to separate effect
-  }, [rideStatus, location, currentRide?.driver?.location, rideId])
 
   // Memoize Map Props
   const pickupProp = useMemo(
@@ -388,6 +361,39 @@ export default function RideSummaryScreen() {
         : undefined,
     [ridePath, currentRide?.driver, markerHeading]
   )
+
+  // ATUALIZAR REGIÃO DO MAPA BASEADO NO STATUS
+  useEffect(() => {
+    if (!rideId || !mapRef.current) return
+
+    let targetLocation: { latitude: number; longitude: number } | undefined
+
+    switch (rideStatus) {
+      case 'picked_up':
+      case 'arrived_dropoff':
+        targetLocation = location.dropoff
+        break
+
+      case 'driver_on_the_way':
+      case 'arrived_pickup':
+        targetLocation = driverLoc ?? location.pickup
+        break
+
+      default:
+        targetLocation = location.pickup
+        break
+    }
+
+    if (targetLocation) {
+      mapRef.current?.setCameraPosition?.({
+        coordinates: {
+          latitude: targetLocation.latitude,
+          longitude: targetLocation.longitude
+        },
+        zoom: 14
+      })
+    }
+  }, [rideStatus, location, driverLoc, rideId])
 
   const mapLocationProp = useMemo(
     () => ({

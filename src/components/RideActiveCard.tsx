@@ -1,16 +1,16 @@
-import { RideInterface } from '@/interfaces/IRide';
-import { formatDistance } from '@/utils/formatDistance';
-import { formatMoney } from '@/utils/formattedNumber';
-import { Clock, Package, User } from 'lucide-react-native';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { RideInterface } from '@/interfaces/IRide'
+import { formatDistance } from '@/utils/formatDistance'
+import { formatMoney } from '@/utils/formattedNumber'
+import { Clock, Package, User } from 'lucide-react-native'
+import { Text, TouchableOpacity, View } from 'react-native'
 
 // 🔥 COMPONENTE: Card de Corrida Ativa
 export const RideActiveCard = ({
   ride,
-  onPress,
+  onPress
 }: {
-  ride: RideInterface;
-  onPress: (ride: RideInterface) => void;
+  ride: RideInterface
+  onPress: (ride: RideInterface) => void
 }) => {
   const getStatusInfo = () => {
     switch (ride.status) {
@@ -18,46 +18,46 @@ export const RideActiveCard = ({
         return {
           label: 'Procurando estafeta',
           color: 'bg-gray-100',
-          textColor: 'text-gray-700',
-        };
+          textColor: 'text-gray-700'
+        }
       case 'driver_on_the_way':
         return {
           label: 'Motorista a caminho',
           color: 'bg-blue-100',
-          textColor: 'text-blue-700',
-        };
+          textColor: 'text-blue-700'
+        }
       case 'arrived_pickup':
         return {
           label: 'No local de recolha',
           color: 'bg-green-100',
-          textColor: 'text-green-700',
-        };
+          textColor: 'text-green-700'
+        }
       case 'picked_up':
         return {
           label: 'Em entrega',
           color: 'bg-orange-100',
-          textColor: 'text-orange-700',
-        };
+          textColor: 'text-orange-700'
+        }
       case 'arrived_dropoff':
         return {
           label: 'Chegou ao destino',
           color: 'bg-purple-100',
-          textColor: 'text-purple-700',
-        };
+          textColor: 'text-purple-700'
+        }
       default:
         return {
           label: 'Em andamento',
           color: 'bg-gray-100',
-          textColor: 'text-gray-700',
-        };
+          textColor: 'text-gray-700'
+        }
     }
-  };
+  }
 
-  const statusInfo = getStatusInfo();
+  const statusInfo = getStatusInfo()
 
   return (
     <TouchableOpacity
-      className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 mb-3"
+      className="bg-white rounded-2xl border border-gray-200 p-4 mb-3"
       onPress={() => onPress(ride)}
       activeOpacity={0.7}
     >
@@ -116,5 +116,5 @@ export const RideActiveCard = ({
         )}
       </View>
     </TouchableOpacity>
-  );
-};
+  )
+}

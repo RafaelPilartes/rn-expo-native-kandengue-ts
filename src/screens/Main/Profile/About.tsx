@@ -66,10 +66,10 @@ export default function AboutScreen() {
   }
 
   const stats = [
-    { icon: Users, value: '1.5K+', label: 'Usuários Ativos' },
-    { icon: MapPin, value: '5+', label: 'Cidades' },
+    { icon: Users, value: '1k+', label: 'Usuários Ativos' },
+    { icon: MapPin, value: '5+', label: 'Provincias' },
     { icon: Star, value: '4.8', label: 'Avaliação' },
-    { icon: Award, value: '99%', label: 'Entregas no Prazo' }
+    { icon: Award, value: '97%', label: 'Entregas no Prazo' }
   ]
 
   const features = [

@@ -1,17 +1,17 @@
-import { RideInterface } from '@/interfaces/IRide';
-import { formatFullDate } from '@/utils/formatDate';
-import { formatMoney } from '@/utils/formattedNumber';
-import { View, Image, Text, TouchableOpacity } from 'react-native';
+import { RideInterface } from '@/interfaces/IRide'
+import { formatFullDate } from '@/utils/formatDate'
+import { formatMoney } from '@/utils/formattedNumber'
+import { View, Image, Text, TouchableOpacity } from 'react-native'
 
 // Componente de Card de Corrida
 interface RideCardProps {
-  ride: RideInterface;
-  onPressDetails: () => void;
+  ride: RideInterface
+  onPressDetails: () => void
 }
 
 const RideCard: React.FC<RideCardProps> = ({ ride, onPressDetails }) => {
   return (
-    <View className="bg-white p-4 rounded-2xl mb-2 shadow-sm border border-gray-100">
+    <View className="bg-white p-4 rounded-2xl mb-2 border border-gray-100">
       {/* Header do pedido */}
       <View className="flex-row items-center justify-between mb-3">
         <View className="flex-row items-center">
@@ -19,7 +19,7 @@ const RideCard: React.FC<RideCardProps> = ({ ride, onPressDetails }) => {
             source={{
               uri:
                 ride.user?.photo ??
-                'https://cdn-icons-png.freepik.com/512/7718/7718888.png',
+                'https://cdn-icons-png.freepik.com/512/7718/7718888.png'
             }}
             className="w-10 h-10 rounded-full mr-3"
           />
@@ -98,7 +98,7 @@ const RideCard: React.FC<RideCardProps> = ({ ride, onPressDetails }) => {
         </TouchableOpacity>
       </View>
     </View>
-  );
-};
+  )
+}
 
-export default RideCard;
+export default RideCard
