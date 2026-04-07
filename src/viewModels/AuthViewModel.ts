@@ -75,6 +75,18 @@ export function useAuthViewModel() {
     },
   });
 
+  // MUTATION: Deletar Conta
+  const deleteAccountMutation = useMutation({
+    mutationFn: (userId: string) => authUseCase.deleteAccount(userId),
+    onSuccess: () => {
+      clearAuth();
+      queryClient.clear(); // limpa tudo
+    },
+    onError: (error: Error) => {
+      console.error('Erro ao deletar conta:', error);
+    },
+  });
+
   // MUTATION: Recuperação de senha
   const forgotPasswordMutation = useMutation({
     mutationFn: (email: string) => authUseCase.forgotPassword(email),
@@ -116,6 +128,7 @@ export function useAuthViewModel() {
     register: registerMutation,
     login: loginMutation,
     logout: logoutMutation,
+    deleteAccount: deleteAccountMutation,
     forgotPassword: forgotPasswordMutation,
 
     // Mutations para email

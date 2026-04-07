@@ -23,6 +23,7 @@ export interface IAuthRepository {
   login(credentials: LoginCredentials): Promise<AuthResponse>;
   register(userData: RegisterData): Promise<AuthResponse>;
   logout(): Promise<void>;
+  deleteAccount(userId: string): Promise<void>;
 
   // Estado da autenticação
   getCurrentUser(): Promise<UserInterface | null>;

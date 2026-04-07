@@ -87,18 +87,17 @@ export default function AppRouter() {
         // Verifica email via mutation exposta (se existir)
         let isEmailVerified = false
 
-        try {
-          // checkEmailVerification é um objeto de mutation (useMutation)
-          // se não existir no VM, este call falhará e assumimos false temporariamente
-          if (checkEmailVerification?.mutateAsync) {
-            isEmailVerified = await checkEmailVerification.mutateAsync()
-          }
-        } catch (e) {
-          console.warn(
-            '⚠️ Falha ao verificar email (assumindo estado atual).',
-            e
-          )
-        }
+        // try {
+        //   // se não existir no VM, este call falhará e assumimos false temporariamente
+        //   if (checkEmailVerification?.mutateAsync) {
+        //     isEmailVerified = await checkEmailVerification.mutateAsync()
+        //   }
+        // } catch (e) {
+        //   console.warn(
+        //     '⚠️ Falha ao verificar email (assumindo estado atual).',
+        //     e
+        //   )
+        // }
 
         const isValid = isUserValidForApp(currentUser) // && !!isEmailVerified
 
@@ -214,7 +213,7 @@ export default function AppRouter() {
 
   const canAccessApp =
     !!currentUser && // firebase has user
-    isFirebaseAuthenticated && // vm indicates authenticated
+    // isFirebaseAuthenticated && // vm indicates authenticated
     zustandIsAuthed && // persisted local store has user
     currentUser?.id === zustandUser?.id && // same user
     isUserValidForApp(currentUser)

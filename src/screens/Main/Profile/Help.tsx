@@ -1,13 +1,7 @@
 // src/screens/Help.tsx
 import React, { useState } from 'react'
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Linking,
-  Alert
-} from 'react-native'
+import { View, Text, ScrollView, TouchableOpacity, Linking } from 'react-native'
+import { useAlert } from '@/context/AlertContext'
 import {
   MessageCircle,
   Phone,
@@ -19,7 +13,7 @@ import {
   MapPin,
   Shield
 } from 'lucide-react-native'
-import { useNavigation } from '@react-navigation/native'
+// import { useNavigation } from '@react-navigation/native'
 import {
   EMAIL_SUPPORT,
   VOICE_NUMBER,
@@ -28,7 +22,8 @@ import {
 import { PageHeader } from '@/components/PageHeader'
 
 export default function HelpScreen() {
-  const navigation = useNavigation<any>()
+  // const navigation = useNavigation<any>()
+  const { showAlert } = useAlert()
   const [expandedFAQ, setExpandedFAQ] = useState<string | null>(null)
 
   const toggleFAQ = (id: string) => {
@@ -37,7 +32,7 @@ export default function HelpScreen() {
 
   const handleCall = () => {
     Linking.openURL(`tel:${VOICE_NUMBER}`).catch(() =>
-      Alert.alert('Erro', 'Não foi possível iniciar a chamada.')
+      showAlert('Erro', 'Não foi possível iniciar a chamada.', 'error')
     )
   }
 
@@ -45,13 +40,15 @@ export default function HelpScreen() {
     // Ideally format number to international format without spaces/dashes
     Linking.openURL(
       `https://wa.me/244${WHATSAPP_NUMBER.replace(/\s/g, '')}`
-    ).catch(() => Alert.alert('Erro', 'Não foi possível abrir o WhatsApp.'))
+    ).catch(() =>
+      showAlert('Erro', 'Não foi possível abrir o WhatsApp.', 'error')
+    )
   }
 
   const handleEmail = () => {
     Linking.openURL(
       `mailto:${EMAIL_SUPPORT}?subject=Suporte - Kandengue Atrevido`
-    ).catch(() => Alert.alert('Erro', 'Não foi possível abrir o email.'))
+    ).catch(() => showAlert('Erro', 'Não foi possível abrir o email.', 'error'))
   }
 
   const faqCategories = [

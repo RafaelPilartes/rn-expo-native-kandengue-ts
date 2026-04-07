@@ -173,6 +173,32 @@ export class FirebaseAuthDAO implements IAuthRepository {
     }
   }
 
+  async deleteAccount(userId: string): Promise<void> {
+    try {
+      const currentUser = this.auth.currentUser;
+      if (!currentUser) {
+        throw new Error('Usuário não autenticado');
+      }
+
+      // ATUALIZAR: Mudar o status do usuário para deleted no Firestore
+      await updateDoc(doc(db, this.usersRef, userId), {
+        status: 'deleted',
+        updated_at: new Date(),
+      });
+
+      // DELETAR: Remover irrevogavelmente o acesso do Firebase Auth
+      await currentUser.delete();
+      
+      console.log('✅ Conta excluída com sucesso');
+    } catch (error: any) {
+      console.error('❌ Erro ao deletar conta:', error);
+      if (error?.code === 'auth/requires-recent-login') {
+        throw new Error('É necessário efetuar o login novamente por motivos de segurança. Por favor, saia e entre de novo antes de excluir a conta.');
+      }
+      throw new Error(mapFirebaseError(error));
+    }
+  }
+
   // GET CURRENT DRIVER - Buscar por Firebase UID ou email
   async getCurrentUser(): Promise<UserEntity | null> {
     try {

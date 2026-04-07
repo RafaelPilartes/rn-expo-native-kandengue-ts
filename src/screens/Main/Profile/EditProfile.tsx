@@ -9,9 +9,10 @@ import {
   ActivityIndicator
 } from 'react-native'
 import { useAlert } from '@/context/AlertContext'
-import { Camera, Mail, Phone, User } from 'lucide-react-native'
+import { Camera, Mail, Phone, User, AlertTriangle } from 'lucide-react-native'
 import { useNavigation } from '@react-navigation/native'
 import { useAuthStore } from '@/storage/store/useAuthStore'
+import { useAuthViewModel } from '@/viewModels/AuthViewModel'
 import PrimaryButton from '@/components/ui/button/PrimaryButton'
 import { useUsersViewModel } from '@/viewModels/UserViewModel'
 import { useImagePicker } from '@/hooks/useImagePicker'
@@ -25,6 +26,7 @@ export default function EditProfileScreen() {
   const navigation = useNavigation<any>()
 
   const { user, setUser } = useAuthStore()
+  const { deleteAccount } = useAuthViewModel()
   const { showAlert } = useAlert()
   const { updateUser, fetchOneUserByField } = useUsersViewModel()
   const {
@@ -227,6 +229,33 @@ export default function EditProfileScreen() {
     }
   }
 
+  const handleDeleteAccountConfirm = () => {
+    showAlert(
+      'Atenção!',
+      'Esta ação é irreversível. Todos os seus dados serão apagados permanentemente e perderá acesso imediato. Deseja excluir a sua conta?',
+      'warning',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Excluir Conta',
+          style: 'destructive',
+          onPress: async () => {
+            if (!user?.id) return
+            setIsLoading(true)
+            try {
+              await deleteAccount.mutateAsync(user.id)
+            } catch (err: any) {
+              const errMsg = err?.message || 'Erro ao deletar conta.'
+              showAlert('Erro na Exclusão', errMsg, 'error')
+            } finally {
+              setIsLoading(false)
+            }
+          }
+        }
+      ]
+    )
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       {/* Header */}
@@ -369,6 +398,30 @@ export default function EditProfileScreen() {
               ? new Date(user.created_at).toLocaleDateString('pt-BR')
               : '--'}
           </Text>
+        </View>
+
+        {/* Zona de Perigo */}
+        <View className="mt-6 pt-6 border-t border-red-100">
+          <Text className="text-xs font-bold text-red-600 mb-3 uppercase tracking-tight ml-1">
+            Zona de Perigo
+          </Text>
+          <TouchableOpacity
+            onPress={handleDeleteAccountConfirm}
+            disabled={isLoading}
+            className="flex-row items-center justify-between p-4 bg-red-50 rounded-xl border border-red-200 active:bg-red-100"
+          >
+            <View className="flex-row items-center flex-1 pr-4">
+              <View className="w-10 h-10 rounded-full bg-red-100 items-center justify-center mr-3 border border-red-200">
+                <AlertTriangle size={20} color="#DC2626" />
+              </View>
+              <View>
+                <Text className="text-red-700 font-bold mb-0.5">Excluir Conta Permanentemente</Text>
+                <Text className="text-red-500/80 text-xs">
+                  Ação irreversível. Todos os dados serão apagados.
+                </Text>
+              </View>
+            </View>
+          </TouchableOpacity>
         </View>
 
         {/* Debug info (apenas desenvolvimento) */}

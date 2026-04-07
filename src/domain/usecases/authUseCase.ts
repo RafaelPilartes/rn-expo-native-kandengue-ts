@@ -61,6 +61,20 @@ export class AuthUseCase {
     }
   }
 
+  // Deletar Conta
+  async deleteAccount(userId: string): Promise<void> {
+    try {
+      if (!userId?.trim()) {
+        throw new Error('ID de usuário inválido');
+      }
+      console.log('UseCase: Deletando conta do usuário:', userId);
+      await this.repository.deleteAccount(userId);
+    } catch (error: any) {
+      console.error('Erro no caso de uso de deletar conta:', error);
+      throw new Error(error.message || 'Erro ao deletar conta');
+    }
+  }
+
   // Enviar verificação por email
   async sendEmailVerification(): Promise<void> {
     try {

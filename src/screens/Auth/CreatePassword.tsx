@@ -237,7 +237,7 @@ export default function CreatePasswordScreen({ route }: CreatePasswordProps) {
           </View>
 
           {/* Informações importantes */}
-          <View className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          {/* <View className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <Text className="text-blue-800 text-sm font-medium mb-1">
               📧 Verificação por Email
             </Text>
@@ -245,7 +245,7 @@ export default function CreatePasswordScreen({ route }: CreatePasswordProps) {
               Após criar sua conta, enviaremos um email de verificação para{' '}
               {email}. Clique no link do email para ativar sua conta.
             </Text>
-          </View>
+          </View> */}
 
           <PrimaryButton
             className="mt-6"
