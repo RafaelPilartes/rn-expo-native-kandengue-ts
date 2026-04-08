@@ -70,7 +70,7 @@ export default function RideHomeScreen() {
 
   // UI principal
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <View className="flex-1 bg-white">
       {/* Top bar */}
       <View className="absolute top-safe left-0 right-0 z-10">
         <AddressDisplay
@@ -95,7 +95,7 @@ export default function RideHomeScreen() {
       />
 
       {/* Bottom input-like box */}
-      <View className="absolute bottom-0 left-0 right-0 pb-safe">
+      <View className="absolute bottom-0 left-0 right-0">
         <View className="flex-row items-center justify-between m-4">
           <View className="flex-row items-center">
             <BackButton className="bg-white mr-3" iconColor="black" />
@@ -108,20 +108,20 @@ export default function RideHomeScreen() {
           />
         </View>
 
-        <View className="bg-white p-6 rounded-t-3xl shadow-lg">
+        <View className="bg-white p-6 rounded-t-3xl pb-safe">
           <Text className="text-lg font-bold mb-3">
             Onde levaremos a sua encomenda?
           </Text>
           <TouchableOpacity
             // disabled={!location}
             onPress={() => navigation.navigate(ROUTES.Rides.CHOOSE)}
-            className="flex-row items-center bg-gray-100 rounded-xl px-4 py-4"
+            className="flex-row items-center bg-gray-100 rounded-xl px-4 py-4 mb-2  "
           >
             <Package size={22} color="gray" />
             <Text className="ml-3 text-gray-500">Procure um destino</Text>
           </TouchableOpacity>
         </View>
       </View>
-    </SafeAreaView>
+    </View>
   )
 }

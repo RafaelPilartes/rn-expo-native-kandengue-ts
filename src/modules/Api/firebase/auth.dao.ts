@@ -8,7 +8,7 @@ import {
   sendEmailVerification,
   reload,
   getIdToken
-} from '@react-native-firebase/auth';
+} from '@react-native-firebase/auth'
 import {
   doc,
   setDoc,
@@ -17,43 +17,54 @@ import {
   query,
   where,
   collection,
-  getDocs,
-} from '@react-native-firebase/firestore';
-import { db, auth } from '@/config/firebase.config';
+  getDocs
+} from '@react-native-firebase/firestore'
+import { db, auth } from '@/config/firebase.config'
 import type {
   IAuthRepository,
   LoginCredentials,
   RegisterData,
-  AuthResponse,
-} from '@/core/interfaces/IAuthRepository';
-import { UserEntity } from '@/core/entities/User';
-import { firebaseCollections } from '@/constants/firebaseCollections';
-import type { UserStatus } from '@/types/enum';
-import { UserInterface } from '@/interfaces/IUser';
-import { convertFirestoreTimestamp } from '@/utils/formatDate';
-import { generateId } from '@/helpers/generateId';
-import { mapFirebaseError } from '@/helpers/mapFirebaseError';
+  AuthResponse
+} from '@/core/interfaces/IAuthRepository'
+import { UserEntity } from '@/core/entities/User'
+import { firebaseCollections } from '@/constants/firebaseCollections'
+import type { UserStatus } from '@/types/enum'
+import { UserInterface } from '@/interfaces/IUser'
+import { convertFirestoreTimestamp } from '@/utils/formatDate'
+import { generateId } from '@/helpers/generateId'
+import { mapFirebaseError } from '@/helpers/mapFirebaseError'
 
 export class FirebaseAuthDAO implements IAuthRepository {
-  private auth = auth;
-  private usersRef = firebaseCollections.users.root;
+  private auth = auth
+  private usersRef = firebaseCollections.users.root
 
   // REGISTRO - Usando ID próprio em vez do UID
   async register(userData: RegisterData): Promise<AuthResponse> {
     try {
-      console.log('Iniciando registro para:', userData.email);
+      console.log('Iniciando registro para:', userData.email)
 
       // 1. Criar usuário no Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(
         this.auth,
         userData.email,
-        userData.password,
-      );
+        userData.password
+      )
 
-      const firebaseUser = userCredential.user;
+      const firebaseUser = userCredential.user
+
+      // VERIFICAR: Se já existe usuario com este email
+      const usersQuery = query(
+        collection(db, this.usersRef),
+        where('email', '==', firebaseUser.email?.toLowerCase())
+      )
+      const userSnapshot = await getDocs(usersQuery)
+
+      if (!userSnapshot.empty) {
+        throw new Error('Perfil do usuario ja cadastrado')
+      }
 
       // GERAR: ID próprio (não usar UID do Firebase)
-      const userId: string = generateId('user');
+      const userId: string = generateId('user')
 
       // 2. Criar perfil do usuário no Firestore com ID próprio
       const userEntity = new UserEntity({
@@ -64,40 +75,40 @@ export class FirebaseAuthDAO implements IAuthRepository {
         email_verified: false,
         phone_verified: false,
         created_at: new Date(),
-        firebase_uid: firebaseUser.uid,
-      });
+        firebase_uid: firebaseUser.uid
+      })
 
       // Validar dados
-      const validation = userEntity.validate();
+      const validation = userEntity.validate()
       if (!validation.isValid) {
-        await firebaseUser.delete();
-        throw new Error(validation.errors.join(', '));
+        await firebaseUser.delete()
+        throw new Error(validation.errors.join(', '))
       }
 
       // SALVAR: No Firestore usando o ID próprio
       await setDoc(
         doc(db, this.usersRef, userId),
-        this.sanitizeUserForFirestore(userEntity),
-      );
+        this.sanitizeUserForFirestore(userEntity)
+      )
 
       // 3. Atualizar perfil no Firebase Auth
       await updateProfile(firebaseUser, {
-        displayName: userData.name,
-      });
+        displayName: userData.name
+      })
 
       // 4. Enviar verificação por email
-      await this.sendEmailVerification();
+      await this.sendEmailVerification()
 
-      console.log('✅ Email de verificação enviado para:', userData.email);
-      console.log('✅ User criado com ID:', userId);
+      console.log('✅ Email de verificação enviado para:', userData.email)
+      console.log('✅ User criado com ID:', userId)
 
       return {
         user: userEntity,
-        token: await getIdToken(firebaseUser),
-      };
+        token: await getIdToken(firebaseUser)
+      }
     } catch (error: any) {
-      console.error('Erro no registro:', error);
-      throw new Error(mapFirebaseError(error));
+      console.error('Erro no registro:', error)
+      throw new Error(mapFirebaseError(error))
     }
   }
 
@@ -107,25 +118,25 @@ export class FirebaseAuthDAO implements IAuthRepository {
       const userCredential = await signInWithEmailAndPassword(
         this.auth,
         credentials.email,
-        credentials.password,
-      );
+        credentials.password
+      )
 
-      const firebaseUser = userCredential.user;
+      const firebaseUser = userCredential.user
 
       // BUSCAR: User pelo email (não pelo UID)
       const usersQuery = query(
         collection(db, this.usersRef),
-        where('email', '==', firebaseUser.email?.toLowerCase()),
-      );
-      const userSnapshot = await getDocs(usersQuery);
+        where('email', '==', firebaseUser.email?.toLowerCase())
+      )
+      const userSnapshot = await getDocs(usersQuery)
 
       if (userSnapshot.empty) {
-        throw new Error('Perfil do usuario não encontrado');
+        throw new Error('Perfil do usuario não encontrado')
       }
 
       // Pegar o primeiro documento (deve ser único por email)
-      const userDoc = userSnapshot.docs[0];
-      const userData = userDoc.data() as UserInterface;
+      const userDoc = userSnapshot.docs[0]
+      const userData = userDoc.data() as UserInterface
 
       // Criar entidade
       const userEntity = new UserEntity({
@@ -143,109 +154,111 @@ export class FirebaseAuthDAO implements IAuthRepository {
         created_at:
           convertFirestoreTimestamp(userData.created_at) || new Date(),
         updated_at: convertFirestoreTimestamp(userData.updated_at),
-        last_login: new Date(),
-      });
+        last_login: new Date()
+      })
 
       // ATUALIZAR: Usando nosso ID próprio
       await updateDoc(doc(db, this.usersRef, userDoc.id), {
         last_login: new Date(),
         updated_at: new Date(),
-        firebase_uid: firebaseUser.uid, // GARANTIR que tem a referência
-      });
+        firebase_uid: firebaseUser.uid // GARANTIR que tem a referência
+      })
 
       return {
         user: userEntity,
-        token: await getIdToken(firebaseUser),
-      };
+        token: await getIdToken(firebaseUser)
+      }
     } catch (error: any) {
-      console.error('Erro no login:', error);
-      throw new Error(mapFirebaseError(error));
+      console.error('Erro no login:', error)
+      throw new Error(mapFirebaseError(error))
     }
   }
 
   async logout(): Promise<void> {
     try {
-      await signOut(this.auth);
-      console.log('Logout realizado com sucesso');
+      await signOut(this.auth)
+      console.log('Logout realizado com sucesso')
     } catch (error: any) {
-      console.error('Erro no logout:', error);
-      throw new Error('Erro ao sair');
+      console.error('Erro no logout:', error)
+      throw new Error('Erro ao sair')
     }
   }
 
   async deleteAccount(userId: string): Promise<void> {
     try {
-      const currentUser = this.auth.currentUser;
+      const currentUser = this.auth.currentUser
       if (!currentUser) {
-        throw new Error('Usuário não autenticado');
+        throw new Error('Usuário não autenticado')
       }
 
       // ATUALIZAR: Mudar o status do usuário para deleted no Firestore
       await updateDoc(doc(db, this.usersRef, userId), {
         status: 'deleted',
-        updated_at: new Date(),
-      });
+        updated_at: new Date()
+      })
 
       // DELETAR: Remover irrevogavelmente o acesso do Firebase Auth
-      await currentUser.delete();
-      
-      console.log('✅ Conta excluída com sucesso');
+      await currentUser.delete()
+
+      console.log('✅ Conta excluída com sucesso')
     } catch (error: any) {
-      console.error('❌ Erro ao deletar conta:', error);
+      console.error('❌ Erro ao deletar conta:', error)
       if (error?.code === 'auth/requires-recent-login') {
-        throw new Error('É necessário efetuar o login novamente por motivos de segurança. Por favor, saia e entre de novo antes de excluir a conta.');
+        throw new Error(
+          'É necessário efetuar o login novamente por motivos de segurança. Por favor, saia e entre de novo antes de excluir a conta.'
+        )
       }
-      throw new Error(mapFirebaseError(error));
+      throw new Error(mapFirebaseError(error))
     }
   }
 
   // GET CURRENT DRIVER - Buscar por Firebase UID ou email
   async getCurrentUser(): Promise<UserEntity | null> {
     try {
-      const firebaseUser = this.auth.currentUser;
+      const firebaseUser = this.auth.currentUser
 
       if (!firebaseUser) {
-        return null;
+        return null
       }
 
-      let userDoc: any = null;
+      let userDoc: any = null
 
       // TENTAR 1: Buscar por firebase_uid
       const uidQuery = query(
         collection(db, this.usersRef),
-        where('firebase_uid', '==', firebaseUser.uid),
-      );
-      const uidSnapshot = await getDocs(uidQuery);
+        where('firebase_uid', '==', firebaseUser.uid)
+      )
+      const uidSnapshot = await getDocs(uidQuery)
 
       if (!uidSnapshot.empty) {
-        userDoc = uidSnapshot.docs[0];
+        userDoc = uidSnapshot.docs[0]
       } else {
         // TENTAR 2: Buscar por email (fallback)
         const emailQuery = query(
           collection(db, this.usersRef),
-          where('email', '==', firebaseUser.email?.toLowerCase()),
-        );
-        const emailSnapshot = await getDocs(emailQuery);
+          where('email', '==', firebaseUser.email?.toLowerCase())
+        )
+        const emailSnapshot = await getDocs(emailQuery)
 
         if (!emailSnapshot.empty) {
-          userDoc = emailSnapshot.docs[0];
+          userDoc = emailSnapshot.docs[0]
 
           // ATUALIZAR: Adicionar firebase_uid se não tiver
           if (!userDoc.data().firebase_uid) {
             await updateDoc(doc(db, this.usersRef, userDoc.id), {
               firebase_uid: firebaseUser.uid,
-              updated_at: new Date(),
-            });
+              updated_at: new Date()
+            })
           }
         }
       }
 
       if (!userDoc) {
-        console.warn('Nenhum user encontrado para o usuário atual');
-        return null;
+        console.warn('Nenhum user encontrado para o usuário atual')
+        return null
       }
 
-      const userData = userDoc.data() as UserInterface;
+      const userData = userDoc.data() as UserInterface
 
       return new UserEntity({
         id: userDoc.id, // USAR ID do documento
@@ -263,124 +276,124 @@ export class FirebaseAuthDAO implements IAuthRepository {
         created_at:
           convertFirestoreTimestamp(userData.created_at) || new Date(),
         updated_at: convertFirestoreTimestamp(userData.updated_at),
-        last_login: convertFirestoreTimestamp(userData.last_login),
-      });
+        last_login: convertFirestoreTimestamp(userData.last_login)
+      })
     } catch (error) {
-      console.error('Erro ao buscar usuario atual:', error);
-      return null;
+      console.error('Erro ao buscar usuario atual:', error)
+      return null
     }
   }
   async isAuthenticated(): Promise<boolean> {
     try {
-      const user = this.auth.currentUser;
-      return !!user;
+      const user = this.auth.currentUser
+      return !!user
     } catch (error) {
-      console.error('Erro ao verificar autenticação:', error);
-      return false;
+      console.error('Erro ao verificar autenticação:', error)
+      return false
     }
   }
 
   async forgotPassword(email: string): Promise<void> {
     try {
-      await sendPasswordResetEmail(this.auth, email);
-      console.log('Email de recuperação enviado para:', email);
+      await sendPasswordResetEmail(this.auth, email)
+      console.log('Email de recuperação enviado para:', email)
     } catch (error: any) {
-      console.error('Erro ao enviar email de recuperação:', error);
-      throw new Error(mapFirebaseError(error));
+      console.error('Erro ao enviar email de recuperação:', error)
+      throw new Error(mapFirebaseError(error))
     }
   }
 
   async resetPassword(token: string, newPassword: string): Promise<void> {
-    throw new Error('Método não implementado - use o link do email');
+    throw new Error('Método não implementado - use o link do email')
   }
 
   // Enviar verificação por email
   async sendEmailVerification(): Promise<void> {
     try {
-      const currentUser = this.auth.currentUser;
+      const currentUser = this.auth.currentUser
 
       if (!currentUser) {
-        throw new Error('Usuário não autenticado');
+        throw new Error('Usuário não autenticado')
       }
 
       if (currentUser.emailVerified) {
-        console.log('Email já verificado');
-        return;
+        console.log('Email já verificado')
+        return
       }
 
-      console.log('Enviando verificação por email para:', currentUser.email);
-      await sendEmailVerification(currentUser);
+      console.log('Enviando verificação por email para:', currentUser.email)
+      await sendEmailVerification(currentUser)
 
-      console.log('✅ Email de verificação enviado com sucesso');
+      console.log('✅ Email de verificação enviado com sucesso')
     } catch (error: any) {
-      console.error('❌ Erro ao enviar verificação por email:', error);
-      throw new Error(mapFirebaseError(error));
+      console.error('❌ Erro ao enviar verificação por email:', error)
+      throw new Error(mapFirebaseError(error))
     }
   }
 
   // Verificar se email foi confirmado
   async checkEmailVerification(): Promise<boolean> {
     try {
-      const currentUser = this.auth.currentUser;
+      const currentUser = this.auth.currentUser
 
       if (!currentUser) {
-        throw new Error('Usuário não autenticado');
+        throw new Error('Usuário não autenticado')
       }
 
-      await this.reloadUser();
-      return currentUser.emailVerified;
+      await this.reloadUser()
+      return currentUser.emailVerified
     } catch (error: any) {
-      console.error('Erro ao verificar email:', error);
-      return false;
+      console.error('Erro ao verificar email:', error)
+      return false
     }
   }
 
   // Recarregar dados do usuário
   async reloadUser(): Promise<void> {
     try {
-      const currentUser = this.auth.currentUser;
+      const currentUser = this.auth.currentUser
 
       if (!currentUser) {
-        return;
+        return
       }
 
-      await reload(currentUser);
-      console.log('✅ Dados do usuário recarregados');
+      await reload(currentUser)
+      console.log('✅ Dados do usuário recarregados')
     } catch (error: any) {
-      console.error('❌ Erro ao recarregar usuário:', error);
-      throw new Error('Erro ao atualizar dados do usuário');
+      console.error('❌ Erro ao recarregar usuário:', error)
+      throw new Error('Erro ao atualizar dados do usuário')
     }
   }
 
   // UTILITÁRIO: Buscar user por ID próprio
   async getUserById(userId: string): Promise<UserEntity | null> {
     try {
-      const userDoc = await getDoc(doc(db, this.usersRef, userId));
+      const userDoc = await getDoc(doc(db, this.usersRef, userId))
 
       if (!userDoc.exists()) {
-        return null;
+        return null
       }
 
-      const userData = userDoc.data() as UserInterface;
+      const userData = userDoc.data() as UserInterface
 
       return new UserEntity({
         id: userDoc.id,
         ...userData,
         created_at: convertFirestoreTimestamp(userData.created_at),
         updated_at: convertFirestoreTimestamp(userData.updated_at),
-        last_login: convertFirestoreTimestamp(userData.last_login),
-      });
+        last_login: convertFirestoreTimestamp(userData.last_login)
+      })
     } catch (error) {
-      console.error('Erro ao buscar user por ID:', error);
-      return null;
+      console.error('Erro ao buscar user por ID:', error)
+      return null
     }
   }
 
   private sanitizeUserForFirestore(user: UserEntity): any {
-    const sanitized: any = { ...user };
-    delete sanitized.password;
+    const sanitized: any = { ...user }
+    delete sanitized.password
     return Object.fromEntries(
-      Object.entries(sanitized).filter(([_, v]) => v !== undefined),
-    );
+      Object.entries(sanitized).filter(([_, v]) => v !== undefined)
+    )
   }
 }
