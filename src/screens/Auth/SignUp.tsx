@@ -99,7 +99,7 @@ export default function SignUpScreen() {
 
   return (
     <KeyboardAvoidingView
-      className="flex-1 bg-white p-safe"
+      className="flex-1 bg-white"
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0} // ajusta se tiver header
     >
@@ -154,7 +154,7 @@ export default function SignUpScreen() {
                 placeholder={`${t('auth:input_email_placeholder')}`}
                 value={formData.email}
                 onChangeText={(text: any) =>
-                  setFormData({ ...formData, email: text })
+                  setFormData({ ...formData, email: text.toLowerCase().trim() })
                 }
                 keyboardType="email-address"
                 autoCapitalize="none"

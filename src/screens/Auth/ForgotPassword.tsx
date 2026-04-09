@@ -1,46 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'
 import {
   View,
   Text,
   TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
-  ScrollView,
-} from 'react-native';
-import { Mail } from 'lucide-react-native';
-import PrimaryButton from '@/components/ui/button/PrimaryButton';
-import LineGradient from '@/components/LineGradient';
-import { InputField } from '@/components/ui/input/InputField';
-import { AuthStackParamList } from '@/types/navigation';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import ROUTES from '@/constants/routes';
-import { BackButton } from '@/components/ui/button/BackButton';
-import { useTranslation } from 'react-i18next';
+  ScrollView
+} from 'react-native'
+import { Mail } from 'lucide-react-native'
+import PrimaryButton from '@/components/ui/button/PrimaryButton'
+import LineGradient from '@/components/LineGradient'
+import { InputField } from '@/components/ui/input/InputField'
+import { AuthStackParamList } from '@/types/navigation'
+import { useNavigation } from '@react-navigation/native'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import ROUTES from '@/constants/routes'
+import { BackButton } from '@/components/ui/button/BackButton'
+import { useTranslation } from 'react-i18next'
 
 export default function ForgotPasswordScreen() {
   const navigation =
-    useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
-  const { t } = useTranslation(['auth', 'common']);
+    useNavigation<NativeStackNavigationProp<AuthStackParamList>>()
+  const { t } = useTranslation(['auth', 'common'])
 
   const navigateTo = (to: any) => {
-    navigation.navigate(to);
-  };
+    navigation.navigate(to)
+  }
 
-  const [email, setEmail] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState('')
+  const [error, setError] = useState('')
 
   const handleRecover = () => {
     if (!email) {
-      setError(`${t('auth:validate_email_required')}`);
-      return;
+      setError(`${t('auth:validate_email_required')}`)
+      return
     }
     if (!/\S+@\S+\.\S+/.test(email)) {
-      setError(`${t('auth:validate_email_invalid')}`);
-      return;
+      setError(`${t('auth:validate_email_invalid')}`)
+      return
     }
-    navigateTo(ROUTES.AuthStack.FORGOT_PASSWORD_SUCCESS);
-  };
+    navigateTo(ROUTES.AuthStack.FORGOT_PASSWORD_SUCCESS)
+  }
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -48,7 +48,7 @@ export default function ForgotPasswordScreen() {
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-1 bg-white p-container">
+        <View className="flex-1 bg-white">
           <View className="absolute top-10 left-6 z-10">
             <BackButton />
           </View>
@@ -110,5 +110,5 @@ export default function ForgotPasswordScreen() {
         </View>
       </ScrollView>
     </TouchableWithoutFeedback>
-  );
+  )
 }

@@ -187,7 +187,7 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView
-      className="flex-1 bg-white p-safe"
+      className="flex-1 bg-white"
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0} // ajusta se tiver header
     >
@@ -225,7 +225,7 @@ export default function LoginScreen() {
                 }
                 placeholder={`${t('auth:input_email_placeholder')}`}
                 value={email}
-                onChangeText={text => setEmail(text.toLowerCase())} // Converter para minúsculo
+                onChangeText={text => setEmail(text.toLowerCase().trim())}
                 keyboardType="email-address"
                 autoComplete="email"
                 autoCapitalize="none"

@@ -100,7 +100,7 @@ export default function ForgotPasswordScreen() {
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-1 bg-white p-container">
+        <View className="flex-1 bg-white">
           <View className="absolute top-10 left-6 z-10">
             <BackButton />
           </View>

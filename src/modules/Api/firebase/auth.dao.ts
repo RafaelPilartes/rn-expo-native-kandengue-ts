@@ -46,8 +46,8 @@ export class FirebaseAuthDAO implements IAuthRepository {
       // 1. Criar usuário no Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(
         this.auth,
-        userData.email,
-        userData.password
+        userData.email.toLowerCase().trim(),
+        userData.password.trim() //
       )
 
       const firebaseUser = userCredential.user
@@ -55,7 +55,8 @@ export class FirebaseAuthDAO implements IAuthRepository {
       // VERIFICAR: Se já existe usuario com este email
       const usersQuery = query(
         collection(db, this.usersRef),
-        where('email', '==', firebaseUser.email?.toLowerCase())
+        where('email', '==', firebaseUser.email?.toLowerCase()),
+        where('status', '!=', 'deleted')
       )
       const userSnapshot = await getDocs(usersQuery)
 
@@ -126,7 +127,8 @@ export class FirebaseAuthDAO implements IAuthRepository {
       // BUSCAR: User pelo email (não pelo UID)
       const usersQuery = query(
         collection(db, this.usersRef),
-        where('email', '==', firebaseUser.email?.toLowerCase())
+        where('email', '==', firebaseUser.email?.toLowerCase()),
+        where('status', '!=', 'deleted')
       )
       const userSnapshot = await getDocs(usersQuery)
 
