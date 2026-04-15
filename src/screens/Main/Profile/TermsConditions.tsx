@@ -17,6 +17,11 @@ import {
 import { useNavigation } from '@react-navigation/native'
 import { PageHeader } from '@/components/PageHeader'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { contentTermsConditions } from '@/data/appContent'
+
+const IconMap: Record<string, any> = {
+  FileText, Shield, CreditCard, User, MapPin, AlertTriangle, CheckCircle
+}
 
 export default function TermsConditionsScreen() {
   const navigation = useNavigation<any>()
@@ -43,134 +48,7 @@ export default function TermsConditionsScreen() {
     )
   }
 
-  const termsSections = [
-    {
-      id: 'acceptance',
-      icon: CheckCircle,
-      title: '1. Aceitação dos Termos',
-      content: `Ao utilizar o aplicativo Kandengue Atrevido, você concorda com estes Termos e Condições. Se não concordar com qualquer parte destes termos, não utilize nossos serviços.
 
-• Idade mínima: 18 anos
-• Capacidade legal para celebrar contratos
-• Aceitação integral dos termos aqui descritos`
-    },
-    {
-      id: 'services',
-      icon: MapPin,
-      title: '2. Serviços Prestados',
-      content: `O Kandengue Atrevido é uma plataforma que conecta:
-      
-• Passageiros a motoristas particulares
-• Clientes a serviços de entrega
-• Usuários a prestadores de serviços logísticos
-
-NÃO SOMOS: prestadores diretos de serviços de transporte, empregadores de motoristas ou responsáveis diretos pelas entregas.`
-    },
-    {
-      id: 'registration',
-      icon: User,
-      title: '3. Cadastro e Conta',
-      content: `Para usar nossos serviços, você precisa:
-
-• Fornecer informações verdadeiras e atualizadas
-• Manter a segurança da sua conta
-• Não compartilhar credenciais de login
-• Ser responsável por todas as atividades na sua conta
-
-Podemos suspender contas que:
-• Violarem estes termos
-• Apresentarem comportamento fraudulento
-• Comprometerem a segurança da plataforma`
-    },
-    {
-      id: 'payments',
-      icon: CreditCard,
-      title: '4. Pagamentos e Tarifas',
-      content: `• Os valores das corridas são calculados com base em distância, tempo e demanda
-• Aceitamos: dinheiro, cartão de crédito/débito, carteira digital
-• Taxas de serviço: 15% sobre o valor da corrida
-• Fundo de garantia: 5% para proteção de disputas
-• Pagamentos são processados de forma segura
-• Reembolsos: analisados caso a caso dentro de 7 dias úteis`
-    },
-    {
-      id: 'responsibilities',
-      icon: Shield,
-      title: '5. Responsabilidades',
-      content: `DO USUÁRIO:
-• Verificar informações antes de confirmar
-• Tratar motoristas/entregadores com respeito
-• Pagar pelos serviços utilizados
-• Comunicar problemas imediatamente
-
-DA PLATAFORMA:
-• Manter o app funcionando
-• Processar pagamentos com segurança
-• Mediar disputas entre usuários
-• Proteger dados pessoais`
-    },
-    {
-      id: 'prohibited',
-      icon: AlertTriangle,
-      title: '6. Condutas Proibidas',
-      content: `É expressamente proibido:
-
-• Transportar itens ilegais ou perigosos
-• Assediar outros usuários
-• Tentar burlar o sistema de pagamento
-• Usar o app para atividades criminosas
-• Danificar propriedade de terceiros
-• Fornecer informações falsas
-
-Violações resultam em suspensão permanente.`
-    },
-    {
-      id: 'liability',
-      icon: FileText,
-      title: '7. Limitação de Responsabilidade',
-      content: `NÃO NOS RESPONSABILIZAMOS POR:
-
-• Atrasos causados por trânsito ou fatores externos
-• Comportamento de motoristas/entregadores
-• Itens esquecidos em veículos
-• Danos a objetos frágeis durante transporte
-• Problemas técnicos momentâneos
-
-NOSSA RESPONSABILIDADE MÁXIMA: valor da corrida em questão.`
-    },
-    {
-      id: 'privacy',
-      icon: Shield,
-      title: '8. Privacidade e Dados',
-      content: `• Coletamos dados necessários para o serviço
-• Usamos localização apenas durante o uso ativo
-• Compartilhamos dados apenas com motoristas/entregadores envolvidos
-• Mantemos dados por período legalmente exigido
-• Você pode solicitar exclusão de dados a qualquer momento
-
-Consulte nossa Política de Privacidade completa.`
-    },
-    {
-      id: 'modifications',
-      icon: FileText,
-      title: '9. Modificações dos Termos',
-      content: `• Podemos atualizar estes termos periodicamente
-• Notificaremos sobre mudanças significativas
-• Uso continuado após mudanças significa aceitação
-• Versão atual: 2.1 (Janeiro 2024)
-• Histórico de alterações disponível no site`
-    },
-    {
-      id: 'jurisdiction',
-      icon: MapPin,
-      title: '10. Lei Aplicável e Foro',
-      content: `• Lei aplicável: Legislação Angolana
-• Foro eleito: Comarca de Luanda
-• Disputas: Tentativa de mediação antes de ação judicial
-• Idioma oficial: Português
-• Vigência: Imediata após publicação`
-    }
-  ]
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
@@ -193,17 +71,17 @@ Consulte nossa Política de Privacidade completa.`
             Eles constituem um contrato legal entre você e o Kandengue Atrevido.
           </Text>
 
-          <View className="bg-yellow-50 p-3 rounded-lg mt-4">
-            <Text className="text-yellow-800 text-sm text-center">
-              ⚠️ Última atualização: 15 de Janeiro de 2024
+          <View className="bg-gray-100 p-3 rounded-lg mt-4">
+            <Text className="text-gray-800 text-sm text-center">
+              Última atualização: Abril de 2026
             </Text>
           </View>
         </View>
 
         {/* Seções dos Termos */}
         <View className="px-6 mt-6">
-          {termsSections.map(section => {
-            const IconComponent = section.icon
+          {contentTermsConditions.map(section => {
+            const IconComponent = IconMap[section.iconName] || FileText
             const isExpanded = isSectionExpanded(section.id)
 
             return (
@@ -243,11 +121,11 @@ Consulte nossa Política de Privacidade completa.`
 
         {/* Aceitação */}
         <View className="px-6 mt-6">
-          <View className="bg-green-50 rounded-2xl p-5">
-            <Text className="text-green-800 font-semibold text-center mb-2">
-              ✅ Ao usar nosso aplicativo, você concorda com todos estes termos.
+          <View className="bg-gray-100 rounded-2xl p-5">
+            <Text className="text-gray-800 font-semibold text-center mb-2">
+              Ao usar nosso aplicativo, você concorda com todos estes termos.
             </Text>
-            <Text className="text-green-700 text-sm text-center">
+            <Text className="text-gray-700 text-sm text-center">
               Se tiver dúvidas, entre em contato com nosso departamento
               jurídico.
             </Text>

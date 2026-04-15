@@ -23,6 +23,7 @@ import {
   LAST_UPDATE,
   SITE_URL
 } from '@/constants/config'
+import { contentAbout } from '@/data/appContent'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function AboutScreen() {
@@ -152,17 +153,8 @@ export default function AboutScreen() {
 
             {expandedSection === 'story' && (
               <View className="mt-4">
-                <Text className="text-gray-700 leading-6 mb-3">
-                  Fundado em 2023, o{' '}
-                  <Text className="font-bold">Kandengue Atrevido</Text> nasceu
-                  da necessidade de conectar pessoas a serviços de transporte e
-                  entregas de forma rápida, segura e acessível em Angola.
-                </Text>
                 <Text className="text-gray-700 leading-6">
-                  Começamos como uma pequena startup em Luanda e hoje estamos
-                  presentes em múltiplas cidades, sempre com o compromisso de
-                  oferecer o melhor serviço aos nossos clientes e oportunidades
-                  de renda para os nossos motoristas.
+                  {contentAbout.history}
                 </Text>
               </View>
             )}
@@ -189,10 +181,7 @@ export default function AboutScreen() {
             {expandedSection === 'mission' && (
               <View className="mt-4">
                 <Text className="text-gray-700 leading-6 mb-4">
-                  Facilitar a mobilidade urbana e revolucionar o setor de
-                  entregas em Angola, oferecendo serviços de qualidade a
-                  qualquer hora e lugar, enquanto criamos oportunidades
-                  económicas sustentáveis.
+                  {contentAbout.mission}
                 </Text>
 
                 <View className="gap-3">
@@ -212,6 +201,65 @@ export default function AboutScreen() {
                       </View>
                     )
                   })}
+                </View>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
+
+        {/* Nossa Visão */}
+        <View className="px-6 mt-4">
+          <TouchableOpacity
+            className="bg-white rounded-2xl p-6"
+            onPress={() => toggleSection('vision')}
+          >
+            <View className="flex-row justify-between items-center">
+              <Text className="text-xl font-bold text-gray-900">
+                Nossa Visão
+              </Text>
+              <ChevronRight
+                size={20}
+                color="#6B7280"
+                className={expandedSection === 'vision' ? 'rotate-90' : ''}
+              />
+            </View>
+
+            {expandedSection === 'vision' && (
+              <View className="mt-4">
+                <Text className="text-gray-700 leading-6">
+                  {contentAbout.vision}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
+
+        {/* Nossos Valores e Slogan */}
+        <View className="px-6 mt-4">
+          <TouchableOpacity
+            className="bg-white rounded-2xl p-6"
+            onPress={() => toggleSection('values')}
+          >
+            <View className="flex-row justify-between items-center">
+              <Text className="text-xl font-bold text-gray-900">
+                Nossos Valores
+              </Text>
+              <ChevronRight
+                size={20}
+                color="#6B7280"
+                className={expandedSection === 'values' ? 'rotate-90' : ''}
+              />
+            </View>
+
+            {expandedSection === 'values' && (
+              <View className="mt-4">
+                <Text className="text-gray-700 leading-6 mb-4">
+                  {contentAbout.values}
+                </Text>
+                <View className="bg-primary-50 p-4 rounded-xl">
+                  <Text className="text-primary-800 font-bold text-center italic">
+                    "{contentAbout.slogan}"
+                  </Text>
                 </View>
               </View>
             )}
@@ -305,7 +353,7 @@ export default function AboutScreen() {
               onPress={handleOpenDev}
             >
               <Text className="text-gray-500 text-center text-sm">
-                👨‍💻 Desenvolvido por Rafael Pilartes
+                Desenvolvido por Rafael Pilartes
               </Text>
             </TouchableOpacity>
           </View>

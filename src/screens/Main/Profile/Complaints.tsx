@@ -48,7 +48,6 @@ export default function ComplaintsScreen() {
   // Tipos de reclamação baseados na interface
   const complaintTypes: Array<{ id: ComplaintType; label: string; icon: any }> =
     [
-      { id: 'service_quality', label: 'Qualidade do Serviço', icon: Package },
       {
         id: 'driver_behavior',
         label: 'Comportamento do Motorista',
@@ -69,6 +68,7 @@ export default function ComplaintsScreen() {
         label: 'Preocupação com Segurança',
         icon: AlertTriangle
       },
+      { id: 'service_quality', label: 'Qualidade do Serviço', icon: Package },
       { id: 'other', label: 'Outro', icon: MapPin }
     ]
 
@@ -76,22 +76,30 @@ export default function ComplaintsScreen() {
   const priorities: Array<{
     id: ComplaintPriority
     label: string
-    color: string
+    activeBgClass: string
+    activeBorderClass: string
+    activeTextClass: string
   }> = [
     {
       id: 'low',
       label: 'Baixa',
-      color: 'bg-green-100 text-green-800 green-300'
+      activeBgClass: 'bg-green-50',
+      activeBorderClass: 'border-green-400',
+      activeTextClass: 'text-green-800'
     },
     {
       id: 'medium',
       label: 'Média',
-      color: 'bg-yellow-100 text-yellow-800 yellow-300'
+      activeBgClass: 'bg-yellow-50',
+      activeBorderClass: 'border-yellow-400',
+      activeTextClass: 'text-yellow-800'
     },
     {
       id: 'high',
       label: 'Alta',
-      color: 'bg-orange-100 text-orange-800 orange-300'
+      activeBgClass: 'bg-orange-50',
+      activeBorderClass: 'border-orange-400',
+      activeTextClass: 'text-orange-800'
     }
   ]
 
@@ -318,19 +326,15 @@ export default function ComplaintsScreen() {
                   onPress={() => handlePrioritySelect(priority.id)}
                 >
                   <View
-                    className={`rounded-xl p-3 border ${
+                    className={`rounded-xl p-3 border border-1 ${
                       isSelected
-                        ? `${priority.color.split(' ')[0]} border-${
-                            priority.color.split(' ')[2]
-                          }`
+                        ? `${priority.activeBgClass} ${priority.activeBorderClass}`
                         : 'bg-white border-gray-200'
                     }`}
                   >
                     <Text
                       className={`text-center font-medium ${
-                        isSelected
-                          ? priority.color.split(' ')[1]
-                          : 'text-gray-700'
+                        isSelected ? priority.activeTextClass : 'text-gray-700'
                       }`}
                     >
                       {priority.label}
@@ -381,14 +385,14 @@ export default function ComplaintsScreen() {
 
         {/* Informações de Tempo de Resolução */}
         {formData.type && formData.priority && (
-          <View className="mb-6 bg-green-50 rounded-2xl p-4">
+          <View className="mb-6 bg-gray-100 rounded-2xl p-4 border border-gray-200">
             <View className="flex-row items-center">
-              <Clock size={18} color="#059669" />
-              <Text className="text-green-800 font-semibold ml-2">
+              <Clock size={18} color="#4B5563" />
+              <Text className="text-gray-800 font-semibold ml-2">
                 Tempo Estimado de Resolução
               </Text>
             </View>
-            <Text className="text-green-700 text-sm mt-1">
+            <Text className="text-gray-700 text-sm mt-1">
               Com base na prioridade selecionada, esperamos resolver em:{' '}
               <Text className="font-bold">
                 {new ComplaintEntity({
@@ -415,7 +419,7 @@ export default function ComplaintsScreen() {
             !formData.subject.trim() ||
             !formData.description.trim()
           }
-          className={`rounded-xl py-4 flex-row justify-center items-center ${
+          className={`rounded-xl py-4 flex-row justify-center items-center gap-2 ${
             isLoadingUpdateComplaint ||
             !formData.type ||
             !formData.subject.trim() ||
@@ -435,12 +439,22 @@ export default function ComplaintsScreen() {
         </TouchableOpacity>
 
         {/* Informações de Suporte */}
-        <View className="mt-6 bg-gray-100 rounded-xl p-4">
-          <Text className="text-gray-700 text-sm text-center">
-            📞 Atendimento 24h: +244 923 456 789{'\n'}
-            📧 Email: support@kandengueatrevido.com{'\n'}
-            🔐 Todas as informações são tratadas com confidencialidade
-          </Text>
+        <View className="mt-6 bg-gray-100 rounded-xl p-4 border border-gray-200">
+          <View className="flex-row items-center justify-center mb-1">
+            <Text className="text-gray-700 text-sm font-medium">
+              Atendimento 24h: +244 923 456 789
+            </Text>
+          </View>
+          <View className="flex-row items-center justify-center mb-1">
+            <Text className="text-gray-700 text-sm font-medium">
+              Email: support@kandengueatrevido.com
+            </Text>
+          </View>
+          <View className="flex-row items-center justify-center mt-2">
+            <Text className="text-gray-500 text-xs italic">
+              Todas as informações são tratadas com confidencialidade
+            </Text>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
