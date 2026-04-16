@@ -16,15 +16,14 @@ import {
 import { useNavigation } from '@react-navigation/native'
 import { PageHeader } from '@/components/PageHeader'
 import { useAlert } from '@/context/AlertContext'
+import { contentAbout } from '@/data/appContent'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import {
   APP_VERSION,
   BUILD_NUMBER,
   DEVELOPER_SITE,
-  LAST_UPDATE,
   SITE_URL
 } from '@/constants/config'
-import { contentAbout } from '@/data/appContent'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function AboutScreen() {
   const [expandedSection, setExpandedSection] = useState<string | null>(null)
@@ -285,14 +284,6 @@ export default function AboutScreen() {
                 <Text className="text-gray-600">Build</Text>
                 <Text className="font-semibold text-gray-900">
                   {BUILD_NUMBER}
-                </Text>
-              </View>
-
-              <View className="flex-row justify-between">
-                <Text className="text-gray-600">Última Atualização</Text>
-                <Text className="font-semibold text-gray-900">
-                  {' '}
-                  {LAST_UPDATE}{' '}
                 </Text>
               </View>
             </View>
