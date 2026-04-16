@@ -134,7 +134,7 @@ export default function HomeScreen() {
       )
       return
     }
-    navigateTo(ROUTES.Rides.HOME)
+    navigateTo(ROUTES.Rides.FLOW)
     // showAlert('Entregas', 'No momento não encontra-se disponível', 'info');
   }
   const handlePressPilot = () => {
@@ -150,7 +150,7 @@ export default function HomeScreen() {
 
     // Navegar para tela do mapa ou abrir app de mapas
     console.log('🗺️ Abrindo mapa com localização:', currentLocation)
-    navigationHomeStack.navigate(ROUTES.Rides.HOME)
+    navigationHomeStack.navigate(ROUTES.Rides.FLOW)
   }
 
   const refreshAddress = async () => {

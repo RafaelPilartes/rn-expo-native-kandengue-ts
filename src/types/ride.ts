@@ -1,5 +1,13 @@
+export type PaymentMethodType = 'cash' | 'card' | 'wallet'
+export type PickupOptionType = 'door' | 'curb'
+
 export type RideDetailsType = {
   receiver: {
+    name: string
+    phone: string
+  }
+  // Who is sending the package (optional — defaults to the logged-in user)
+  sender?: {
     name: string
     phone: string
   }
@@ -8,8 +16,12 @@ export type RideDetailsType = {
     description: string
     quantity: number
     size: 'small' | 'medium' | 'large'
-    weight?: number // opcional (kg)
+    weight?: number
   }
+  // How the driver should meet the sender at pickup
+  pickup_option?: PickupOptionType
+  // Payment method chosen by the user
+  payment_method?: PaymentMethodType
 }
 
 export type RateType = {

@@ -48,6 +48,7 @@ export type HomeStackParamList = {
 
   RideHomeScreen: undefined;
   RideChooseScreen: undefined;
+  RideFlowScreen: undefined;
   RideSummaryScreen: {
     id?: string;
     location: {
@@ -62,6 +63,11 @@ export type HomeStackParamList = {
       type: string;
       description: string;
     };
+    // Extended fields from the new unified flow
+    sender?: { name: string; phone: string };
+    pickupOption?: 'door' | 'curb';
+    paymentMethod?: 'cash' | 'card' | 'wallet';
+    driverInstructions?: string;
   };
   RideFinishedScreen: {
     rideId?: string;

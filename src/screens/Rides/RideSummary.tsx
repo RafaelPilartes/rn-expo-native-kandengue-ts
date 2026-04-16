@@ -44,6 +44,11 @@ type RideSummaryScreenRouteParams = {
   }
   receiver: { name: string; phone: string }
   article: { type: string; description: string }
+  // Fields from the new unified flow
+  sender?: { name: string; phone: string }
+  pickupOption?: 'door' | 'curb'
+  paymentMethod?: 'cash' | 'card' | 'wallet'
+  driverInstructions?: string
 }
 
 export default function RideSummaryScreen() {
@@ -55,7 +60,11 @@ export default function RideSummaryScreen() {
     id: rideId,
     location,
     article,
-    receiver
+    receiver,
+    sender,
+    pickupOption,
+    paymentMethod,
+    driverInstructions,
   } = route.params as RideSummaryScreenRouteParams
 
   const navigation =
@@ -166,14 +175,19 @@ export default function RideSummaryScreen() {
         details: {
           item: {
             type: article.type,
-            description: article.description || '', // Ensure string
+            description: article.description || '',
             quantity: 1,
             size: 'medio' as const
           },
           receiver: {
             name: receiver.name,
             phone: receiver.phone
-          }
+          },
+          sender: sender
+            ? { name: sender.name, phone: sender.phone }
+            : undefined,
+          pickup_option: pickupOption,
+          payment_method: paymentMethod,
         },
         fare: fareDetailsTemp as RideFareInterface,
         status: 'idle' as const

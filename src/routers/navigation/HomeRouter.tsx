@@ -7,6 +7,7 @@ import RideSummaryScreen from '@/screens/Rides/RideSummary';
 import RideFinishedScreen from '@/screens/Rides/RideFinished';
 import RideChooseScreen from '@/screens/Rides/RideChoose';
 import RideHomeScreen from '@/screens/Rides/RideHome';
+import RideFlowScreen from '@/screens/Rides/RideFlow';
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
 
@@ -24,9 +25,13 @@ export default function HomeRouter() {
         component={NotificationsScreen}
       />
 
-      {/* RideStack fora do Tab */}
+      {/* Legacy screens kept for reference — not registered in nav */}
+      {/* RideHome → replaced by RideFlow */}
       <Stack.Screen name={ROUTES.Rides.HOME} component={RideHomeScreen} />
       <Stack.Screen name={ROUTES.Rides.CHOOSE} component={RideChooseScreen} />
+
+      {/* New unified flow */}
+      <Stack.Screen name={ROUTES.Rides.FLOW} component={RideFlowScreen} />
       <Stack.Screen name={ROUTES.Rides.SUMMARY} component={RideSummaryScreen} />
       <Stack.Screen
         name={ROUTES.Rides.FINISHED}
