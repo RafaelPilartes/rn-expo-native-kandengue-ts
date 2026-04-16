@@ -1,7 +1,7 @@
-// src/screens/Ride/components/DriverStatusOverlay.tsx
+// src/screens/Rides/components/Status/DriverStatusOverlay.tsx
 import React from 'react'
 import { View, Text } from 'react-native'
-import { Clock, User, Navigation, Shield } from 'lucide-react-native'
+import { Clock, Navigation, MapPin } from 'lucide-react-native'
 
 interface DriverStatusOverlayProps {
   duration: string
@@ -17,71 +17,54 @@ export const DriverStatusOverlay: React.FC<DriverStatusOverlayProps> = ({
   vehicleInfo
 }) => {
   return (
-    <View className="absolute top-safe left-4 right-4 bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
-      {/* Header */}
-      <View className="flex-row items-center justify-between mb-3">
-        <Text className="text-lg font-bold text-gray-900">
-          Motorista a Caminho
-        </Text>
+    <View
+      className="absolute top-safe left-4 right-4 z-50 bg-white rounded-md p-4 border border-gray-100"
+      style={{
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 12 },
+        shadowOpacity: 0.08,
+        shadowRadius: 24,
+        elevation: 8
+      }}
+    >
+      {/* Live Status Header */}
+      <View className="flex-row items-center justify-between mb-5">
+        <View className="flex-row items-center">
+          <View className="w-2 h-2 rounded-full bg-blue-500 mr-2 shadow-sm shadow-blue-400" />
+          <Text className="text-[11px] font-bold text-blue-500 uppercase tracking-widest">
+            Motorista a Caminho
+          </Text>
+        </View>
       </View>
 
-      {/* Informações do motorista */}
-      {/* <View className="flex-row items-center mb-4">
-        <View className="w-10 h-10 bg-blue-500 rounded-full items-center justify-center mr-3">
-          <User size={20} color="white" />
-        </View>
+      {/* Main Info Section */}
+      <View className="flex-row items-center justify-between">
         <View className="flex-1">
-          <Text className="text-gray-900 font-semibold">{driverName}</Text>
-          <Text className="text-gray-600 text-sm">Estafeta</Text>
-          {vehicleInfo && (
-            <Text className="text-gray-500 text-xs mt-1">{vehicleInfo}</Text>
-          )}
-        </View>
-      </View> */}
-
-      {/* Tempo e status */}
-      <View className="space-y-2 mb-4">
-        <View className="flex-row justify-between items-center">
-          <View className="flex-row items-center">
-            <Clock size={16} color="#6B7280" />
-            <Text className="text-sm text-gray-600 ml-2">
-              Chega em aproximadamente
+          <Text className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
+            Motorista chega em
+          </Text>
+          <View className="flex-row">
+            <Clock size={16} color="#6b7280" strokeWidth={2.5} />
+            <Text className="text-base font-bold text-gray-800 ml-1.5">
+              {estimatedTime || '--:--'}
             </Text>
           </View>
-          <Text className="text-sm text-gray-900 font-semibold">
-            {duration}
-          </Text>
         </View>
 
-        {estimatedTime && (
-          <View className="flex-row justify-between items-center">
-            <Text className="text-gray-600">Previsão de chegada</Text>
-            <Text className="text-gray-900 font-semibold">{estimatedTime}</Text>
+        <View className="h-10 w-px bg-gray-100 mx-4" />
+
+        <View className="flex-1 items-end">
+          <Text className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
+            Duração da Viagem
+          </Text>
+          <View className="flex-row items-baseline">
+            <Text className="text-3xl font-bold text-gray-900 leading-none">
+              {duration.split(' ')[0]}
+            </Text>
+            <Text className="text-sm font-bold text-gray-500 ml-1">min</Text>
           </View>
-        )}
-      </View>
-
-      {/* Status de rastreamento */}
-      {/* <View className="bg-green-50 p-3 rounded-lg mb-4">
-        <View className="flex-row items-center">
-          <Navigation size={16} color="#059669" />
-          <Text className="text-green-800 text-sm ml-2 font-medium">
-            Rastreamento ativo
-          </Text>
         </View>
-        <Text className="text-green-700 text-xs mt-1">
-          Você pode acompanhar a localização do motorista em tempo real
-        </Text>
-      </View> */}
-
-      {/* Informações de segurança */}
-      {/* <View className="flex-row items-center bg-blue-50 p-2 rounded-lg">
-        <Shield size={14} color="#1D4ED8" />
-        <Text className="text-blue-700 text-xs ml-2 flex-1">
-          Seu pedido está seguro. Motorista verificado e com histórico de
-          entregas.
-        </Text>
-      </View> */}
+      </View>
     </View>
   )
 }

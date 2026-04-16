@@ -1,5 +1,5 @@
 // src/screens/hooks/useRideSummary.ts
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useWaitTimerByDate } from './useWaitTimerByDate'
 import { useRideRatesViewModel } from '@/viewModels/RideRateViewModel'
 import { RideRateEntity } from '@/core/entities/RideRate'
@@ -30,6 +30,17 @@ export function useRideSummary(rideId?: string) {
     useRideRoute(ride?.pickup, ride?.dropoff)
 
   // ROTA DO MOTORISTA (se existir)
+  // Stabilize driver's last position by value (lat/lng), not by object
+  // reference. Firestore re-creates the tracking object on every snapshot,
+  // causing useRideRoute to fire even when the driver hasn't moved.
+  const lastDriverPath = rideTracking?.path[rideTracking.path.length - 1]
+  const stableDriverPosition = useMemo(() => {
+    if (!lastDriverPath?.latitude || !lastDriverPath?.longitude) return null
+    return { latitude: lastDriverPath.latitude, longitude: lastDriverPath.longitude }
+    // Primitive values as keys — only re-creates object when coordinates actually change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastDriverPath?.latitude, lastDriverPath?.longitude])
+
   const {
     routeCoords: routeCoordsDriver,
     distanceKm: distanceKmDriver,
@@ -37,8 +48,7 @@ export function useRideSummary(rideId?: string) {
     distance: distanceDriver,
     duration: durationDriver
   } = useRideRoute(
-    // last position
-    rideTracking?.path[rideTracking?.path.length - 1],
+    stableDriverPosition,
     ride?.status === 'picked_up' ? ride.dropoff : ride?.pickup
   )
 
