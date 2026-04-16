@@ -24,11 +24,13 @@ import { useAlert } from '@/context/AlertContext'
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
 import { RideInterface } from '@/interfaces/IRide'
 import { formatMoney } from '@/utils/formattedNumber'
+import { RideFareInterface } from '@/interfaces/IRideFare'
 
 type Props = {
   rideData: RideInterface
   rideStatus: RideStatusType
   distance: string
+  fareDetails: RideFareInterface | null
   onCancel: () => void
   onChange?: (index: number) => void
   snapPoints: (string | number)[]
@@ -72,7 +74,10 @@ const VehicleIcon = ({ type }: { type?: string }) => {
 }
 
 export const DriverRideSheet = forwardRef<BottomSheetModal, Props>(
-  ({ rideData, rideStatus, distance, onCancel, snapPoints }, ref) => {
+  (
+    { rideData, fareDetails, rideStatus, distance, onCancel, snapPoints },
+    ref
+  ) => {
     const { showAlert } = useAlert()
 
     const driver = rideData.driver
@@ -333,7 +338,7 @@ export const DriverRideSheet = forwardRef<BottomSheetModal, Props>(
           <View className="flex-row items-center justify-between border-t border-gray-100 pt-4 mb-12">
             <View>
               <Text className="text-green-600 text-2xl font-bold">
-                Kz {formatMoney(rideData.fare.total, 0)}
+                Kz {formatMoney(fareDetails?.total || 0, 0)}
               </Text>
               <Text className="text-gray-400 text-xs">Valor total</Text>
             </View>

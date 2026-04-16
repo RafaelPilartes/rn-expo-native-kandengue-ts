@@ -88,7 +88,7 @@ export const RideStatusManager: React.FC<Props> = ({
         <RideStatusDelivering
           distanceTraveled={distanceTraveled ? String(distanceTraveled) : '0'}
           distanceTotal={distanceTotal ? String(distanceTotal) : '0'}
-          duration={duration ? String(duration) : '0'}
+          duration={driverDuration ? String(driverDuration) : '0'}
           packageInfo={packageInfo}
           customerName={customerName}
         />

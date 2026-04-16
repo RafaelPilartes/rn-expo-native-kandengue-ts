@@ -64,7 +64,7 @@ export default function RideSummaryScreen() {
     sender,
     pickupOption,
     paymentMethod,
-    driverInstructions,
+    driverInstructions
   } = route.params as RideSummaryScreenRouteParams
 
   const navigation =
@@ -187,7 +187,7 @@ export default function RideSummaryScreen() {
             ? { name: sender.name, phone: sender.phone }
             : undefined,
           pickup_option: pickupOption,
-          payment_method: paymentMethod,
+          payment_method: paymentMethod
         },
         fare: fareDetailsTemp as RideFareInterface,
         status: 'idle' as const
@@ -331,7 +331,6 @@ export default function RideSummaryScreen() {
     }
   }, [rideStatus, rideId])
 
-
   // Memoize Map Props
   const pickupProp = useMemo(
     () =>
@@ -469,6 +468,7 @@ export default function RideSummaryScreen() {
         <DriverRideSheet
           ref={bottomSheetRef}
           rideData={currentRide}
+          fareDetails={fareDetails}
           rideStatus={rideStatus}
           distance={distance}
           onCancel={() => setShowCancelModal(true)}

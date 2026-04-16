@@ -52,10 +52,10 @@ export const RideStatusDelivering: React.FC<RideStatusDeliveringProps> = ({
             </Text>
           </View>
         </View>
-        <View className="flex-row items-center bg-green-50 px-2.5 py-1 rounded-full">
+        {/* <View className="flex-row items-center bg-green-50 px-2.5 py-1 rounded-full">
           <View className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5" />
           <Text className="text-green-700 text-xs font-medium">Ao vivo</Text>
-        </View>
+        </View> */}
       </View>
 
       {/* Stats row */}
@@ -90,9 +90,7 @@ export const RideStatusDelivering: React.FC<RideStatusDeliveringProps> = ({
             <View className="flex-1 items-center">
               <View className="flex-row items-center mb-1">
                 <User size={12} color="#9ca3af" />
-                <Text className="text-gray-400 text-[11px] ml-1">
-                  Destino
-                </Text>
+                <Text className="text-gray-400 text-[11px] ml-1">Destino</Text>
               </View>
               <Text
                 className="text-gray-900 text-sm font-bold"
