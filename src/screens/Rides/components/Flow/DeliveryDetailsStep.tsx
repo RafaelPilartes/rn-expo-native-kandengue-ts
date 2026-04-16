@@ -43,19 +43,19 @@ const PickupOptionCard = memo(function PickupOptionCard({
       onPress={onSelect}
       activeOpacity={0.8}
       className={`flex-1 p-4 rounded-2xl border-2 ${
-        isSelected ? 'border-gray-900 bg-gray-900' : 'border-gray-100 bg-white'
+        isSelected ? 'border-primary-200 bg-white' : 'border-gray-100 bg-white'
       }`}
     >
       <View className={`mb-2 ${isSelected ? 'opacity-100' : 'opacity-50'}`}>
         {icon}
       </View>
       <Text
-        className={`font-bold text-sm mb-0.5 ${isSelected ? 'text-white' : 'text-gray-800'}`}
+        className={`font-bold text-sm mb-0.5 ${isSelected ? 'text-primary-200' : 'text-gray-800'}`}
       >
         {label}
       </Text>
       <Text
-        className={`text-xs ${isSelected ? 'text-gray-400' : 'text-gray-500'}`}
+        className={`text-xs ${isSelected ? 'text-gray-500' : 'text-gray-600'}`}
       >
         {subtitle}
       </Text>
@@ -212,7 +212,7 @@ export const DeliveryDetailsStep = memo(function DeliveryDetailsStep({
             icon={
               <DoorOpen
                 size={22}
-                color={pickupOption === 'door' ? 'white' : '#374151'}
+                color={pickupOption === 'door' ? '#e0212d' : '#374151'}
               />
             }
             isSelected={pickupOption === 'door'}
@@ -225,7 +225,7 @@ export const DeliveryDetailsStep = memo(function DeliveryDetailsStep({
             icon={
               <Navigation
                 size={22}
-                color={pickupOption === 'curb' ? 'white' : '#374151'}
+                color={pickupOption === 'curb' ? '#e0212d' : '#374151'}
               />
             }
             isSelected={pickupOption === 'curb'}

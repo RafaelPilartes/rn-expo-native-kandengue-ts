@@ -40,6 +40,10 @@ interface RideFlowState {
   setPickup: (place: CustomPlace | null) => void
   setDropoff: (place: CustomPlace | null) => void
 
+  // Map pin picking mode — null = off, 'pickup'/'dropoff' = active
+  mapPickingMode: 'pickup' | 'dropoff' | null
+  setMapPickingMode: (mode: 'pickup' | 'dropoff' | null) => void
+
   setArticleType: (type: string) => void
   setPaymentMethod: (method: PaymentMethodType) => void
 
@@ -60,6 +64,7 @@ const initialState = {
   step: 1 as RideFlowStep,
   pickup: null,
   dropoff: null,
+  mapPickingMode: null as 'pickup' | 'dropoff' | null,
   articleType: 'Documentos',
   paymentMethod: 'cash' as PaymentMethodType,
   senderIsSelf: true,
@@ -88,6 +93,8 @@ export const useRideFlowStore = create<RideFlowState>((set, get) => ({
 
   setPickup: place => set({ pickup: place }),
   setDropoff: place => set({ dropoff: place }),
+
+  setMapPickingMode: mode => set({ mapPickingMode: mode }),
 
   setArticleType: type => set({ articleType: type }),
   setPaymentMethod: method => set({ paymentMethod: method }),

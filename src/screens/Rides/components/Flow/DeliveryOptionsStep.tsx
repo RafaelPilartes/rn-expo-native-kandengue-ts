@@ -1,6 +1,12 @@
 // src/screens/Rides/components/Flow/DeliveryOptionsStep.tsx
 import React, { useRef, useCallback, memo, useState, useEffect } from 'react'
-import { View, Text, TouchableOpacity, ActivityIndicator, Keyboard } from 'react-native'
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ActivityIndicator,
+  Keyboard
+} from 'react-native'
 import {
   ArrowLeft,
   ArrowRight,
@@ -108,11 +114,16 @@ export const DeliveryOptionsStep = memo(function DeliveryOptionsStep({
 
   return (
     <>
-      <View style={{ paddingHorizontal: 20, marginBottom: keyboardVisible ? 200 : 20 }}>
+      <View
+        style={{
+          paddingHorizontal: 20,
+          marginBottom: keyboardVisible ? 200 : 20
+        }}
+      >
         {/* Estimated Price Card */}
         <Animated.View
           entering={FadeInDown.delay(50).duration(400)}
-          className="bg-gray-900 rounded-2xl p-5 mt-4 mb-5"
+          className="bg-primary-200 rounded-2xl p-5 mt-4 mb-5"
         >
           {isLoadingRoute ? (
             <View className="items-center py-2">
@@ -124,23 +135,21 @@ export const DeliveryOptionsStep = memo(function DeliveryOptionsStep({
           ) : (
             <View className="flex-row justify-between items-center">
               <View>
-                <Text className="text-gray-400 text-xs mb-1">
-                  Valor estimado
-                </Text>
+                <Text className="text-white text-xs mb-1">Valor estimado</Text>
                 <Text className="text-white text-3xl font-bold">
                   {formatMoney(fareDetails?.total ?? 0, 0)}
                 </Text>
               </View>
-              <View className="items-end gap-1">
-                <View className="bg-gray-800 px-3 py-1.5 rounded-full">
-                  <Text className="text-gray-300 text-xs">
+              <View className="items-end justify-center gap-1">
+                <View className="bg-white px-3 py-1.5 border border-white rounded-3xl">
+                  <Text className="text-gray-800 text-xs">
                     {distanceKm != null
                       ? `${distanceKm.toFixed(1)} km`
                       : '-- km'}
                   </Text>
                 </View>
-                <View className="bg-gray-800 px-3 py-1.5 rounded-full">
-                  <Text className="text-gray-300 text-xs">
+                <View className="bg-white px-3 py-1.5 border border-white rounded-3xl">
+                  <Text className="text-gray-800 text-xs">
                     {durationMinutes != null
                       ? `~${durationMinutes} min`
                       : '-- min'}
@@ -190,12 +199,12 @@ export const DeliveryOptionsStep = memo(function DeliveryOptionsStep({
                   activeOpacity={0.8}
                   className={`flex-1 items-center py-3 rounded-xl border ${
                     isSelected
-                      ? 'bg-gray-900 border-gray-900'
+                      ? 'bg-white border-primary-200'
                       : 'bg-white border-gray-200'
                   }`}
                 >
                   <Text
-                    className={`text-xs font-semibold mt-1 ${isSelected ? 'text-white' : 'text-gray-600'}`}
+                    className={`text-xs font-semibold mt-1 ${isSelected ? 'text-primary-200' : 'text-gray-600'}`}
                   >
                     {opt.label}
                   </Text>

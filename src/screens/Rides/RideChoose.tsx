@@ -389,7 +389,7 @@ export default function RideChooseScreen() {
                   {/* Details Section (Appears after dropoff selected) */}
                   {showDetails && (
                     <Animated.View
-                      entering={FadeInUp.springify().damping(15)}
+                      entering={FadeInUp.springify().damping(25)}
                       className="gap-4"
                       style={{ zIndex: 10 }} // Lower zIndex
                     >
@@ -474,7 +474,12 @@ export default function RideChooseScreen() {
                               onChangeText={setDescription}
                               multiline
                               className="flex-1 text-gray-800 font-medium p-0 m-0"
-                              style={{ paddingTop: 0, paddingBottom: 0, textAlignVertical: 'top', height: '100%' }}
+                              style={{
+                                paddingTop: 0,
+                                paddingBottom: 0,
+                                textAlignVertical: 'top',
+                                height: '100%'
+                              }}
                               placeholderTextColor="#9ca3af"
                               onFocus={() => {
                                 setTimeout(() => {

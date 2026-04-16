@@ -26,7 +26,7 @@ const StepIndicator = memo(function StepIndicator({ step }: { step: number }) {
         <View
           key={s}
           className={`rounded-full transition-all ${
-            s === step ? 'w-5 h-1.5 bg-gray-900' : 'w-1.5 h-1.5 bg-gray-300'
+            s === step ? 'w-5 h-1.5 bg-primary-200' : 'w-1.5 h-1.5 bg-gray-300'
           }`}
         />
       ))}
@@ -54,13 +54,20 @@ export const RideFlowBottomSheet = memo(function RideFlowBottomSheet({
   durationMinutes,
   isLoadingRoute
 }: RideFlowBottomSheetProps) {
-  const { step } = useRideFlowStore()
+  const { step, mapPickingMode } = useRideFlowStore()
 
   // Single scroll ref shared across all steps that need keyboard-aware scrolling
   const scrollRef = useRef<any>(null)
 
-  const snapPoints = useMemo(() => SNAP_POINTS_BY_STEP[step] ?? ['40%'], [step])
-  const initialIndex = useMemo(() => INITIAL_INDEX_BY_STEP[step] ?? 0, [step])
+  const snapPoints = useMemo(() => {
+    if (mapPickingMode !== null) return ['12%'] // Almost closed, revealing the map
+    return SNAP_POINTS_BY_STEP[step] ?? ['40%']
+  }, [step, mapPickingMode])
+
+  const initialIndex = useMemo(() => {
+    if (mapPickingMode !== null) return 0
+    return INITIAL_INDEX_BY_STEP[step] ?? 0
+  }, [step, mapPickingMode])
 
   const renderContent = useCallback(() => {
     switch (step) {

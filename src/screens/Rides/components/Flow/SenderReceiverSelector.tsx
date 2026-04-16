@@ -49,12 +49,12 @@ export const SenderReceiverSelector = memo(function SenderReceiverSelector({
           onPress={() => onToggleSelf(true)}
           activeOpacity={0.8}
           className={`flex-1 py-3 rounded-xl border items-center ${
-            isSelf ? 'bg-gray-900 border-gray-900' : 'bg-white border-gray-200'
+            isSelf ? 'bg-white border-primary-200' : 'bg-white border-gray-200'
           }`}
         >
           <Text
             className={`text-sm font-semibold ${
-              isSelf ? 'text-white' : 'text-gray-600'
+              isSelf ? 'text-primary-200' : 'text-gray-600'
             }`}
           >
             Eu
@@ -65,7 +65,9 @@ export const SenderReceiverSelector = memo(function SenderReceiverSelector({
           onPress={() => onToggleSelf(false)}
           activeOpacity={0.8}
           className={`flex-1 py-3 rounded-xl border items-center ${
-            !isSelf ? 'bg-gray-900 border-gray-900' : 'bg-white border-gray-200'
+            !isSelf
+              ? 'bg-primary-200 border-primary-200'
+              : 'bg-white border-gray-200'
           }`}
         >
           <Text
@@ -81,7 +83,7 @@ export const SenderReceiverSelector = memo(function SenderReceiverSelector({
       {/* Conditional Inputs — only shown when "Outra pessoa" */}
       {!isSelf && (
         <Animated.View
-          entering={FadeInDown.springify().damping(18)}
+          entering={FadeInDown.springify().damping(25)}
           exiting={FadeOutUp.duration(200)}
           className="gap-2"
         >
@@ -116,7 +118,7 @@ export const SenderReceiverSelector = memo(function SenderReceiverSelector({
       {/* Auto-fill Preview — shown when "Eu" */}
       {isSelf && personInfo.name !== '' && (
         <Animated.View
-          entering={FadeInDown.springify().damping(18)}
+          entering={FadeInDown.springify().damping(25)}
           className="flex-row items-center bg-gray-50 px-4 py-2.5 rounded-xl border border-gray-100"
         >
           <User size={15} color="#e0212d" />

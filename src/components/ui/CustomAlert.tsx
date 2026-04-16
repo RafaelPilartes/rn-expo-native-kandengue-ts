@@ -6,12 +6,7 @@ import Animated, {
   withSpring,
   withTiming
 } from 'react-native-reanimated'
-import {
-  CheckCircle,
-  AlertTriangle,
-  XCircle,
-  Info
-} from 'lucide-react-native'
+import { CheckCircle, AlertTriangle, XCircle, Info } from 'lucide-react-native'
 import { useAlert } from '../../context/AlertContext'
 
 const getAlertConfig = (type: string) => {
@@ -36,7 +31,7 @@ export const CustomAlert = () => {
   useEffect(() => {
     if (alertVisible) {
       opacity.value = withTiming(1, { duration: 150 })
-      scale.value = withSpring(1, { damping: 15, stiffness: 200 })
+      scale.value = withSpring(1, { damping: 25, stiffness: 200 })
     } else {
       opacity.value = withTiming(0, { duration: 150 })
       scale.value = withTiming(0.8, { duration: 150 })

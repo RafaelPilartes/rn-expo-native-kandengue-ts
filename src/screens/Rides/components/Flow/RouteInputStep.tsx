@@ -5,9 +5,9 @@ import {
   Text,
   TouchableOpacity,
   ActivityIndicator,
-  Keyboard,
+  Keyboard
 } from 'react-native'
-import { Crosshair, ArrowRight, MapPin } from 'lucide-react-native'
+import { Crosshair, ArrowRight, MapPin, Map, X } from 'lucide-react-native'
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
 import { useBottomSheet } from '@gorhom/bottom-sheet'
 import { GOOGLE_API_KEY } from '@/constants/keys'
@@ -23,7 +23,7 @@ const cleanGoogleStyles = {
     borderTopWidth: 0,
     borderBottomWidth: 0,
     paddingHorizontal: 0,
-    paddingVertical: 0,
+    paddingVertical: 0
   },
   textInput: {
     backgroundColor: 'transparent',
@@ -33,11 +33,11 @@ const cleanGoogleStyles = {
     fontSize: 15,
     color: '#111827',
     fontWeight: '500' as const,
-    height: 40,
+    height: 48, // increased height for better touch target
     marginTop: 0,
-    marginLeft: 0,
+    marginLeft: 12, // padding inside the input text
     marginRight: 0,
-    marginBottom: 0,
+    marginBottom: 0
   },
   listView: {
     backgroundColor: '#fff',
@@ -51,26 +51,35 @@ const cleanGoogleStyles = {
     shadowOpacity: 0.1,
     shadowRadius: 12,
     position: 'absolute' as const,
-    top: 44,
+    top: 52,
     left: 0,
     right: 0,
-    zIndex: 9999,
+    zIndex: 9999
   },
   row: { padding: 14, borderBottomWidth: 1, borderBottomColor: '#f9fafb' },
-  description: { fontSize: 14, color: '#374151' },
+  description: { fontSize: 14, color: '#374151' }
 }
 
 export const RouteInputStep = memo(function RouteInputStep() {
-  const { pickup, dropoff, setPickup, setDropoff, nextStep } = useRideFlowStore()
+  const {
+    pickup,
+    dropoff,
+    setPickup,
+    setDropoff,
+    nextStep,
+    setMapPickingMode
+  } = useRideFlowStore()
   const { requestCurrentLocation } = useLocation()
-  
+
   // Aceder aos métodos do BottomSheet pai
   const { expand } = useBottomSheet()
 
   const pickupRef = useRef<any>(null)
   const dropoffRef = useRef<any>(null)
 
-  const [activeInput, setActiveInput] = useState<'pickup' | 'dropoff' | null>(null)
+  const [activeInput, setActiveInput] = useState<'pickup' | 'dropoff' | null>(
+    null
+  )
   const [showPickupList, setShowPickupList] = useState(false)
   const [showDropoffList, setShowDropoffList] = useState(false)
   const [loadingPickup, setLoadingPickup] = useState(false)
@@ -78,9 +87,28 @@ export const RouteInputStep = memo(function RouteInputStep() {
 
   const canProceed = pickup !== null && dropoff !== null
 
+  // Sincronizar o input visual de Recolha se for definido externamente (ex: mapa)
+  React.useEffect(() => {
+    if (pickup && pickupRef.current) {
+      pickupRef.current.setAddressText(pickup.description)
+    } else if (!pickup && pickupRef.current) {
+      pickupRef.current.setAddressText('')
+    }
+  }, [pickup])
+
+  // Sincronizar o input visual de Entrega se for definido externamente (ex: mapa)
+  React.useEffect(() => {
+    if (dropoff && dropoffRef.current) {
+      dropoffRef.current.setAddressText(dropoff.description)
+    } else if (!dropoff && dropoffRef.current) {
+      dropoffRef.current.setAddressText('')
+    }
+  }, [dropoff])
+
   const fetchCurrentLocationFor = useCallback(
     async (target: 'pickup' | 'dropoff') => {
-      const setLoading = target === 'pickup' ? setLoadingPickup : setLoadingDropoff
+      const setLoading =
+        target === 'pickup' ? setLoadingPickup : setLoadingDropoff
       const setter = target === 'pickup' ? setPickup : setDropoff
       const ref = target === 'pickup' ? pickupRef : dropoffRef
 
@@ -89,7 +117,10 @@ export const RouteInputStep = memo(function RouteInputStep() {
         const coords = await requestCurrentLocation()
         if (!coords) return
 
-        const result = await getAddressFromCoords(coords.latitude, coords.longitude)
+        const result = await getAddressFromCoords(
+          coords.latitude,
+          coords.longitude
+        )
 
         let description = `${coords.latitude}, ${coords.longitude}`
         let placeId = `current_${target}_${Date.now()}`
@@ -106,7 +137,7 @@ export const RouteInputStep = memo(function RouteInputStep() {
           place_id: placeId,
           name,
           latitude: coords.latitude,
-          longitude: coords.longitude,
+          longitude: coords.longitude
         }
 
         setter(place)
@@ -139,7 +170,7 @@ export const RouteInputStep = memo(function RouteInputStep() {
         place_id: data.place_id,
         name: data.structured_formatting.main_text,
         latitude: lat,
-        longitude: lng,
+        longitude: lng
       }
       setter(place)
       setShowList(false)
@@ -152,137 +183,208 @@ export const RouteInputStep = memo(function RouteInputStep() {
 
   return (
     <View className="flex-1 px-5 pt-4 pb-6">
-      {/* Title */}
       <Text className="text-xl font-bold text-gray-900 mb-5">
         Para onde vai a encomenda?
       </Text>
 
-      {/* Route Card */}
+      {/* Route Card Minimalist */}
       <View
         className="bg-gray-50 rounded-2xl p-4 border border-gray-100"
         style={{ zIndex: 50 }}
       >
         {/* --- PICKUP --- */}
         <View className="flex-row" style={{ zIndex: 100 }}>
-          {/* Icon + Line */}
-          <View className="items-center mr-3 pt-2">
-            <View className="w-3 h-3 rounded-full bg-green-500" />
-            <View className="w-px flex-1 bg-gray-200 my-1" />
+          <View className="items-center mr-4 pt-4">
+            <View className="w-2.5 h-2.5 rounded-full bg-green-500" />
+            <View className="w-px flex-1 bg-gray-300 my-1.5" />
           </View>
 
-          <View className="flex-1 pb-3">
-            <View className="flex-row items-center justify-between mb-1">
-              <Text className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">
-                De onde?
-              </Text>
-              <TouchableOpacity
-                onPress={() => fetchCurrentLocationFor('pickup')}
-                disabled={loadingPickup}
-                className="flex-row items-center px-2 py-1 rounded-lg bg-green-50"
-                activeOpacity={0.7}
-              >
-                {loadingPickup ? (
-                  <ActivityIndicator size={11} color="#10b981" />
-                ) : (
-                  <Crosshair size={11} color="#10b981" />
-                )}
-                <Text className="text-[11px] font-semibold text-green-600 ml-1">
-                  Minha localização
-                </Text>
-              </TouchableOpacity>
-            </View>
-
+          <View className="flex-1 pb-4">
             <View
-              className={`bg-white rounded-xl border px-3 ${
-                activeInput === 'pickup' ? 'border-green-400' : 'border-gray-100'
+              className={`bg-white rounded-xl border flex-row items-start ${
+                activeInput === 'pickup'
+                  ? 'border-green-400 '
+                  : 'border-gray-200'
               }`}
             >
-              <GooglePlacesAutocomplete
-                ref={pickupRef}
-                placeholder="Local de recolha"
-                onPress={(data, details = null) =>
-                  handleSelectPlace(data, details, setPickup, setShowPickupList, () =>
-                    dropoffRef.current?.focus()
-                  )
-                }
-                query={{ key: GOOGLE_API_KEY, language: 'pt-BR', components: 'country:ao' }}
-                fetchDetails
-                styles={cleanGoogleStyles}
-                textInputProps={{
-                  onFocus: () => { 
-                    expand() // Força o BottomSheet a subir para 85%
-                    setActiveInput('pickup')
-                    setShowPickupList(true) 
-                  },
-                  onBlur: () => { setActiveInput(null); setShowPickupList(false) },
-                  placeholderTextColor: '#9ca3af',
-                }}
-                enablePoweredByContainer={false}
-                debounce={300}
-                listViewDisplayed={showPickupList}
-                onTimeout={() => setShowPickupList(false)}
-              />
+              <View className="flex-1">
+                <GooglePlacesAutocomplete
+                  ref={pickupRef}
+                  placeholder="Local de recolha"
+                  onPress={(data, details = null) =>
+                    handleSelectPlace(
+                      data,
+                      details,
+                      setPickup,
+                      setShowPickupList,
+                      () => dropoffRef.current?.focus()
+                    )
+                  }
+                  query={{
+                    key: GOOGLE_API_KEY,
+                    language: 'pt-BR',
+                    components: 'country:ao'
+                  }}
+                  fetchDetails
+                  styles={cleanGoogleStyles}
+                  textInputProps={{
+                    onFocus: () => {
+                      expand()
+                      setActiveInput('pickup')
+                      setShowPickupList(true)
+                    },
+                    onBlur: () => {
+                      setActiveInput(null)
+                      setShowPickupList(false)
+                    },
+                    placeholderTextColor: '#9ca3af'
+                  }}
+                  enablePoweredByContainer={false}
+                  debounce={300}
+                  listViewDisplayed={showPickupList}
+                  onTimeout={() => setShowPickupList(false)}
+                />
+              </View>
+              {pickup && (
+                <TouchableOpacity
+                  onPress={() => {
+                    setPickup(null)
+                    pickupRef.current?.setAddressText('')
+                  }}
+                  className="p-3.5 justify-center items-center"
+                >
+                  <X size={18} color="#9ca3af" />
+                </TouchableOpacity>
+              )}
             </View>
+
+            {/* Quick Actions (only show if empty) */}
+            {!pickup && (
+              <View className="flex-row items-center mt-2.5 gap-2">
+                <TouchableOpacity
+                  onPress={() => fetchCurrentLocationFor('pickup')}
+                  disabled={loadingPickup}
+                  className="flex-row items-center bg-white border border-gray-200 px-3 py-1.5 rounded-full "
+                  activeOpacity={0.7}
+                >
+                  {loadingPickup ? (
+                    <ActivityIndicator size={12} color="#10b981" />
+                  ) : (
+                    <Crosshair size={12} color="#10b981" />
+                  )}
+                  <Text className="text-[11px] font-semibold text-gray-600 ml-1.5">
+                    Local atual
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setMapPickingMode('pickup')}
+                  className="flex-row items-center bg-white border border-gray-200 px-3 py-1.5 rounded-full "
+                  activeOpacity={0.7}
+                >
+                  <Map size={12} color="#4b5563" />
+                  <Text className="text-[11px] font-semibold text-gray-600 ml-1.5">
+                    No mapa
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         </View>
 
         {/* --- DROPOFF --- */}
         <View className="flex-row" style={{ zIndex: 90 }}>
-          <View className="items-center mr-3 pt-2">
-            <View className="w-3 h-3 rounded-sm bg-red-500" />
+          <View className="items-center mr-4 pt-4">
+            <View className="w-2.5 h-2.5 rounded-sm bg-red-500" />
           </View>
 
           <View className="flex-1">
-            <View className="flex-row items-center justify-between mb-1">
-              <Text className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">
-                Para onde?
-              </Text>
-              <TouchableOpacity
-                onPress={() => fetchCurrentLocationFor('dropoff')}
-                disabled={loadingDropoff}
-                className="flex-row items-center px-2 py-1 rounded-lg bg-red-50"
-                activeOpacity={0.7}
-              >
-                {loadingDropoff ? (
-                  <ActivityIndicator size={11} color="#ef4444" />
-                ) : (
-                  <Crosshair size={11} color="#ef4444" />
-                )}
-                <Text className="text-[11px] font-semibold text-red-500 ml-1">
-                  Minha localização
-                </Text>
-              </TouchableOpacity>
-            </View>
-
             <View
-              className={`bg-white rounded-xl border px-3 ${
-                activeInput === 'dropoff' ? 'border-red-400' : 'border-gray-100'
+              className={`bg-white rounded-xl border flex-row items-start ${
+                activeInput === 'dropoff'
+                  ? 'border-red-400 '
+                  : 'border-gray-200'
               }`}
             >
-              <GooglePlacesAutocomplete
-                ref={dropoffRef}
-                placeholder="Local de entrega"
-                onPress={(data, details = null) =>
-                  handleSelectPlace(data, details, setDropoff, setShowDropoffList)
-                }
-                query={{ key: GOOGLE_API_KEY, language: 'pt-BR', components: 'country:ao' }}
-                fetchDetails
-                styles={cleanGoogleStyles}
-                textInputProps={{
-                  onFocus: () => { 
-                    expand() // Força o BottomSheet a subir para 85%
-                    setActiveInput('dropoff')
-                    setShowDropoffList(true) 
-                  },
-                  onBlur: () => { setActiveInput(null); setShowDropoffList(false) },
-                  placeholderTextColor: '#9ca3af',
-                }}
-                enablePoweredByContainer={false}
-                debounce={300}
-                listViewDisplayed={showDropoffList}
-                onTimeout={() => setShowDropoffList(false)}
-              />
+              <View className="flex-1">
+                <GooglePlacesAutocomplete
+                  ref={dropoffRef}
+                  placeholder="Local de entrega"
+                  onPress={(data, details = null) =>
+                    handleSelectPlace(
+                      data,
+                      details,
+                      setDropoff,
+                      setShowDropoffList
+                    )
+                  }
+                  query={{
+                    key: GOOGLE_API_KEY,
+                    language: 'pt-BR',
+                    components: 'country:ao'
+                  }}
+                  fetchDetails
+                  styles={cleanGoogleStyles}
+                  textInputProps={{
+                    onFocus: () => {
+                      expand()
+                      setActiveInput('dropoff')
+                      setShowDropoffList(true)
+                    },
+                    onBlur: () => {
+                      setActiveInput(null)
+                      setShowDropoffList(false)
+                    },
+                    placeholderTextColor: '#9ca3af'
+                  }}
+                  enablePoweredByContainer={false}
+                  debounce={300}
+                  listViewDisplayed={showDropoffList}
+                  onTimeout={() => setShowDropoffList(false)}
+                />
+              </View>
+              {dropoff && (
+                <TouchableOpacity
+                  onPress={() => {
+                    setDropoff(null)
+                    dropoffRef.current?.setAddressText('')
+                  }}
+                  className="p-3.5 justify-center items-center"
+                >
+                  <X size={18} color="#9ca3af" />
+                </TouchableOpacity>
+              )}
             </View>
+
+            {/* Quick Actions */}
+            {!dropoff && (
+              <View className="flex-row items-center mt-2.5 gap-2">
+                <TouchableOpacity
+                  onPress={() => fetchCurrentLocationFor('dropoff')}
+                  disabled={loadingDropoff}
+                  className="flex-row items-center bg-white border border-gray-200 px-3 py-1.5 rounded-full "
+                  activeOpacity={0.7}
+                >
+                  {loadingDropoff ? (
+                    <ActivityIndicator size={12} color="#ef4444" />
+                  ) : (
+                    <Crosshair size={12} color="#ef4444" />
+                  )}
+                  <Text className="text-[11px] font-semibold text-gray-600 ml-1.5">
+                    Local atual
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setMapPickingMode('dropoff')}
+                  className="flex-row items-center bg-white border border-gray-200 px-3 py-1.5 rounded-full "
+                  activeOpacity={0.7}
+                >
+                  <Map size={12} color="#4b5563" />
+                  <Text className="text-[11px] font-semibold text-gray-600 ml-1.5">
+                    No mapa
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         </View>
       </View>
@@ -296,7 +398,9 @@ export const RouteInputStep = memo(function RouteInputStep() {
           canProceed ? 'bg-primary-200' : 'bg-gray-200'
         }`}
       >
-        <Text className={`text-base font-bold mr-2 ${canProceed ? 'text-white' : 'text-gray-400'}`}>
+        <Text
+          className={`text-base font-bold mr-2 ${canProceed ? 'text-white' : 'text-gray-400'}`}
+        >
           Ver opções e preço
         </Text>
         <ArrowRight size={18} color={canProceed ? 'white' : '#9ca3af'} />
