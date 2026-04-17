@@ -1,5 +1,6 @@
 // src/screens/Main/History/components/RideDetailsSheetModal.tsx
-import React, { forwardRef, useMemo, memo, useCallback } from 'react'
+import React, { forwardRef, useMemo, memo, useCallback, useState } from 'react'
+import ImageView from 'react-native-image-viewing'
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
@@ -43,6 +44,26 @@ const RideDetailsSheetModal = forwardRef<
   BottomSheetModal,
   RideDetailsSheetModalProps
 >(({ selectedRide, snapPoints, onChange }, ref) => {
+  const [isImageViewerVisible, setIsImageViewerVisible] = useState(false)
+  const [imageIndex, setImageIndex] = useState(0)
+
+  // Memoize proof images
+  const proofImages = useMemo(() => {
+    const images = []
+    if (selectedRide?.proof_pickup_photo) {
+      images.push({ uri: selectedRide.proof_pickup_photo })
+    }
+    if (selectedRide?.proof_dropoff_photo) {
+      images.push({ uri: selectedRide.proof_dropoff_photo })
+    }
+    return images
+  }, [selectedRide?.proof_pickup_photo, selectedRide?.proof_dropoff_photo])
+
+  const handleOpenImage = useCallback((index: number) => {
+    setImageIndex(index)
+    setIsImageViewerVisible(true)
+  }, [])
+
   // Memoize displayed fare
   const displayedFare = useMemo(
     () =>
@@ -315,7 +336,7 @@ const RideDetailsSheetModal = forwardRef<
                       )}
                     </View>
                     <View className="items-start mt-1">
-                      <View className="bg-slate-200/80 px-2 py-1 rounded border border-slate-300">
+                      <View className="bg-slate-50 px-2 py-1 rounded border border-gray-200">
                         <Text className="text-slate-800 font-extrabold text-[11px] tracking-widest uppercase">
                           {selectedRide.driver.vehicle.plate || 'SEM PLACA'}
                         </Text>
@@ -331,6 +352,74 @@ const RideDetailsSheetModal = forwardRef<
                 </View>
               )}
             </View>
+          </View>
+        )}
+
+        {/* Proof Photos Section */}
+        {proofImages.length > 0 && (
+          <View className="px-6 py-6 border-t border-gray-100">
+            <Text className="text-lg font-bold text-gray-900 mb-4">
+              Evidências da Entrega
+            </Text>
+
+            <View className="flex-row gap-3">
+              {selectedRide?.proof_pickup_photo && (
+                <View className="flex-1">
+                  <Text className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">
+                    Recolha
+                  </Text>
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={() => handleOpenImage(0)}
+                    className="w-full h-40 rounded-2xl overflow-hidden bg-gray-200 border border-gray-100"
+                  >
+                    <Image
+                      source={{ uri: selectedRide.proof_pickup_photo }}
+                      className="w-full h-full"
+                      resizeMode="cover"
+                    />
+                    <View className="absolute bottom-0 left-0 right-0 bg-black/40 py-2 items-center">
+                      <Text className="text-white text-xs font-medium">
+                        Ver em tela cheia
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              {selectedRide?.proof_dropoff_photo && (
+                <View className="flex-1">
+                  <Text className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">
+                    Entrega
+                  </Text>
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={() =>
+                      handleOpenImage(selectedRide.proof_pickup_photo ? 1 : 0)
+                    }
+                    className="w-full h-40 rounded-2xl overflow-hidden bg-gray-200 border border-gray-100"
+                  >
+                    <Image
+                      source={{ uri: selectedRide.proof_dropoff_photo }}
+                      className="w-full h-full"
+                      resizeMode="cover"
+                    />
+                    <View className="absolute bottom-0 left-0 right-0 bg-black/40 py-2 items-center">
+                      <Text className="text-white text-xs font-medium">
+                        Ver em tela cheia
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+
+            <ImageView
+              images={proofImages}
+              imageIndex={imageIndex}
+              visible={isImageViewerVisible}
+              onRequestClose={() => setIsImageViewerVisible(false)}
+            />
           </View>
         )}
       </BottomSheetScrollView>

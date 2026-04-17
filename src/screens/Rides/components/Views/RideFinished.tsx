@@ -1,7 +1,8 @@
 // src/screens/Ride/RideFinishedScreen.tsx
 import React, { useCallback, useState } from 'react'
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native'
+import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native'
 import { Check, Star, MapPin, Navigation } from 'lucide-react-native'
+import ImageView from 'react-native-image-viewing'
 import { RideInterface } from '@/interfaces/IRide'
 import { formatMoney } from '@/utils/formattedNumber'
 import { useRoute, useNavigation } from '@react-navigation/native'
@@ -25,6 +26,7 @@ export const RideCompletedScreen: React.FC<RideFinishedScreenRoutePros> = ({
 
   // ESTADO PARA CONTROLAR CLICKS MÚLTIPLOS
   const [isNavigating, setIsNavigating] = useState(false)
+  const [isImageViewerVisible, setIsImageViewerVisible] = useState(false)
 
   const totalPaid = `Kz ${formatMoney(rideDetails.fare.total)}`
 
@@ -80,7 +82,18 @@ export const RideCompletedScreen: React.FC<RideFinishedScreenRoutePros> = ({
   }, [])
 
   return (
-    <View className="flex-1 bg-gray-50 justify-center items-center px-6 py-8">
+    <ScrollView
+      className="flex-1 bg-white"
+      contentContainerStyle={{
+        flexGrow: 1,
+        paddingVertical: 40,
+        // maxHeight: '90%',
+        paddingHorizontal: 24,
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}
+      showsVerticalScrollIndicator={false}
+    >
       {/* CARD */}
       <View className="bg-white rounded-3xl shadow-md w-full max-w-md overflow-hidden">
         {/* HEADER */}
@@ -146,7 +159,7 @@ export const RideCompletedScreen: React.FC<RideFinishedScreenRoutePros> = ({
           </View>
 
           {/* PAGAMENTO */}
-          <View className="border border-green-200 bg-green-50 rounded-xl p-4">
+          <View className="border border-green-200 bg-green-50 rounded-xl p-4 mb-6">
             <Text className="text-green-800 font-semibold mb-1">
               Total da corrida
             </Text>
@@ -159,6 +172,39 @@ export const RideCompletedScreen: React.FC<RideFinishedScreenRoutePros> = ({
               O valor final da corrida.
             </Text>
           </View>
+
+          {/* PROVA DE ENTREGA */}
+          {rideDetails.proof_dropoff_photo && (
+            <View className="mb-2">
+              <Text className="text-lg font-semibold text-gray-800 mb-3">
+                Prova de Entrega
+              </Text>
+
+              <TouchableOpacity
+                activeOpacity={0.9}
+                onPress={() => setIsImageViewerVisible(true)}
+                className="w-full h-40 rounded-2xl overflow-hidden bg-gray-200 border border-gray-100"
+              >
+                <Image
+                  source={{ uri: rideDetails.proof_dropoff_photo }}
+                  className="w-full h-full"
+                  resizeMode="cover"
+                />
+                <View className="absolute bottom-0 left-0 right-0 bg-black/40 py-2 items-center">
+                  <Text className="text-white text-xs font-medium">
+                    Ver em tela cheia
+                  </Text>
+                </View>
+              </TouchableOpacity>
+
+              <ImageView
+                images={[{ uri: rideDetails.proof_dropoff_photo }]}
+                imageIndex={0}
+                visible={isImageViewerVisible}
+                onRequestClose={() => setIsImageViewerVisible(false)}
+              />
+            </View>
+          )}
         </View>
       </View>
 
@@ -223,6 +269,6 @@ export const RideCompletedScreen: React.FC<RideFinishedScreenRoutePros> = ({
           </Text>
         </View>
       )}
-    </View>
+    </ScrollView>
   )
 }
