@@ -8,6 +8,7 @@ import RideFinishedScreen from '@/screens/Rides/RideFinished';
 import RideChooseScreen from '@/screens/Rides/RideChoose';
 import RideHomeScreen from '@/screens/Rides/RideHome';
 import RideFlowScreen from '@/screens/Rides/RideFlow';
+import RideChatScreen from '@/screens/Rides/RideChat';
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
 
@@ -36,6 +37,10 @@ export default function HomeRouter() {
       <Stack.Screen
         name={ROUTES.Rides.FINISHED}
         component={RideFinishedScreen}
+      />
+      <Stack.Screen
+        name={ROUTES.Rides.CHAT}
+        component={RideChatScreen}
       />
     </Stack.Navigator>
   );

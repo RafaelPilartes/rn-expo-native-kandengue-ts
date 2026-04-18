@@ -48,6 +48,7 @@ const ROUTES = {
     FLOW: 'RideFlowScreen',
     SUMMARY: 'RideSummaryScreen',
     FINISHED: 'RideFinishedScreen',
+    CHAT: 'RideChatScreen',
     REQUESTS: 'RequestsScreen',
     TRANSFERS: 'TransfersScreen'
   },

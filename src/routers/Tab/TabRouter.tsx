@@ -21,6 +21,7 @@ const hiddenHomeTabRoutes = [
   ROUTES.Rides.FLOW,
   ROUTES.Rides.SUMMARY,
   ROUTES.Rides.FINISHED,
+  ROUTES.Rides.CHAT,
   ROUTES.HomeStack.NOTIFICATIONS
 ]
 const hiddenHistoryTabRoutes = [ROUTES.HistoryStack.HISTORY_DETAILS]

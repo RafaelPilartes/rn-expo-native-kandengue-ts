@@ -1,97 +1,104 @@
-import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
-import { StackScreenProps } from '@react-navigation/stack';
-import { CustomPlace } from './places';
-import { RideFareInterface } from '@/interfaces/IRideFare';
-import { RideInterface } from '@/interfaces/IRide';
+import { BottomTabScreenProps } from '@react-navigation/bottom-tabs'
+import { StackScreenProps } from '@react-navigation/stack'
+import { CustomPlace } from './places'
+import { RideFareInterface } from '@/interfaces/IRideFare'
+import { RideInterface } from '@/interfaces/IRide'
 
 // Tipos para cada roteador
 export type AuthStackParamList = {
-  LangScreen: undefined;
-  OnboardingScreen: undefined;
-  PermissionsScreen: undefined;
-  WelcomeScreen: undefined;
-  SignInScreen: undefined;
-  SignUpScreen: undefined;
+  LangScreen: undefined
+  OnboardingScreen: undefined
+  PermissionsScreen: undefined
+  WelcomeScreen: undefined
+  SignInScreen: undefined
+  SignUpScreen: undefined
 
   CreatePasswordScreen: {
-    fullName: string;
-    email: string;
-    phoneNumber: string;
-  };
+    fullName: string
+    email: string
+    phoneNumber: string
+  }
   SmsVerificationScreen: {
-    fullName: string;
-    email: string;
-    phoneNumber: string;
-    password: string;
-    verificationId: string;
-  };
-  VerificationSuccessScreen: undefined;
-  ForgotPasswordScreen: undefined;
-  ForgotPasswordSuccessScreen: undefined;
-  NewPasswordScreen: undefined;
-  NewPasswordSuccessScreen: undefined;
+    fullName: string
+    email: string
+    phoneNumber: string
+    password: string
+    verificationId: string
+  }
+  VerificationSuccessScreen: undefined
+  ForgotPasswordScreen: undefined
+  ForgotPasswordSuccessScreen: undefined
+  NewPasswordScreen: undefined
+  NewPasswordSuccessScreen: undefined
 
-  PinScreen: undefined;
-  PinSetupScreen: undefined;
-};
+  PinScreen: undefined
+  PinSetupScreen: undefined
+}
 
 export type MainTabParamList = {
-  HomeTab: NavigatorScreenParams<HomeStackParamList>;
-  MapTab: undefined;
-  HistoryTab: NavigatorScreenParams<HistoryStackParamList>;
-  ProfileTab: NavigatorScreenParams<ProfileStackParamList>;
-};
+  HomeTab: NavigatorScreenParams<HomeStackParamList>
+  MapTab: undefined
+  HistoryTab: NavigatorScreenParams<HistoryStackParamList>
+  ProfileTab: NavigatorScreenParams<ProfileStackParamList>
+}
 
 export type HomeStackParamList = {
-  HomeScreen: undefined;
-  NotificationsScreen: undefined;
+  HomeScreen: undefined
+  NotificationsScreen: undefined
 
-  RideHomeScreen: undefined;
-  RideChooseScreen: undefined;
-  RideFlowScreen: undefined;
+  RideHomeScreen: undefined
+  RideChooseScreen: undefined
+  RideFlowScreen: undefined
   RideSummaryScreen: {
-    id?: string;
+    id?: string
     location: {
-      pickup: CustomPlace;
-      dropoff: CustomPlace;
-    };
+      pickup: CustomPlace
+      dropoff: CustomPlace
+    }
     receiver: {
-      name: string;
-      phone: string;
-    };
+      name: string
+      phone: string
+    }
     article: {
-      type: string;
-      description: string;
-    };
+      type: string
+      description: string
+    }
     // Extended fields from the new unified flow
-    sender?: { name: string; phone: string };
-    pickupOption?: 'door' | 'curb';
-    paymentMethod?: 'cash' | 'card' | 'wallet';
-    driverInstructions?: string;
-  };
+    sender?: { name: string; phone: string }
+    pickupOption?: 'door' | 'curb'
+    paymentMethod?: 'cash' | 'card' | 'wallet'
+    driverInstructions?: string
+  }
   RideFinishedScreen: {
-    rideId?: string;
-    rideDetails: RideInterface;
-  };
-};
+    rideId?: string
+    rideDetails: RideInterface
+  }
+
+  RideChatScreen: {
+    rideId: string
+    chatId?: string 
+    driver: { id: string; name: string; avatar?: string }
+    passenger: { id: string; name: string; avatar?: string }
+  }
+}
 
 export type HistoryStackParamList = {
-  HistoryScreen: undefined;
-};
+  HistoryScreen: undefined
+}
 
 export type ProfileStackParamList = {
-  ProfileScreen: undefined;
-  EditProfileScreen: undefined;
-  AboutScreen: undefined;
-  FaqScreen: undefined;
-  ComplaintsScreen: undefined;
-  HelpScreen: undefined;
-  PrivacyPolicyScreen: undefined;
-  TermsConditionsScreen: undefined;
-};
+  ProfileScreen: undefined
+  EditProfileScreen: undefined
+  AboutScreen: undefined
+  FaqScreen: undefined
+  ComplaintsScreen: undefined
+  HelpScreen: undefined
+  PrivacyPolicyScreen: undefined
+  TermsConditionsScreen: undefined
+}
 
 // Merge de todos os tipos
 export type RootStackParamList = {
-  AuthStack: NavigatorScreenParams<AuthStackParamList>;
-  Main: NavigatorScreenParams<MainTabParamList>;
-};
+  AuthStack: NavigatorScreenParams<AuthStackParamList>
+  Main: NavigatorScreenParams<MainTabParamList>
+}

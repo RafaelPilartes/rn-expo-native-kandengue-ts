@@ -25,6 +25,8 @@ import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
 import { RideInterface } from '@/interfaces/IRide'
 import { formatMoney } from '@/utils/formattedNumber'
 import { RideFareInterface } from '@/interfaces/IRideFare'
+import { useNavigation } from '@react-navigation/native'
+import ROUTES from '@/constants/routes'
 
 type Props = {
   rideData: RideInterface
@@ -102,22 +104,25 @@ export const DriverRideSheet = forwardRef<BottomSheetModal, Props>(
       }
     }
 
+    const navigation = useNavigation<any>()
+    
     const handleMessage = () => {
-      if (driver?.phone) {
-        showAlert(
-          'Enviar mensagem',
-          `Deseja enviar mensagem para ${driver.phone}?`,
-          'info',
-          [
-            { text: 'Cancelar', style: 'cancel' },
-            {
-              text: 'Enviar',
-              onPress: () => Linking.openURL(`sms:${driver.phone}`)
-            }
-          ]
-        )
+      if (rideData.user?.id && rideData.driver?.id) {
+        navigation.navigate(ROUTES.Rides.CHAT, {
+          rideId: rideData.id,
+          driver: {
+            id: rideData.driver.id,
+            name: rideData.driver.name,
+            avatar: rideData.driver.photo,
+          },
+          passenger: {
+            id: rideData.user.id,
+            name: rideData.user.name,
+            avatar: rideData.user.photo,
+          }
+        })
       } else {
-        showAlert('Info', 'Número do entregador não disponível', 'info')
+        showAlert('Erro', 'Participantes não disponíveis no momento', 'error')
       }
     }
 

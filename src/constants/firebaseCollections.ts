@@ -39,6 +39,14 @@ export const firebaseCollections = {
     single: (rideId: string) => `rides/${rideId}`,
   },
 
+  // ============================================
+  // CHATS
+  chats: {
+    root: 'chats',
+    single: (chatId: string) => `chats/${chatId}`,
+    messages: (chatId: string) => `chats/${chatId}/messages`
+  },
+
   // =============================================
   // RIDERATES
   rideRates: {
