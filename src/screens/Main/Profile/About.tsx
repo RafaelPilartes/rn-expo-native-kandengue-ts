@@ -13,7 +13,6 @@ import {
   ChevronRight,
   ExternalLink
 } from 'lucide-react-native'
-import { useNavigation } from '@react-navigation/native'
 import { PageHeader } from '@/components/PageHeader'
 import { useAlert } from '@/context/AlertContext'
 import { contentAbout } from '@/data/appContent'
@@ -140,7 +139,7 @@ export default function AboutScreen() {
             onPress={() => toggleSection('story')}
           >
             <View className="flex-row justify-between items-center">
-              <Text className="text-xl font-bold text-gray-900">
+              <Text className="text-lg font-bold text-gray-900">
                 Nossa História
               </Text>
               <ChevronRight
@@ -167,7 +166,7 @@ export default function AboutScreen() {
             onPress={() => toggleSection('mission')}
           >
             <View className="flex-row justify-between items-center">
-              <Text className="text-xl font-bold text-gray-900">
+              <Text className="text-lg font-bold text-gray-900">
                 Nossa Missão
               </Text>
               <ChevronRight
@@ -213,7 +212,7 @@ export default function AboutScreen() {
             onPress={() => toggleSection('vision')}
           >
             <View className="flex-row justify-between items-center">
-              <Text className="text-xl font-bold text-gray-900">
+              <Text className="text-lg font-bold text-gray-900">
                 Nossa Visão
               </Text>
               <ChevronRight
@@ -240,7 +239,7 @@ export default function AboutScreen() {
             onPress={() => toggleSection('values')}
           >
             <View className="flex-row justify-between items-center">
-              <Text className="text-xl font-bold text-gray-900">
+              <Text className="text-lg font-bold text-gray-900">
                 Nossos Valores
               </Text>
               <ChevronRight
@@ -268,7 +267,7 @@ export default function AboutScreen() {
         {/* Informações Técnicas */}
         <View className="px-6 mt-4">
           <View className="bg-white rounded-2xl p-6">
-            <Text className="text-xl font-bold text-gray-900 mb-4">
+            <Text className="text-lg font-bold text-gray-900 mb-4">
               Informações do App
             </Text>
 
@@ -293,7 +292,7 @@ export default function AboutScreen() {
         {/* Links Rápidos */}
         <View className="px-6 mt-4">
           <View className="bg-white rounded-2xl p-6">
-            <Text className="text-xl font-bold text-gray-900 mb-4">
+            <Text className="text-lg font-bold text-gray-900 mb-4">
               Links Úteis
             </Text>
 

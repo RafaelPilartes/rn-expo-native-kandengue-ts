@@ -1,3 +1,9 @@
+import {
+  EMAIL_SUPPORT,
+  VOICE_NUMBER,
+  WHATSAPP_NUMBER
+} from '@/constants/config'
+
 export const contentAbout = {
   history: `Kandengue Atrevido (KA) é uma empresa jovem e inovadora que foi criada com o objectivo de oferecer serviços de transporte, especialmente no ramo de entregas. Com uma equipe de jovens empreendedores, a empresa busca trazer uma abordagem fresca e ousada para o sector.
 
@@ -7,17 +13,17 @@ Com uma visão empreendedora e uma equipe dedicada, a Kandengue Atrevido (KA) te
   mission: `Oferecer soluções logísticas e eficientes para os nossos clientes, garantindo entregas rápidas e seguras, com o compromisso de conectar pessoas e negócios em toda Angola.`,
   vision: `Oferecer soluções logísticas e eficientes para os nossos clientes, garantindo entregas rápidas e seguras, com o compromisso de conectar pessoas e negócios em toda Angola.`,
   values: `Promover a humildade, semear o respeito, estimular a pontualidade e servir com qualidade.`,
-  slogan: `Kandengue Atrevido, chegar atrasado? Duvido!`,
-};
+  slogan: `Kandengue Atrevido, chegar atrasado? Duvido!`
+}
 
 export const contentHelp = {
   attendanceChannels: {
-    phone: '928 888 745',
-    whatsapp: '928 888 745',
-    email: 'suporte@kandengueatrevido.com',
+    phone: VOICE_NUMBER,
+    whatsapp: WHATSAPP_NUMBER,
+    email: EMAIL_SUPPORT
   },
-  schedule: 'Das 8h às 22h, todos os dias',
-};
+  schedule: 'Das 8h às 22h, todos os dias'
+}
 
 export const contentPrivacyPolicy = [
   {
@@ -135,7 +141,7 @@ O utilizador pode gerir as permissões de cookies nas configurações do disposi
     iconName: 'CheckCircle',
     content: `Ao utilizar a App da Kandengue Atrevido, o utilizador declara que leu, compreendeu e concorda com esta Política de Privacidade.`
   }
-];
+]
 
 export const contentTermsConditions = [
   {
@@ -198,7 +204,7 @@ Deveres do Kandengue Atrevido:
 - Atrasos motivados por condições de trânsito ou de força maior.
 - Comportamentos isolados perpetrados por parceiros independentes.`
   }
-];
+]
 
 export const contentFaq = [
   {
@@ -243,4 +249,4 @@ export const contentFaq = [
     question: 'Qual é o horário em que posso encontrar carros disponíveis?',
     answer: `O aplicativo opera 24 horas por dia. Contudo, entre as 8h e as 22h, o volume de motoristas e o suporte oficial do Kandengue Atrevido encontram-se na sua máxima capacidade.`
   }
-];
+]

@@ -29,6 +29,7 @@ import type {
   ContactPreference
 } from '@/core/interfaces/IComplaintRepository'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { WHATSAPP_NUMBER, EMAIL_SUPPORT } from '@/constants/config'
 
 export default function ComplaintsScreen() {
   const navigation = useNavigation<any>()
@@ -442,12 +443,12 @@ export default function ComplaintsScreen() {
         <View className="mt-6 bg-gray-100 rounded-xl p-4 border border-gray-200">
           <View className="flex-row items-center justify-center mb-1">
             <Text className="text-gray-700 text-sm font-medium">
-              Atendimento 24h: +244 923 456 789
+              Atendimento 24h: {WHATSAPP_NUMBER}
             </Text>
           </View>
           <View className="flex-row items-center justify-center mb-1">
             <Text className="text-gray-700 text-sm font-medium">
-              Email: support@kandengueatrevido.com
+              Email: {EMAIL_SUPPORT}
             </Text>
           </View>
           <View className="flex-row items-center justify-center mt-2">

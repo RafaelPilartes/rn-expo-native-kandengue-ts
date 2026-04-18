@@ -22,6 +22,8 @@ export type RideDetailsType = {
   pickup_option?: PickupOptionType
   // Payment method chosen by the user
   payment_method?: PaymentMethodType
+  // Instructions for the driver
+  driver_instructions?: string
 }
 
 export type RateType = {

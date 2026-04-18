@@ -187,7 +187,8 @@ export default function RideSummaryScreen() {
             ? { name: sender.name, phone: sender.phone }
             : undefined,
           pickup_option: pickupOption,
-          payment_method: paymentMethod
+          payment_method: paymentMethod,
+          driver_instructions: driverInstructions
         },
         fare: fareDetailsTemp as RideFareInterface,
         status: 'idle' as const

@@ -98,7 +98,9 @@ export default function HelpScreen() {
       questions: [
         {
           id: 'safety-1',
-          question: 'Em caso de emergência durante a corrida, use o botão de alerta para avisar seus contatos de confiança e as autoridades.'
+          question: 'Botão de Pânico',
+          answer:
+            'Em caso de emergência durante a corrida, use o botão de pânico para alertar seus contatos de confiança e as autoridades.'
         }
       ]
     }
@@ -149,7 +151,9 @@ export default function HelpScreen() {
               </View>
               <View className="ml-4 flex-1">
                 <Text className="font-semibold text-gray-900">Ligar agora</Text>
-                <Text className="text-gray-500 text-xs">{contentHelp.attendanceChannels.phone}</Text>
+                <Text className="text-gray-500 text-xs">
+                  {contentHelp.attendanceChannels.phone}
+                </Text>
               </View>
             </TouchableOpacity>
 
