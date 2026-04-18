@@ -281,11 +281,18 @@ export default function RideSummaryScreen() {
 
   // LIMPAR AO SAIR DA TELA
   useEffect(() => {
-    const unsubscribe = navigation.addListener('blur', () => {
+    const unsubscribeBlur = navigation.addListener('blur', () => {
       bottomSheetRef.current?.close()
     })
 
-    return unsubscribe
+    const unsubscribeFocus = navigation.addListener('focus', () => {
+      bottomSheetRef.current?.present()
+    })
+
+    return () => {
+      unsubscribeBlur()
+      unsubscribeFocus()
+    }
   }, [navigation])
 
   // PREVENIR SAIDA DA TELA
