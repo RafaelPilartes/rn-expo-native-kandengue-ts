@@ -10,6 +10,8 @@ import ROUTES from '@/constants/routes'
 import { useAlert } from '@/context/AlertContext'
 import { useUserState } from '../hooks/useUserState'
 import { useRidesViewModel } from '@/viewModels/RideViewModel'
+import { usePushNotifications } from '@/hooks/usePushNotifications'
+import { displayNotification } from '@/services/notifications/notifee.service'
 
 interface AppContextReturn {
   // Estado
@@ -42,6 +44,20 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const { user } = useAuthStore()
 
   const { showAlert } = useAlert()
+
+  // Push notifications — registers FCM token once user is authenticated
+  usePushNotifications({
+    userId: user?.firebase_uid,
+    role: 'passenger',
+    onForegroundMessage: message => {
+      // App is in foreground: FCM suppresses the system banner.
+      // Use notifee to show a real heads-up notification with sound (Uber/Yango style).
+      const title = message.notification?.title ?? 'Kandengue Atrevido'
+      const body = message.notification?.body ?? ''
+      const data = message.data as Record<string, string> | undefined
+      displayNotification(title, body, data)
+    },
+  })
 
   // Estados via Custom Hooks
   const { currentUserData } = useUserState()

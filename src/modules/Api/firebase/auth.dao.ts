@@ -33,6 +33,7 @@ import { UserInterface } from '@/interfaces/IUser'
 import { convertFirestoreTimestamp } from '@/utils/formatDate'
 import { generateId } from '@/helpers/generateId'
 import { mapFirebaseError } from '@/helpers/mapFirebaseError'
+import { PushNotificationService } from '@/services/notifications/pushNotification.service'
 
 export class FirebaseAuthDAO implements IAuthRepository {
   private auth = auth
@@ -177,6 +178,14 @@ export class FirebaseAuthDAO implements IAuthRepository {
   }
 
   async logout(): Promise<void> {
+    try {
+      // Clean up FCM token before invalidating the session
+      await PushNotificationService.unregisterDevice()
+    } catch {
+      // Non-fatal: proceed with logout even if push cleanup fails
+      console.log('Erro ao remover token FCM')
+    }
+
     try {
       await signOut(this.auth)
       console.log('Logout realizado com sucesso')

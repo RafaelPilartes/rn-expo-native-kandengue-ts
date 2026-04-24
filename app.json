@@ -76,6 +76,16 @@
     "plugins": [
       "@react-native-firebase/app",
       "@react-native-firebase/auth",
+      [
+        "@react-native-firebase/messaging",
+        {
+          "ios": {
+            "permissions": ["alert", "badge", "sound"]
+          }
+        }
+      ],
+      "./plugins/withFcmDefaultChannel",
+      "./plugins/withNotifeeGradle",
       "expo-maps",
       [
         "expo-build-properties",
