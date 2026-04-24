@@ -1,6 +1,6 @@
 // src/screens/Profile.tsx
-import React from 'react'
-import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native'
+import React, { useState } from 'react'
+import { View, Text, TouchableOpacity, ScrollView, Image, ActivityIndicator } from 'react-native'
 import {
   Edit,
   HelpCircle,
@@ -21,28 +21,39 @@ export default function Profile() {
   const navigation = useNavigation<any>()
 
   const { logout } = useAuthViewModel()
-
   const { user } = useAuthStore()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   const handleLogout = async () => {
-    await logout.mutateAsync()
+    setIsLoggingOut(true)
+    try {
+      await logout.mutateAsync()
+    } finally {
+      setIsLoggingOut(false)
+    }
   }
 
   const MenuItem = ({
     icon: Icon,
     label,
-    onPress
+    onPress,
+    isLoading
   }: {
     icon: any
     label: string
     onPress: () => void
+    isLoading?: boolean
   }) => (
     <TouchableOpacity
       onPress={onPress}
+      disabled={isLoading}
       className="flex-row items-center px-4 py-3 bg-white border-b border-gray-100"
     >
-      <Icon size={20} color="black" />
-      <Text className="ml-3 text-base text-gray-800">{label}</Text>
+      <Icon size={20} color={isLoading ? '#9ca3af' : 'black'} />
+      <Text className={`ml-3 text-base flex-1 ${isLoading ? 'text-gray-400' : 'text-gray-800'}`}>
+        {isLoading ? 'Saindo...' : label}
+      </Text>
+      {isLoading && <ActivityIndicator size="small" color="#111827" />}
     </TouchableOpacity>
   )
 
@@ -110,7 +121,12 @@ export default function Profile() {
 
         {/* Logout */}
         <View className="bg-white mb-4 px-6 rounded-b-3xl">
-          <MenuItem icon={LogOut} label="Sair" onPress={handleLogout} />
+          <MenuItem 
+            icon={LogOut} 
+            label="Sair" 
+            onPress={handleLogout} 
+            isLoading={isLoggingOut}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>
