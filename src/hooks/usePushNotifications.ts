@@ -22,6 +22,12 @@ interface UsePushNotificationsOptions {
   onForegroundMessage?: (
     message: FirebaseMessagingTypes.RemoteMessage,
   ) => void
+
+  /**
+   * Called when the OS notification permission is denied/blocked.
+   * Use this to show an alert directing the user to app settings.
+   */
+  onPermissionBlocked?: () => void
 }
 
 /**
@@ -36,6 +42,7 @@ export function usePushNotifications({
   userId,
   role,
   onForegroundMessage,
+  onPermissionBlocked,
 }: UsePushNotificationsOptions): void {
   const tokenRefreshUnsubRef = useRef<(() => void) | null>(null)
   const foregroundUnsubRef = useRef<(() => void) | null>(null)
@@ -47,7 +54,14 @@ export function usePushNotifications({
 
     async function setup() {
       const granted = await PushNotificationService.requestPermission()
-      if (!granted || cancelled) return
+
+      if (!granted) {
+        // Notify the consumer that permission is blocked
+        onPermissionBlocked?.()
+        return
+      }
+
+      if (cancelled) return
 
       await PushNotificationService.getAndRegisterToken()
       if (cancelled) return

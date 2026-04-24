@@ -1,5 +1,6 @@
 // src/providers/AppProvider.tsx
 import React, { createContext, useContext, useCallback, ReactNode } from 'react'
+import { Linking } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { HomeStackParamList, MainTabParamList } from '@/types/navigation'
@@ -56,6 +57,20 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       const body = message.notification?.body ?? ''
       const data = message.data as Record<string, string> | undefined
       displayNotification(title, body, data)
+    },
+    onPermissionBlocked: () => {
+      showAlert(
+        'Notificações Bloqueadas',
+        'As notificações estão desativadas. Não receberá avisos sobre suas corridas e promoções. Por favor, ative nas configurações do app.',
+        'warning',
+        [
+          { text: 'Agora não', style: 'cancel' },
+          {
+            text: 'Abrir Configurações',
+            onPress: () => Linking.openSettings()
+          }
+        ]
+      )
     },
   })
 

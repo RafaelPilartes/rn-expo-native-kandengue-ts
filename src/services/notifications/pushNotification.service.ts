@@ -20,13 +20,11 @@ import ApiDAO from '@/modules/Api/rest/Api.dao'
 
 type NotificationRole = 'driver' | 'passenger'
 
-// FCM Topics — match o NotificationCategory do backend
+// FCM Topics — MUST match backend fcm-topics.ts exactly
 const TOPICS = {
-  ALL: 'all_users',
-  DRIVERS: 'drivers',
-  PASSENGERS: 'passengers',
-  PROMOTIONS: 'promotions',
-  RIDE_UPDATES: 'ride_updates',
+  ALL: 'all-users',
+  DRIVERS: 'drivers-all',
+  PASSENGERS: 'passengers-all',
 } as const
 
 /**
@@ -104,22 +102,20 @@ export const PushNotificationService = {
   /**
    * Subscribes the device to FCM topics based on user role.
    * Topics allow O(1) broadcast sends without iterating all tokens.
-   * All users get `all_users` + `promotions`. Role-specific topics are added on top.
+   * All users get `all-users`. Role-specific topics are added on top.
    */
   async subscribeToTopics(role: NotificationRole): Promise<void> {
     try {
       const messaging = getMessaging()
 
-      // Common topics for all users
+      // Common topic for all users
       await subscribeToTopic(messaging, TOPICS.ALL)
-      await subscribeToTopic(messaging, TOPICS.PROMOTIONS)
 
       // Role-specific topics
       if (role === 'driver') {
         await subscribeToTopic(messaging, TOPICS.DRIVERS)
       } else {
         await subscribeToTopic(messaging, TOPICS.PASSENGERS)
-        await subscribeToTopic(messaging, TOPICS.RIDE_UPDATES)
       }
 
       console.info('[Push] Subscribed to topics for role:', role)
@@ -150,10 +146,8 @@ export const PushNotificationService = {
 
       // Unsubscribe from all topics
       await unsubscribeFromTopic(messaging, TOPICS.ALL)
-      await unsubscribeFromTopic(messaging, TOPICS.PROMOTIONS)
       await unsubscribeFromTopic(messaging, TOPICS.DRIVERS)
       await unsubscribeFromTopic(messaging, TOPICS.PASSENGERS)
-      await unsubscribeFromTopic(messaging, TOPICS.RIDE_UPDATES)
 
       // Delete local token
       await deleteToken(messaging)

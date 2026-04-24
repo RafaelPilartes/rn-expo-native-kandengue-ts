@@ -181,9 +181,9 @@ export class FirebaseAuthDAO implements IAuthRepository {
     try {
       // Clean up FCM token before invalidating the session
       await PushNotificationService.unregisterDevice()
-    } catch {
+    } catch (error: any) {
       // Non-fatal: proceed with logout even if push cleanup fails
-      console.log('Erro ao remover token FCM')
+      console.log('Erro ao remover token FCM', error)
     }
 
     try {
