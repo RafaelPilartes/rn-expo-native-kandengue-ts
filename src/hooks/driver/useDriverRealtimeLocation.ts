@@ -26,9 +26,9 @@ export function useDriverRealtimeLocation(
     }
 
     listenDriverRealtime(driverId, (driver: DriverEntity) => {
-      if (!driver.location) return
+      if (!driver.current_location) return
 
-      const newLoc = driver.location
+      const newLoc = driver.current_location
       const prevLoc = previousLocationRef.current
 
       // Calculate heading from previous to current position
