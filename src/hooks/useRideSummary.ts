@@ -10,6 +10,7 @@ import { useFareCalculation } from './ride/useFareCalculation'
 import { RideStatusType } from '@/types/enum'
 import { isWithinTimeRange, timeToMinutes } from '@/helpers/rideTime'
 import { RateType } from '@/types/ride'
+import { useDriverRealtimeLocation } from './driver/useDriverRealtimeLocation'
 
 export function useRideSummary(rideId?: string) {
   const initial: RideStatusType = 'idle'
@@ -30,16 +31,13 @@ export function useRideSummary(rideId?: string) {
     useRideRoute(ride?.pickup, ride?.dropoff)
 
   // ROTA DO MOTORISTA (se existir)
-  // Stabilize driver's last position by value (lat/lng), not by object
-  // reference. Firestore re-creates the tracking object on every snapshot,
-  // causing useRideRoute to fire even when the driver hasn't moved.
-  const lastDriverPath = rideTracking?.path[rideTracking.path.length - 1]
+  const driverLocation = useDriverRealtimeLocation(ride?.driver?.id)
+
   const stableDriverPosition = useMemo(() => {
-    if (!lastDriverPath?.latitude || !lastDriverPath?.longitude) return null
-    return { latitude: lastDriverPath.latitude, longitude: lastDriverPath.longitude }
-    // Primitive values as keys — only re-creates object when coordinates actually change
+    if (!driverLocation?.latitude || !driverLocation?.longitude) return null
+    return { latitude: driverLocation.latitude, longitude: driverLocation.longitude }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastDriverPath?.latitude, lastDriverPath?.longitude])
+  }, [driverLocation?.latitude, driverLocation?.longitude])
 
   const {
     routeCoords: routeCoordsDriver,

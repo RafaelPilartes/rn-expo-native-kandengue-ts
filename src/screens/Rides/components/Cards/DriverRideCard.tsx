@@ -105,7 +105,7 @@ export const DriverRideSheet = forwardRef<BottomSheetModal, Props>(
     }
 
     const navigation = useNavigation<any>()
-    
+
     const handleMessage = () => {
       if (rideData.user?.id && rideData.driver?.id) {
         navigation.navigate(ROUTES.Rides.CHAT, {
@@ -113,12 +113,12 @@ export const DriverRideSheet = forwardRef<BottomSheetModal, Props>(
           driver: {
             id: rideData.driver.id,
             name: rideData.driver.name,
-            avatar: rideData.driver.photo,
+            avatar: rideData.driver.photo
           },
           passenger: {
             id: rideData.user.id,
             name: rideData.user.name,
-            avatar: rideData.user.photo,
+            avatar: rideData.user.photo
           }
         })
       } else {
@@ -255,7 +255,7 @@ export const DriverRideSheet = forwardRef<BottomSheetModal, Props>(
                     <Phone color="white" size={18} />
                   </TouchableOpacity>
                   <TouchableOpacity
-                    className="w-10 h-10 rounded-full bg-blue-500 items-center justify-center"
+                    className="w-10 h-10 rounded-full bg-primary-200 items-center justify-center"
                     onPress={handleMessage}
                   >
                     <MessageCircle color="white" size={18} />

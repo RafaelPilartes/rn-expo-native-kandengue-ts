@@ -228,7 +228,7 @@ export default function RideFlowScreen() {
       )}
 
       {/* Full-Screen Map wrapped to intercept touches instantly */}
-      <View 
+      <View
         className="flex-1"
         onTouchStart={() => {
           if (mapPickingMode) {
@@ -252,7 +252,7 @@ export default function RideFlowScreen() {
                   {
                     id: 'flow-route',
                     coordinates: routeCoordsFlow,
-                    color: '#111827',
+                    color: '#e0212d',
                     width: 4
                   }
                 ]
