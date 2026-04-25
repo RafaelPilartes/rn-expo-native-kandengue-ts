@@ -16,7 +16,7 @@ import { useLocation } from '@/context/LocationContext'
 import { useRideFlowStore } from '@/storage/store/useRideFlowStore'
 import { useRideRoute } from '@/hooks/ride/useRideRoute'
 import { useFareCalculation } from '@/hooks/ride/useFareCalculation'
-import { useRideSummary } from '@/hooks/useRideSummary'
+import { useRideSummary } from '@/hooks/ride/useRideSummary'
 import { getAddressFromCoords } from '@/services/google/googleApi'
 import { CustomPlace } from '@/types/places'
 
@@ -77,7 +77,11 @@ export default function RideFlowScreen() {
   }, [mapPickingMode])
 
   // Prefetch ride rates for fare calculation
-  const { rideRates } = useRideSummary(undefined)
+  const { rideRates } = useRideSummary({
+    rideId: undefined,
+    previewPickup: pickup ?? { latitude: 0, longitude: 0 },
+    previewDropoff: dropoff ?? { latitude: 0, longitude: 0 }
+  })
 
   // Calculate route when both locations are selected
   const {

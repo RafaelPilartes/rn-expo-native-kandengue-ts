@@ -35,12 +35,8 @@ export const RideCompletedScreen: React.FC<RideFinishedScreenRoutePros> = ({
     if (isNavigating) return
 
     setIsNavigating(true)
-    console.log('🔄 Navegando para Home...')
-
-    // navigationHomeStack.navigate(ROUTES.HomeStack.HOME)
     ;(navigation as any).navigate(ROUTES.HomeStack.HOME)
 
-    // Reset após navegação
     setTimeout(() => setIsNavigating(false), 1000)
   }, [isNavigating, navigation])
 
@@ -48,38 +44,21 @@ export const RideCompletedScreen: React.FC<RideFinishedScreenRoutePros> = ({
     if (isNavigating) return
 
     setIsNavigating(true)
-    console.log('🔄 Navegando para Rating...')
-
-    // navigationHomeStack.navigate(ROUTES.HomeStack.HOME)
     ;(navigation as any).navigate(ROUTES.HomeStack.HOME)
-    // navigationMainStack.navigate(ROUTES.Ride.RIDE_RATING, {
-    //   rideId,
-    //   rideDetails,
-    // });
 
     setTimeout(() => setIsNavigating(false), 1000)
-  }, [isNavigating, navigation, rideId, rideDetails])
+  }, [isNavigating, navigation])
 
   const handleViewHistory = useCallback(() => {
     if (isNavigating) return
 
     setIsNavigating(true)
-    console.log('🔄 Navegando para Histórico...')
-
-    // navigationMainStack.navigate(ROUTES.MainTab.HISTORY)
     ;(navigation as any).navigate(ROUTES.MainTab.HISTORY)
 
     setTimeout(() => setIsNavigating(false), 1000)
   }, [isNavigating, navigation])
 
-  // VERIFICAR SE O COMPONENTE ESTÁ SENDO RENDERIZADO MÚLTIPLAS VEZES
-  React.useEffect(() => {
-    console.log('🎯 RideCompletedScreen renderizado')
 
-    return () => {
-      console.log('🧹 RideCompletedScreen desmontado')
-    }
-  }, [])
 
   return (
     <ScrollView
@@ -260,15 +239,7 @@ export const RideCompletedScreen: React.FC<RideFinishedScreenRoutePros> = ({
         </Text>
       </TouchableOpacity>
 
-      {/* DEBUG - Apenas em desenvolvimento */}
-      {__DEV__ && (
-        <View className="mt-4 p-2 bg-yellow-100 rounded-lg">
-          <Text className="text-yellow-800 text-xs text-center">
-            🔍 Debug: {isNavigating ? 'Navegando...' : 'Pronto'} |
-            Renderizações: {React.useRef(0).current++}
-          </Text>
-        </View>
-      )}
+
     </ScrollView>
   )
 }

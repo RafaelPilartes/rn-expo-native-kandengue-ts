@@ -1,4 +1,3 @@
-// src/screens/hooks/useRideRealtime.ts
 import { useEffect, useState } from 'react'
 import { useRidesViewModel } from '@/viewModels/RideViewModel'
 import { RideInterface } from '@/interfaces/IRide'
@@ -13,78 +12,67 @@ export function useRideRealtime(rideId?: string) {
   } = useRideTrackingsViewModel()
 
   const [ride, setRide] = useState<RideInterface | null>(null)
-  const [errorRide, setErrorRide] = useState<string | null>(null)
   const [isLoadingRide, setIsLoadingRide] = useState(true)
 
   const [rideTracking, setRideTracking] =
     useState<RideTrackingsInterface | null>(null)
   const [isLoadingTracking, setIsLoadingTracking] = useState(true)
-  const [errorRideTracking, setErrorRideTracking] = useState<string | null>(
-    null
-  )
 
   useEffect(() => {
     if (!rideId) {
       setRide(null)
       setIsLoadingRide(false)
+      setRideTracking(null)
+      setIsLoadingTracking(false)
       return
     }
 
-    const setupRealtimeListener = async () => {
+    // Fetch initial ride data + setup realtime listener
+    const initRide = async () => {
       try {
         setIsLoadingRide(true)
-        setErrorRide(null)
-
-        // Primeiro busca os dados iniciais
         const initialRide = await fetchRideById(rideId)
         setRide(initialRide)
-        setIsLoadingRide(false)
       } catch (err) {
         console.error('Erro ao buscar corrida:', err)
-        setErrorRide('Erro ao carregar dados da corrida')
+      } finally {
         setIsLoadingRide(false)
       }
     }
 
-    const setupRealtimeTrackingListener = async () => {
+    // Fetch initial tracking data + setup realtime listener
+    const initTracking = async () => {
       try {
         setIsLoadingTracking(true)
-        setErrorRideTracking(null)
-
-        // Primeiro busca os dados iniciais
-        const initialRideTracking = await fetchAllRideTrackingsByField(
-          'ride_id',
-          rideId
-        )
-
-        if (!initialRideTracking?.data) {
-          setRideTracking(null)
-          setIsLoadingTracking(false)
-          return
-        }
-
-        setRideTracking(initialRideTracking?.data[0])
-        setIsLoadingTracking(false)
+        const result = await fetchAllRideTrackingsByField('ride_id', rideId)
+        setRideTracking(result?.data?.[0] ?? null)
       } catch (err) {
-        console.error('Erro ao buscar corrida:', err)
-        setErrorRideTracking('Erro ao carregar dados da corrida')
+        console.error('Erro ao buscar tracking:', err)
+      } finally {
         setIsLoadingTracking(false)
       }
     }
 
-    setupRealtimeListener()
-    setupRealtimeTrackingListener()
+    initRide()
+    initTracking()
 
-    listenRideRealtime(rideId, setRide as any)
-    listenRideTrackingsByField('ride_id', rideId, setRideTracking as any)
+    // Setup realtime listeners
+    // Note: ViewModels manage listener cleanup internally via refs
+    listenRideRealtime(rideId, (updatedRide) => {
+      setRide(updatedRide as unknown as RideInterface)
+    })
+
+    listenRideTrackingsByField('ride_id', rideId, (updatedTracking) => {
+      setRideTracking(updatedTracking as unknown as RideTrackingsInterface)
+    })
+
+    // Cleanup is handled by the ViewModel's internal ref + useEffect cleanup
   }, [rideId])
 
   return {
     ride,
     isLoadingRide,
-    errorRide,
     rideTracking,
-    isLoadingTracking,
-    errorRideTracking
+    isLoadingTracking
   }
 }

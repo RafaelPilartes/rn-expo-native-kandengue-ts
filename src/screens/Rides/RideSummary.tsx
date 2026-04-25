@@ -1,40 +1,37 @@
-// src/screens/Ride/RideSummaryScreen.tsx
-import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react'
+// src/screens/Rides/RideSummary.tsx
+import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { BackHandler, Vibration } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-
-// Hooks
-import { useRideSummary } from '@/hooks/useRideSummary'
-import { useRideRoute } from '@/hooks/ride/useRideRoute'
-import { useFareCalculation } from '@/hooks/ride/useFareCalculation'
-import { useAuthStore } from '@/storage/store/useAuthStore'
-import { useAlert } from '@/context/AlertContext'
 import {
   CommonActions,
   useNavigation,
   useRoute
 } from '@react-navigation/native'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
+
+// Hooks
+import { useRideSummary } from '@/hooks/ride/useRideSummary'
+import { useAuthStore } from '@/storage/store/useAuthStore'
+import { useAlert } from '@/context/AlertContext'
+import { useNetwork } from '@/hooks/useNetwork'
+import { useMap } from '@/providers/MapProvider'
 
 // Types
-import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { HomeStackParamList } from '@/types/navigation'
 import { CustomPlace } from '@/types/places'
 import { RideFareInterface } from '@/interfaces/IRideFare'
+import { RideInterface } from '@/interfaces/IRide'
+import { CreateRideParams } from '@/hooks/ride/useRideFlow'
 import ROUTES from '@/constants/routes'
 import { VIBRATION_PATTERN_BOOST } from '@/constants/vibration'
 
 // Components
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
-import { calculateHeading } from '@/helpers/bearing'
 import { RideMapContainer } from './components/Map/RideMapContainer'
 import { DriverRideSheet } from './components/Cards/DriverRideCard'
-import { RideModals } from './components/Modals/RideModals'
 import { CancelRideModal } from './components/Modals/CancelRideModal'
 import { RideEstimationView } from './components/Views/RideEstimationView'
 import { RideTrackingView } from './components/Views/RideTrackingView'
-import { RideInterface } from '@/interfaces/IRide'
-import { useNetwork } from '@/hooks/useNetwork'
-import { useMap } from '@/providers/MapProvider'
 
 type RideSummaryScreenRouteParams = {
   id: string | undefined
@@ -44,7 +41,6 @@ type RideSummaryScreenRouteParams = {
   }
   receiver: { name: string; phone: string }
   article: { type: string; description: string }
-  // Fields from the new unified flow
   sender?: { name: string; phone: string }
   pickupOption?: 'door' | 'curb'
   paymentMethod?: 'cash' | 'card' | 'wallet'
@@ -52,9 +48,13 @@ type RideSummaryScreenRouteParams = {
 }
 
 export default function RideSummaryScreen() {
-  const route = useRoute()
+  const routeNav = useRoute()
   const { user } = useAuthStore()
   const { isConnected } = useNetwork()
+  const { showAlert } = useAlert()
+  const { centerOnPoint, mapRef } = useMap()
+  const navigation =
+    useNavigation<NativeStackNavigationProp<HomeStackParamList>>()
 
   const {
     id: rideId,
@@ -65,87 +65,50 @@ export default function RideSummaryScreen() {
     pickupOption,
     paymentMethod,
     driverInstructions
-  } = route.params as RideSummaryScreenRouteParams
+  } = routeNav.params as RideSummaryScreenRouteParams
 
-  const navigation =
-    useNavigation<NativeStackNavigationProp<HomeStackParamList>>()
-  const { showAlert } = useAlert()
-
-  const { centerOnPoint, mapRef } = useMap()
-
+  // Local UI state
   const bottomSheetRef = useRef<BottomSheetModal>(null)
-
   const [isCreatingRide, setIsCreatingRide] = useState(false)
   const [showCancelModal, setShowCancelModal] = useState(false)
 
-  // HOOK PRINCIPAL - Monitora a corrida em tempo real
+  // Unified hook — one source of truth for everything
   const {
-    loading: isLoadingDataRide,
-    ride: currentRide,
-    rideTracking,
-    routeCoords,
-    distance,
-    duration,
-    rideRates,
-
-    // Rota do motorista
-    routeCoordsDriver,
-    durationDriver,
-    // driver,
-    durationMinutes,
-
-    distanceKm,
-    fareDetails,
+    loading,
     rideStatus,
+    currentRide,
+    route,
+    driverRoute,
+    driver,
+    fareDetails,
+    waitTimer,
+    actions
+  } = useRideSummary({
+    rideId,
+    previewPickup: location.pickup,
+    previewDropoff: location.dropoff
+  })
 
-    // tempo
-    currentTime,
-    additionalTime,
+  // Pickup/dropoff with description for map markers
+  const pickupMarker = {
+    ...location.pickup,
+    name: currentRide?.pickup?.description ?? location.pickup.name,
+    description: currentRide?.pickup?.description ?? location.pickup.description
+  }
 
-    // ações
-    handleCreateRide,
-    handleCanceledRide
-  } = useRideSummary(rideId)
+  const dropoffMarker = {
+    ...location.dropoff,
+    name: currentRide?.dropoff?.description ?? location.dropoff.name,
+    description:
+      currentRide?.dropoff?.description ?? location.dropoff.description
+  }
 
-  // CÁLCULOS TEMPORÁRIOS - Para mostrar antes de criar a corrida
-  const {
-    routeCoords: routeCoordsTemp,
-    distanceKm: distanceKmTemp,
-    durationMinutes: durationMinutesTemp,
-    distance: distanceTemp,
-    duration: durationTemp
-  } = useRideRoute(location.pickup, location.dropoff)
+  // ─── Actions ──────────────────────────────────────────
 
-  const { fareDetails: fareDetailsTemp } = useFareCalculation(
-    distanceKmTemp,
-    0, // Initial wait time is 0
-    rideRates ?? null
-  )
-
-  const ridePath = rideTracking?.path || []
-
-  // Memoize heading calculation
-  const markerHeading = useMemo(() => {
-    if (ridePath.length >= 2) {
-      const lastPointTracked = ridePath[ridePath.length - 1]
-      const prevPointTracked = ridePath[ridePath.length - 2]
-
-      return calculateHeading(
-        prevPointTracked.latitude,
-        prevPointTracked.longitude,
-        lastPointTracked.latitude,
-        lastPointTracked.longitude
-      )
-    }
-    return 0
-  }, [ridePath])
-
-  // Center on Pickup Callback
   const centerOnPickup = useCallback(async () => {
     await centerOnPoint(location.pickup)
-  }, [])
+  }, [centerOnPoint, location.pickup])
 
-  // Create Ride Callback
   const handleCreateNewRide = useCallback(async () => {
     if (!isConnected) {
       showAlert(
@@ -164,25 +127,32 @@ export default function RideSummaryScreen() {
     setIsCreatingRide(true)
 
     try {
-      // @ts-expect-error CreateParams type mismatch with pickup.description
-      const rideData: CreateParams = {
-        user: user,
-        pickup: location.pickup,
-        dropoff: location.dropoff,
-        distance: distanceKmTemp,
-        duration: durationMinutesTemp ?? 0,
+      const rideData: CreateRideParams = {
+        pickup: {
+          description: location.pickup.description ?? '',
+          place_id: location.pickup.place_id ?? '',
+          name: location.pickup.name,
+          latitude: location.pickup.latitude,
+          longitude: location.pickup.longitude
+        },
+        dropoff: {
+          description: location.dropoff.description ?? '',
+          place_id: location.dropoff.place_id ?? '',
+          name: location.dropoff.name,
+          latitude: location.dropoff.latitude,
+          longitude: location.dropoff.longitude
+        },
+        distance: route.distanceKm,
+        duration: route.durationMinutes ?? 0,
         type: 'delivery' as const,
         details: {
           item: {
             type: article.type,
             description: article.description || '',
             quantity: 1,
-            size: 'medio' as const
+            size: 'medium' as const
           },
-          receiver: {
-            name: receiver.name,
-            phone: receiver.phone
-          },
+          receiver: { name: receiver.name, phone: receiver.phone },
           sender: sender
             ? { name: sender.name, phone: sender.phone }
             : undefined,
@@ -190,14 +160,12 @@ export default function RideSummaryScreen() {
           payment_method: paymentMethod,
           driver_instructions: driverInstructions
         },
-        fare: fareDetailsTemp as RideFareInterface,
-        status: 'idle' as const
+        fare: fareDetails as RideFareInterface
       }
 
-      const rideCreated = await handleCreateRide(rideData)
+      const rideCreated = await actions.createRide(rideData)
 
       if (rideCreated?.id) {
-        // Navegar para a mesma tela com o ID da corrida
         navigation.dispatch(
           CommonActions.setParams({
             id: rideCreated.id,
@@ -217,21 +185,24 @@ export default function RideSummaryScreen() {
     }
   }, [
     user,
+    isConnected,
     location,
-    distanceKmTemp,
-    durationMinutesTemp,
+    route.distanceKm,
+    route.durationMinutes,
     article,
     receiver,
-    fareDetailsTemp,
-    handleCreateRide,
+    sender,
+    pickupOption,
+    paymentMethod,
+    driverInstructions,
+    fareDetails,
+    actions,
     navigation,
     showAlert
   ])
 
-  // Cancel Ride Callback
   const handleCancelRide = useCallback(
     async (reason: string) => {
-      // Close modal immediately
       setShowCancelModal(false)
 
       if (!isConnected) {
@@ -249,21 +220,25 @@ export default function RideSummaryScreen() {
           return
         }
 
-        await handleCanceledRide(reason)
+        await actions.cancelRide(reason)
 
-        // Navegar de volta
         setTimeout(() => {
           if (navigation.canGoBack()) navigation.goBack()
         }, 1500)
       } catch (error: any) {
-        console.error('❌ Erro ao cancelar corrida:', error)
-        showAlert('Erro', error.message || 'Falha ao cancelar corrida', 'error')
+        showAlert(
+          'Erro',
+          error.message || 'Falha ao cancelar corrida',
+          'error'
+        )
       }
     },
-    [rideId, handleCanceledRide, navigation, showAlert, isConnected]
+    [rideId, actions, navigation, showAlert, isConnected]
   )
 
-  // CONTROLAR BOTTOM SHEET
+  // ─── Lifecycle Effects ────────────────────────────────
+
+  // Bottom sheet visibility based on driver assignment
   useEffect(() => {
     const hasDriver = [
       'driver_on_the_way',
@@ -277,39 +252,33 @@ export default function RideSummaryScreen() {
     } else {
       bottomSheetRef.current?.dismiss()
     }
-  }, [rideStatus, currentRide]) // Removed navigation dependency
+  }, [rideStatus, currentRide])
 
-  // LIMPAR AO SAIR DA TELA
+  // Bottom sheet focus/blur handling
   useEffect(() => {
-    const unsubscribeBlur = navigation.addListener('blur', () => {
+    const unBlur = navigation.addListener('blur', () => {
       bottomSheetRef.current?.close()
     })
-
-    const unsubscribeFocus = navigation.addListener('focus', () => {
+    const unFocus = navigation.addListener('focus', () => {
       bottomSheetRef.current?.present()
     })
-
     return () => {
-      unsubscribeBlur()
-      unsubscribeFocus()
+      unBlur()
+      unFocus()
     }
   }, [navigation])
 
-  // PREVENIR SAIDA DA TELA
+  // Prevent accidental back navigation during active ride
   useEffect(() => {
     const backAction = () => {
-      if (!rideId) return
+      if (!rideId) return false
 
       showAlert(
         'Está no meio de uma corrida',
         'Deseja realmente sair?',
         'warning',
         [
-          {
-            text: 'Ficar',
-            onPress: () => null,
-            style: 'cancel'
-          },
+          { text: 'Ficar', onPress: () => null, style: 'cancel' },
           {
             text: 'Sair',
             onPress: () => {
@@ -323,128 +292,41 @@ export default function RideSummaryScreen() {
       return true
     }
 
-    const backHandler = BackHandler.addEventListener(
+    const handler = BackHandler.addEventListener(
       'hardwareBackPress',
       backAction
     )
+    return () => handler.remove()
+  }, [rideId, navigation, showAlert])
 
-    return () => backHandler.remove()
-  }, [rideId, navigation, showAlert]) // Added dependencies
-
-  // VIBRAR SEMPRE QUE O STATUS MUDAR
+  // Vibrate on status change
   useEffect(() => {
-    if (!rideId) return
-    if (rideStatus) {
-      Vibration.vibrate(VIBRATION_PATTERN_BOOST)
-    }
+    if (!rideId || !rideStatus) return
+    Vibration.vibrate(VIBRATION_PATTERN_BOOST)
   }, [rideStatus, rideId])
 
-  // Memoize Map Props
-  const pickupProp = useMemo(
-    () =>
-      currentRide || !rideId
-        ? {
-            latitude: currentRide?.pickup.latitude ?? location.pickup.latitude,
-            longitude:
-              currentRide?.pickup.longitude ?? location.pickup.longitude,
-            title: 'Local de Recolha',
-            description:
-              currentRide?.pickup.description || location.pickup.description
-          }
-        : undefined,
-    [currentRide, rideId, location.pickup]
-  )
-
-  const dropoffProp = useMemo(
-    () =>
-      currentRide || !rideId
-        ? {
-            latitude:
-              currentRide?.dropoff.latitude ?? location.dropoff.latitude,
-            longitude:
-              currentRide?.dropoff.longitude ?? location.dropoff.longitude,
-            title: 'Local de Entrega',
-            description:
-              currentRide?.dropoff.description || location.dropoff.description
-          }
-        : undefined,
-    [currentRide, rideId, location.dropoff]
-  )
-
-  const driverLoc = useMemo(
-    () =>
-      ridePath && ridePath.length >= 1 && currentRide?.driver
-        ? {
-            latitude: ridePath[ridePath.length - 1].latitude,
-            longitude: ridePath[ridePath.length - 1].longitude,
-            rotation: markerHeading
-          }
-        : undefined,
-    [ridePath, currentRide?.driver, markerHeading]
-  )
-
-  // ATUALIZAR REGIÃO DO MAPA BASEADO NO STATUS
-  useEffect(() => {
-    if (!rideId || !mapRef.current) return
-
-    let targetLocation: { latitude: number; longitude: number } | undefined
-
-    switch (rideStatus) {
-      case 'picked_up':
-      case 'arrived_dropoff':
-        targetLocation = location.dropoff
-        break
-
-      case 'driver_on_the_way':
-      case 'arrived_pickup':
-        targetLocation = driverLoc ?? location.pickup
-        break
-
-      default:
-        targetLocation = location.pickup
-        break
-    }
-
-    if (targetLocation) {
-      mapRef.current?.setCameraPosition?.({
-        coordinates: {
-          latitude: targetLocation.latitude,
-          longitude: targetLocation.longitude
-        },
-        zoom: 14
-      })
-    }
-  }, [rideStatus, location, driverLoc, rideId])
-
-  const mapLocationProp = useMemo(
-    () => ({
-      pickup: pickupProp,
-      dropoff: dropoffProp
-    }),
-    [pickupProp, dropoffProp]
-  )
+  // ─── Render ───────────────────────────────────────────
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      {/* 1. MAP CONTAINER */}
+      {/* 1. MAP */}
       <RideMapContainer
         mapRef={mapRef}
-        currentRide={currentRide || null}
-        location={mapLocationProp}
         rideStatus={rideStatus}
-        routeCoords={routeCoords}
-        driverLocation={driverLoc}
-        routeCoordsTemp={routeCoordsTemp}
-        routeCoordsDriver={routeCoordsDriver}
+        pickup={pickupMarker}
+        dropoff={dropoffMarker}
+        driver={driver}
+        route={route}
+        driverRoute={driverRoute}
       />
 
-      {/* 2. MAIN CONTENT (STATUS MANAGER vs ESTIMATION) */}
+      {/* 2. CONTENT: Estimation (pre-ride) or Tracking (active ride) */}
       {!rideId ? (
         <RideEstimationView
           location={location}
-          fareDetails={fareDetailsTemp}
-          distance={distanceTemp}
-          duration={String(durationTemp)}
+          fareDetails={fareDetails}
+          distance={route.distanceText}
+          duration={route.durationText}
           isLoading={isCreatingRide}
           onConfirm={handleCreateNewRide}
           onCancel={() => navigation.goBack()}
@@ -454,38 +336,32 @@ export default function RideSummaryScreen() {
         <RideTrackingView
           rideId={rideId}
           currentRide={currentRide as RideInterface}
-          isLoadingData={isLoadingDataRide}
+          isLoadingData={loading}
           rideStatus={rideStatus}
-          location={location}
           fareDetails={fareDetails}
-          fareDetailsTemp={fareDetailsTemp}
-          durationMinutes={durationMinutes}
-          durationDriver={durationDriver}
-          distanceKm={distanceKm}
-          currentTime={currentTime}
-          additionalTime={Number(additionalTime)}
+          route={route}
+          driverRoute={driverRoute}
+          waitTimer={waitTimer}
           onCancel={() => setShowCancelModal(true)}
           onAutoCancel={handleCancelRide}
           onCenterMap={centerOnPickup}
         />
       )}
 
-      {/* 3. MODALS AND SHEETS */}
-      {/* DRIVER RIDE SHEET */}
-      {currentRide && currentRide.driver && (
+      {/* 3. DRIVER BOTTOM SHEET */}
+      {currentRide?.driver && (
         <DriverRideSheet
           ref={bottomSheetRef}
           rideData={currentRide}
           fareDetails={fareDetails}
           rideStatus={rideStatus}
-          distance={distance}
+          distance={route.distanceText}
           onCancel={() => setShowCancelModal(true)}
           snapPoints={['26%', '40%']}
         />
       )}
 
-      <RideModals />
-      {/* Keeping CancelRideModal here for now as it uses local state 'showCancelModal' */}
+      {/* 4. CANCEL MODAL */}
       <CancelRideModal
         visible={showCancelModal}
         onClose={() => setShowCancelModal(false)}
