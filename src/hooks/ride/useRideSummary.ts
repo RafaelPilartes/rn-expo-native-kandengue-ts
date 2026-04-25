@@ -10,6 +10,7 @@ import { useFareCalculation } from './useFareCalculation'
 import { RideStatusType } from '@/types/enum'
 import { useDriverRealtimeLocation } from '../driver/useDriverRealtimeLocation'
 import { trimPolylineFromPosition } from '@/helpers/polyline'
+import { calculateHeading } from '@/helpers/bearing'
 import { CustomPlace } from '@/types/places'
 
 type LatLng = { latitude: number; longitude: number }
@@ -49,7 +50,7 @@ export function useRideSummary(config: UseRideSummaryConfig) {
   const [rideRates, setRideRates] = useState<RideRateEntity | null>(null)
 
   // Ride data (realtime from Firestore)
-  const { ride, isLoadingRide, isLoadingTracking } = useRideRealtime(rideId)
+  const { ride, rideTracking, isLoadingRide, isLoadingTracking } = useRideRealtime(rideId)
 
   // Rates
   const { listenAll: listenRates } = useRideRatesViewModel()
@@ -79,12 +80,42 @@ export function useRideSummary(config: UseRideSummaryConfig) {
     useDriverRealtimeLocation(ride?.driver?.id)
 
   const stableDriverPosition = useMemo<LatLng | null>(() => {
-    if (!driverLocation?.latitude || !driverLocation?.longitude) return null
-    return {
-      latitude: driverLocation.latitude,
-      longitude: driverLocation.longitude
+    if (driverLocation?.latitude && driverLocation?.longitude) {
+      return {
+        latitude: driverLocation.latitude,
+        longitude: driverLocation.longitude
+      }
     }
-  }, [driverLocation?.latitude, driverLocation?.longitude])
+
+    // Fallback to ride tracking path if driver document doesn't have location
+    if (rideTracking?.path && rideTracking.path.length > 0) {
+      const lastPos = rideTracking.path[rideTracking.path.length - 1]
+      return {
+        latitude: lastPos.latitude,
+        longitude: lastPos.longitude
+      }
+    }
+
+    return null
+  }, [driverLocation?.latitude, driverLocation?.longitude, rideTracking?.path])
+
+  const stableDriverHeading = useMemo(() => {
+    if (driverLocation) return driverHeading
+
+    // Fallback to ride tracking path
+    if (rideTracking?.path && rideTracking.path.length >= 2) {
+      const lastPos = rideTracking.path[rideTracking.path.length - 1]
+      const prevPos = rideTracking.path[rideTracking.path.length - 2]
+      return calculateHeading(
+        prevPos.latitude,
+        prevPos.longitude,
+        lastPos.latitude,
+        lastPos.longitude
+      )
+    }
+
+    return 0
+  }, [driverLocation, driverHeading, rideTracking?.path])
 
   // Driver's current destination depends on ride status
   const driverCurrentDestination = useMemo<LatLng | null>(() => {
@@ -193,9 +224,9 @@ export function useRideSummary(config: UseRideSummaryConfig) {
   const driver: DriverInfo = useMemo(
     () => ({
       location: stableDriverPosition,
-      heading: driverHeading
+      heading: stableDriverHeading
     }),
-    [stableDriverPosition, driverHeading]
+    [stableDriverPosition, stableDriverHeading]
   )
 
   return {
