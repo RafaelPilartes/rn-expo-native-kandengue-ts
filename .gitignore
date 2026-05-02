@@ -46,3 +46,6 @@ yarn-error.*
 # Firebase
 google-services.json
 GoogleService-Info.plist
+
+# AI context
+CLAUDE.md
