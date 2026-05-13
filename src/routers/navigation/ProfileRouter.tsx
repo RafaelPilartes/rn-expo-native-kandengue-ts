@@ -9,6 +9,8 @@ import ComplaintsScreen from '@/screens/Main/Profile/Complaints';
 import HelpScreen from '@/screens/Main/Profile/Help';
 import PrivacyPolicyScreen from '@/screens/Main/Profile/PrivacyPolicy';
 import TermsConditionsScreen from '@/screens/Main/Profile/TermsConditions';
+import ReferralEarningsScreen from '@/screens/Main/Profile/ReferralEarnings';
+import WithdrawalRequestScreen from '@/screens/Main/Profile/WithdrawalRequest';
 
 const Stack = createNativeStackNavigator<ProfileStackParamList>();
 
@@ -42,6 +44,14 @@ export default function ProfileRouter() {
       <Stack.Screen
         name={ROUTES.ProfileStack.TERMS}
         component={TermsConditionsScreen}
+      />
+      <Stack.Screen
+        name={ROUTES.ProfileStack.REFERRAL_EARNINGS}
+        component={ReferralEarningsScreen}
+      />
+      <Stack.Screen
+        name={ROUTES.ProfileStack.WITHDRAWAL_REQUEST}
+        component={WithdrawalRequestScreen}
       />
     </Stack.Navigator>
   );

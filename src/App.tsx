@@ -1,8 +1,8 @@
-import { StatusBar } from 'expo-status-bar'
 import './i18n'
 import '@/styles/global.css'
 import 'react-native-gesture-handler'
 
+import { StatusBar } from 'expo-status-bar'
 import AppRouter from '@/routers'
 import { STORAGE_TYPE } from '@/storage/constants'
 import { StorageManager } from '@/storage/storageManager'

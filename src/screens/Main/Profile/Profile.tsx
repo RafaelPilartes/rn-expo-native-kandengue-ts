@@ -8,7 +8,8 @@ import {
   Shield,
   Book,
   AlertCircle,
-  LogOut
+  LogOut,
+  Wallet
 } from 'lucide-react-native'
 import { useNavigation } from '@react-navigation/native'
 import ROUTES from '@/constants/routes'
@@ -102,6 +103,13 @@ export default function Profile() {
             icon={HelpCircle}
             label="Ajuda"
             onPress={() => navigation.navigate(ROUTES.ProfileStack.HELP)}
+          />
+          <MenuItem
+            icon={Wallet}
+            label="Os meus ganhos de referência"
+            onPress={() =>
+              navigation.navigate(ROUTES.ProfileStack.REFERRAL_EARNINGS)
+            }
           />
         </View>
 

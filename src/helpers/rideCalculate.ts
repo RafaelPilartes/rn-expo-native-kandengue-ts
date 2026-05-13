@@ -48,6 +48,9 @@ export function calculateFare(
       distance_cost: round(distanceCost),
       wait_cost: round(waitCost),
       insurance_fee: round(insuranceFee),
+      // gross_amount = total ANTES de qualquer desconto promocional aplicado.
+      // Escrito sempre (mesmo sem promo) para auditoria consistente.
+      gross_amount: round(finalTotal),
     },
     payouts: {
       driver_earnings: round(

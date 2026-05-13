@@ -95,6 +95,8 @@ export type ProfileStackParamList = {
   HelpScreen: undefined
   PrivacyPolicyScreen: undefined
   TermsConditionsScreen: undefined
+  ReferralEarningsScreen: undefined
+  WithdrawalRequestScreen: undefined
 }
 
 // Merge de todos os tipos

@@ -1,6 +1,6 @@
 // src/screens/Ride/RideFinishedScreen.tsx
 import React from 'react'
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native'
+import { ActivityIndicator, View, Text, TouchableOpacity, ScrollView } from 'react-native'
 import { Check, Star, MapPin, Navigation } from 'lucide-react-native'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import ROUTES from '@/constants/routes'
@@ -10,6 +10,7 @@ import { formatMoney } from '@/utils/formattedNumber'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { HomeStackParamList } from '@/types/navigation'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { useRideFinishedFare } from '@/hooks/ride/useRideFinishedFare'
 
 type RideFinishedScreenRouteParams = {
   rideId?: string
@@ -20,11 +21,18 @@ export default function RideFinishedScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<HomeStackParamList>>()
 
-  // CONST { navigationMainStack, navigationHomeStack } = useAppProvider() // Removed
   const route = useRoute()
   const { rideId, rideDetails } = route.params as RideFinishedScreenRouteParams
 
-  const totalPaid = `Kz ${formatMoney(rideDetails.fare.total)}`
+  const docId = rideId ?? rideDetails.id
+  const hasPromo = !!rideDetails.promotion_usage_id
+
+  const { fare, isVerifying } = useRideFinishedFare(docId, rideDetails.fare, hasPromo)
+
+  const grossAmount = fare.breakdown?.gross_amount
+  const discount = fare.breakdown?.discount
+  const hasDiscount = discount !== undefined && discount > 0
+  const totalPaid = formatMoney(fare.total)
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
@@ -96,17 +104,60 @@ export default function RideFinishedScreen() {
 
               {/* PAGAMENTO */}
               <View className="border border-green-200 bg-green-50 rounded-xl p-4">
-                <Text className="text-green-800 font-semibold mb-1">
-                  Total da corrida
-                </Text>
+                <View className="flex-row items-center justify-between mb-3">
+                  <Text className="text-green-800 font-semibold">
+                    Resumo de pagamento
+                  </Text>
+                  {isVerifying && <ActivityIndicator size="small" color="#059669" />}
+                </View>
 
-                <Text className="text-green-700 text-2xl font-bold">
-                  {totalPaid}
-                </Text>
+                {isVerifying && (
+                  <View className="items-center py-3">
+                    <ActivityIndicator size="large" color="#059669" />
+                    <Text className="text-green-700 text-sm mt-2">
+                      A verificar promoção...
+                    </Text>
+                  </View>
+                )}
 
-                <Text className="text-green-700 text-xs mt-1">
-                  O valor final da corrida.
-                </Text>
+                {!isVerifying && (
+                  <>
+                    {hasDiscount && (
+                      <>
+                        <View className="flex-row justify-between items-center mb-1">
+                          <Text className="text-gray-500 text-sm">Valor original</Text>
+                          <Text className="text-gray-500 text-sm line-through">
+                            Kz {formatMoney(grossAmount!)}
+                          </Text>
+                        </View>
+                        <View className="flex-row justify-between items-center mb-3">
+                          <Text className="text-green-700 text-sm font-medium">
+                            Desconto aplicado
+                          </Text>
+                          <Text className="text-green-700 text-sm font-semibold">
+                            − Kz {formatMoney(discount!)}
+                          </Text>
+                        </View>
+                        <View className="h-px bg-green-200 mb-3" />
+                      </>
+                    )}
+
+                    <View className="flex-row justify-between items-center">
+                      <Text className="text-green-800 font-semibold text-base">
+                        {hasDiscount ? 'Total a pagar' : 'Total da corrida'}
+                      </Text>
+                      <Text className="text-green-700 text-2xl font-bold">
+                        Kz {totalPaid}
+                      </Text>
+                    </View>
+
+                    {hasDiscount && (
+                      <Text className="text-green-600 text-xs mt-2 text-right">
+                        Poupou Kz {formatMoney(discount!)} com o código promocional
+                      </Text>
+                    )}
+                  </>
+                )}
               </View>
             </View>
           </View>

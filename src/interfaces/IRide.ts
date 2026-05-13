@@ -30,6 +30,13 @@ export interface RideInterface {
   completed_at?: Date;
   canceled_at?: Date;
 
+  // Campos do sistema de promoções (replicação manual — fonte de verdade:
+  // documento "08 — Firestore Schema").
+  promotion_id?: string;
+  promotion_usage_id?: string;
+  driver_matched_at?: Date | null;
+  cancelled_by?: 'driver' | 'user' | 'system';
+
   created_at?: Date;
   updated_at?: Date;
 }

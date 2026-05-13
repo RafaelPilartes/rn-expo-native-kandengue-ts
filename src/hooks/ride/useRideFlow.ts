@@ -20,6 +20,7 @@ type SyncStatusToServerParams = {
   completedAt?: Date
   canceledAt?: Date
   fare?: RideFareInterface | null
+  cancelledBy?: 'driver' | 'user' | 'system'
 }
 
 export type CreateRideParams = {
@@ -30,6 +31,8 @@ export type CreateRideParams = {
   duration: number
   details: RideDetailsType
   fare: RideFareInterface
+  promotion_id?: string
+  promotion_usage_id?: string
 }
 
 export function useRideFlow(
@@ -50,7 +53,8 @@ export function useRideFlow(
     waitingEndAt,
     completedAt,
     canceledAt,
-    fare
+    fare,
+    cancelledBy
   }: SyncStatusToServerParams) => {
     if (!rideId) return
 
@@ -66,7 +70,8 @@ export function useRideFlow(
           waiting_end_at: waitingEndAt ?? undefined,
           completed_at: completedAt ?? undefined,
           canceled_at: canceledAt ?? undefined,
-          fare: fare ?? undefined
+          fare: fare ?? undefined,
+          cancelled_by: cancelledBy ?? undefined
         }
       })
     } catch (error: any) {
@@ -82,7 +87,9 @@ export function useRideFlow(
     duration,
     type,
     details,
-    fare
+    fare,
+    promotion_id,
+    promotion_usage_id
   }: CreateRideParams): Promise<RideInterface | undefined> => {
     if (!currentUserData) return
 
@@ -95,7 +102,9 @@ export function useRideFlow(
       distance,
       duration,
       type,
-      details
+      details,
+      ...(promotion_id ? { promotion_id } : {}),
+      ...(promotion_usage_id ? { promotion_usage_id } : {})
     }
 
     try {
@@ -196,10 +205,13 @@ export function useRideFlow(
 
   const canceled = async (reason: string) => {
     try {
+      // cancelled_by: 'user' — sinaliza ao trigger onRideCancelled que aplica
+      // a janela de graça (2min) sobre driver_matched_at.
       await syncStatusToServer({
         status: 'canceled',
         reason,
-        canceledAt: new Date()
+        canceledAt: new Date(),
+        cancelledBy: 'user'
       })
 
       await stopTracking()

@@ -32,6 +32,8 @@ import { DriverRideSheet } from './components/Cards/DriverRideCard'
 import { CancelRideModal } from './components/Modals/CancelRideModal'
 import { RideEstimationView } from './components/Views/RideEstimationView'
 import { RideTrackingView } from './components/Views/RideTrackingView'
+import { PromoCodeField } from './components/Cards/PromoCodeField'
+import { usePromotionViewModel } from '@/viewModels/PromotionViewModel'
 
 type RideSummaryScreenRouteParams = {
   id: string | undefined
@@ -71,6 +73,14 @@ export default function RideSummaryScreen() {
   const bottomSheetRef = useRef<BottomSheetModal>(null)
   const [isCreatingRide, setIsCreatingRide] = useState(false)
   const [showCancelModal, setShowCancelModal] = useState(false)
+
+  // Promo code flow
+  const {
+    feedback: promoFeedback,
+    validate: validatePromo,
+    apply: applyPromo,
+    reset: resetPromo,
+  } = usePromotionViewModel()
 
   // Unified hook — one source of truth for everything
   const {
@@ -127,6 +137,62 @@ export default function RideSummaryScreen() {
     setIsCreatingRide(true)
 
     try {
+      // Reservar código promocional (se houver) antes de criar a ride.
+      // O promotion_usage_id retornado é anexado à ride para o trigger
+      // onRideCreated vincular a reserva permanentemente.
+      let promoApplied:
+        | { promotion_id: string; promotion_usage_id: string }
+        | undefined
+
+      if (promoFeedback.state === 'valid') {
+        try {
+          const result = await applyPromo({
+            code: promoFeedback.result.code_applied,
+            ride_context: {
+              city_origin: location.pickup.name ?? '',
+              city_destination: location.dropoff.name ?? '',
+              ride_type: 'delivery',
+              estimated_price: fareDetails?.total ?? 0,
+              payment_method: paymentMethod ?? 'cash',
+            },
+          })
+          promoApplied = {
+            promotion_id: result.promotion_id,
+            promotion_usage_id: result.promotion_usage_id,
+          }
+        } catch (err: any) {
+          showAlert(
+            'Código promocional',
+            err.message || 'Não foi possível aplicar o código',
+            'warning',
+          )
+          setIsCreatingRide(false)
+          return
+        }
+      }
+
+      // Constrói a fare final com desconto incluído (se promo foi aplicada).
+      // gross_amount guarda sempre o bruto para o trigger onRideCompleted.
+      const baseFare = fareDetails as RideFareInterface
+      const grossAmount = baseFare.total
+      const finalFare: RideFareInterface =
+        promoApplied && promoFeedback.state === 'valid'
+          ? {
+              ...baseFare,
+              total: promoFeedback.result.final_price,
+              breakdown: {
+                ...baseFare.breakdown,
+                gross_amount: grossAmount,
+                discount: promoFeedback.result.discount_amount,
+                promotion_id: promoApplied.promotion_id,
+                promotion_code: promoFeedback.result.code_applied,
+              },
+            }
+          : {
+              ...baseFare,
+              breakdown: { ...baseFare.breakdown, gross_amount: grossAmount },
+            }
+
       const rideData: CreateRideParams = {
         pickup: {
           description: location.pickup.description ?? '',
@@ -160,7 +226,13 @@ export default function RideSummaryScreen() {
           payment_method: paymentMethod,
           driver_instructions: driverInstructions
         },
-        fare: fareDetails as RideFareInterface
+        fare: finalFare,
+        ...(promoApplied
+          ? {
+              promotion_id: promoApplied.promotion_id,
+              promotion_usage_id: promoApplied.promotion_usage_id,
+            }
+          : {})
       }
 
       const rideCreated = await actions.createRide(rideData)
@@ -198,8 +270,31 @@ export default function RideSummaryScreen() {
     fareDetails,
     actions,
     navigation,
-    showAlert
+    showAlert,
+    promoFeedback,
+    applyPromo
   ])
+
+  // Validar código promocional contra contexto da ride
+  const handlePromoValidate = useCallback(
+    async (code: string) => {
+      try {
+        await validatePromo({
+          code,
+          ride_context: {
+            city_origin: location.pickup.name ?? '',
+            city_destination: location.dropoff.name ?? '',
+            ride_type: 'delivery',
+            estimated_price: fareDetails?.total ?? 0,
+            payment_method: paymentMethod ?? 'cash',
+          },
+        })
+      } catch {
+        // PromotionViewModel já trata o erro via feedback
+      }
+    },
+    [validatePromo, location, fareDetails, paymentMethod]
+  )
 
   const handleCancelRide = useCallback(
     async (reason: string) => {
@@ -331,6 +426,24 @@ export default function RideSummaryScreen() {
           onConfirm={handleCreateNewRide}
           onCancel={() => navigation.goBack()}
           onCenterMap={centerOnPickup}
+          promoSlot={
+            <PromoCodeField
+              feedback={promoFeedback}
+              onValidate={handlePromoValidate}
+              onClear={resetPromo}
+              disabled={isCreatingRide}
+            />
+          }
+          promoDiscountAmount={
+            promoFeedback.state === 'valid'
+              ? promoFeedback.result.discount_amount
+              : undefined
+          }
+          promoFinalPrice={
+            promoFeedback.state === 'valid'
+              ? promoFeedback.result.final_price
+              : undefined
+          }
         />
       ) : (
         <RideTrackingView

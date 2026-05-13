@@ -33,6 +33,12 @@ export class RideEntity implements RideInterface {
   completed_at?: Date;
   canceled_at?: Date;
 
+  // Promoções (replicação manual — fonte de verdade: "08 — Firestore Schema")
+  promotion_id?: string;
+  promotion_usage_id?: string;
+  driver_matched_at?: Date | null;
+  cancelled_by?: 'driver' | 'user' | 'system';
+
   created_at?: Date;
   updated_at?: Date;
 
@@ -61,6 +67,11 @@ export class RideEntity implements RideInterface {
 
     this.completed_at = params.completed_at;
     this.canceled_at = params.canceled_at;
+
+    this.promotion_id = params.promotion_id;
+    this.promotion_usage_id = params.promotion_usage_id;
+    this.driver_matched_at = params.driver_matched_at;
+    this.cancelled_by = params.cancelled_by;
 
     this.created_at = params.created_at;
     this.updated_at = params.updated_at;

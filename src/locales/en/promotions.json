@@ -1,0 +1,53 @@
+{
+  "code_field": {
+    "prompt": "Have a promo code?",
+    "header": "Promo code",
+    "placeholder": "WELCOME10",
+    "apply": "Apply",
+    "applied": "Code applied: {{code}}",
+    "discount_applied": "Discount of {{amount}} AOA applied"
+  },
+  "errors": {
+    "NOT_FOUND": "Code not found",
+    "INACTIVE": "Code is inactive",
+    "OUT_OF_DATE_RANGE": "Code is outside its valid period",
+    "LIMIT_REACHED": "This code has reached its usage limit",
+    "USER_LIMIT_REACHED": "You have already reached the usage limit for this code",
+    "USER_NOT_ELIGIBLE": "This code is not available for your account",
+    "ONLY_NEW_USERS": "This code is only for new users",
+    "NOT_ELIGIBLE_INACTIVE": "This code requires a minimum inactivity period",
+    "INVALID_RIDE_TYPE": "This code is not valid for this ride type",
+    "INVALID_CITY": "This code is not valid for the selected origin or destination",
+    "INVALID_PAYMENT_METHOD": "This code is not valid for this payment method",
+    "BELOW_MIN_RIDE_VALUE": "This code requires a minimum ride value of {{value}} AOA",
+    "SELF_REFERRAL": "You cannot use your own referral code"
+  },
+  "payment_warning": "Code {{code}} is only valid for {{method}} payment. Switching removes the discount.",
+  "referral": {
+    "title": "My referral earnings",
+    "summary": "Summary",
+    "total_paid": "Total received",
+    "pending": "Pending",
+    "in_processing": "In processing",
+    "minimum_for_withdrawal": "Minimum for withdrawal: {{amount}} AOA",
+    "request_withdrawal": "Request withdrawal",
+    "no_earnings_yet": "You have no referral earnings yet.",
+    "history": "History",
+    "ride_label": "Ride {{id}}…",
+    "below_minimum": "Reach the minimum of {{amount}} AOA to withdraw."
+  },
+  "withdrawal": {
+    "title": "Request withdrawal",
+    "total_to_receive": "Total to receive",
+    "bank": "Bank",
+    "bank_placeholder": "e.g. BFA, BAI, BIC…",
+    "account_number": "Account number (IBAN)",
+    "account_number_placeholder": "0000 0000 0000 0000 0000 0",
+    "account_holder": "Account holder",
+    "account_holder_placeholder": "Holder name",
+    "submit": "Confirm request",
+    "success_title": "Request sent",
+    "success_body": "Your withdrawal will be processed shortly.",
+    "incomplete_form": "Fill in all fields."
+  }
+}

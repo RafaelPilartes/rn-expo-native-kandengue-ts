@@ -342,10 +342,19 @@ export const DriverRideSheet = forwardRef<BottomSheetModal, Props>(
           {/* Preço e ações */}
           <View className="flex-row items-center justify-between border-t border-gray-100 pt-4 mb-12">
             <View>
+              {(rideData.fare?.breakdown?.discount ?? 0) > 0 && (
+                <Text className="text-gray-400 text-xs line-through">
+                  Kz {formatMoney(rideData.fare.breakdown!.gross_amount!, 0)}
+                </Text>
+              )}
               <Text className="text-green-600 text-2xl font-bold">
-                Kz {formatMoney(fareDetails?.total || 0, 0)}
+                Kz {formatMoney(rideData.fare?.total ?? fareDetails?.total ?? 0, 0)}
               </Text>
-              <Text className="text-gray-400 text-xs">Valor total</Text>
+              <Text className="text-gray-400 text-xs">
+                {(rideData.fare?.breakdown?.discount ?? 0) > 0
+                  ? `Desc. Kz ${formatMoney(rideData.fare.breakdown!.discount!, 0)}`
+                  : 'Valor total'}
+              </Text>
             </View>
 
             {/* Botão de cancelamento (disponível apenas em certos status) */}

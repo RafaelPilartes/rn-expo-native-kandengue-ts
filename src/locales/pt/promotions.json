@@ -1,0 +1,53 @@
+{
+  "code_field": {
+    "prompt": "Tens um código promocional?",
+    "header": "Código promocional",
+    "placeholder": "WELCOME10",
+    "apply": "Aplicar",
+    "applied": "Código aplicado: {{code}}",
+    "discount_applied": "Desconto de {{amount}} AOA aplicado"
+  },
+  "errors": {
+    "NOT_FOUND": "Código não encontrado",
+    "INACTIVE": "Código inativo",
+    "OUT_OF_DATE_RANGE": "Código fora do período de validade",
+    "LIMIT_REACHED": "Este código atingiu o limite total de usos",
+    "USER_LIMIT_REACHED": "Já atingiste o limite de usos deste código",
+    "USER_NOT_ELIGIBLE": "Este código não está disponível para o teu utilizador",
+    "ONLY_NEW_USERS": "Este código é apenas para novos utilizadores",
+    "NOT_ELIGIBLE_INACTIVE": "Este código requer um período mínimo de inatividade",
+    "INVALID_RIDE_TYPE": "Este código não é válido para este tipo de corrida",
+    "INVALID_CITY": "Este código não é válido para a origem ou destino",
+    "INVALID_PAYMENT_METHOD": "Este código não é válido para este método de pagamento",
+    "BELOW_MIN_RIDE_VALUE": "Este código requer um valor mínimo de {{value}} AOA",
+    "SELF_REFERRAL": "Não podes usar o teu próprio código de referência"
+  },
+  "payment_warning": "O código {{code}} é válido apenas para pagamento por {{method}}. Ao trocar, o desconto será removido.",
+  "referral": {
+    "title": "Os meus ganhos de referência",
+    "summary": "Resumo",
+    "total_paid": "Total recebido",
+    "pending": "Pendente",
+    "in_processing": "Em processamento",
+    "minimum_for_withdrawal": "Mínimo para saque: {{amount}} AOA",
+    "request_withdrawal": "Solicitar saque",
+    "no_earnings_yet": "Ainda não tens ganhos de referência.",
+    "history": "Histórico",
+    "ride_label": "Ride {{id}}…",
+    "below_minimum": "Atinge o mínimo de {{amount}} AOA para sacar."
+  },
+  "withdrawal": {
+    "title": "Solicitar saque",
+    "total_to_receive": "Total a receber",
+    "bank": "Banco",
+    "bank_placeholder": "Ex: BFA, BAI, BIC…",
+    "account_number": "Número de conta (IBAN)",
+    "account_number_placeholder": "0000 0000 0000 0000 0000 0",
+    "account_holder": "Titular da conta",
+    "account_holder_placeholder": "Nome do titular",
+    "submit": "Confirmar pedido",
+    "success_title": "Pedido enviado",
+    "success_body": "O teu saque será processado em breve.",
+    "incomplete_form": "Preenche todos os campos."
+  }
+}

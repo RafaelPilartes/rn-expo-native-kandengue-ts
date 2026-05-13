@@ -1,3 +1,5 @@
+import './src/lib/firebaseEmulator'
+
 import { registerRootComponent } from 'expo'
 
 import App from './src/App'
@@ -10,9 +12,9 @@ PushNotificationService.setBackgroundHandler()
 setupNotifeeBackgroundHandler()
 
 if (!__DEV__) {
-  console.log = () => {};
-  console.info = () => {};
-  console.warn = () => {};
+  console.log = () => {}
+  console.info = () => {}
+  console.warn = () => {}
 }
 
 registerRootComponent(App)
