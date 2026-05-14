@@ -30,6 +30,17 @@ export interface RideInterface {
   completed_at?: Date;
   canceled_at?: Date;
 
+  // Percentagens de rateio gravadas na ride para o trigger onRidePromotionUpdated.
+  // Fonte: rideRates.insurance_percent + rideRates.payouts.*_percent.
+  rate?: {
+    insurance_percent: number
+    payouts: {
+      driver_percent: number
+      company_percent: number
+      pension_fund_percent: number
+    }
+  };
+
   // Campos do sistema de promoções (replicação manual — fonte de verdade:
   // documento "08 — Firestore Schema").
   promotion_id?: string;

@@ -103,6 +103,16 @@ export function useRideFlow(
       duration,
       type,
       details,
+      ...(rideRates ? {
+        rate: {
+          insurance_percent: rideRates.insurance_percent,
+          payouts: {
+            driver_percent: rideRates.payouts.driver_percent,
+            company_percent: rideRates.payouts.company_percent,
+            pension_fund_percent: rideRates.payouts.pension_fund_percent,
+          }
+        }
+      } : {}),
       ...(promotion_id ? { promotion_id } : {}),
       ...(promotion_usage_id ? { promotion_usage_id } : {})
     }
