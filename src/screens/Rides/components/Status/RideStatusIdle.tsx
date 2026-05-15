@@ -165,9 +165,7 @@ export const RideStatusIdle: React.FC<RideStatusIdleProps> = ({
           <View className="flex-row items-center">
             <Clock
               size={16}
-              color={searchStatus.color
-                .replace('text-', '')
-                .replace('-600', '-500')}
+              color={COLOR_MAP[searchStatus.color] ?? '#6B7280'}
             />
             <Text className={`font-medium ml-2 ${searchStatus.color}`}>
               {searchStatus.text}
