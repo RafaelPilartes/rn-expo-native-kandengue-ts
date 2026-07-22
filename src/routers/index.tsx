@@ -17,6 +17,24 @@ import { useAlert } from '@/context/AlertContext'
 
 const Stack = createNativeStackNavigator()
 
+// Compares version strings segment-by-segment as numbers (e.g. "1.0.10" > "1.0.9")
+// instead of lexicographic string comparison, which breaks once any segment
+// reaches two digits.
+function isVersionGreater(latest: string, current: string): boolean {
+  const latestParts = latest.split('.').map(Number)
+  const currentParts = current.split('.').map(Number)
+  const length = Math.max(latestParts.length, currentParts.length)
+
+  for (let i = 0; i < length; i++) {
+    const l = latestParts[i] ?? 0
+    const c = currentParts[i] ?? 0
+    if (l > c) return true
+    if (l < c) return false
+  }
+
+  return false
+}
+
 export default function AppRouter() {
   const [isInitializing, setIsInitializing] = useState(true)
   const [isCheckingVersion, setIsCheckingVersion] = useState(true)
@@ -259,7 +277,7 @@ export default function AppRouter() {
       console.log('📦 Última versão:', lastVersion)
       console.log('📦 Versão atual:', currentVersion)
 
-      if (lastVersion && lastVersion > currentVersion) {
+      if (lastVersion && isVersionGreater(lastVersion, currentVersion)) {
         console.log('🔄 Nova versão disponível!')
         setLastVersionAvailable(lastVersion)
         setHasUpdated(true)
