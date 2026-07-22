@@ -85,7 +85,8 @@
             "buildReactNativeFromSource": true
           }
         }
-      ]
+      ],
+      "./plugins/withFmtCxxStandardFix"
     ]
   }
 }
