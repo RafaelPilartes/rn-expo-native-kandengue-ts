@@ -1,5 +1,5 @@
 import type { RideRatesInterface } from '@/interfaces/IRideRates';
-import { isWithinTimeRange, timeToMinutes } from './rideTime';
+import { getCurrentRateCard } from './rideTime';
 import { RideFareInterface } from '@/interfaces/IRideFare';
 
 export function calculateFare(
@@ -7,24 +7,7 @@ export function calculateFare(
   waitMinutes: number,
   rideRates: RideRatesInterface,
 ): RideFareInterface {
-  const now = new Date();
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
-
-  const dayStart = timeToMinutes(rideRates.day_rates.start_time);
-  const dayEnd = timeToMinutes(rideRates.day_rates.end_time);
-
-  const nightStart = timeToMinutes(rideRates.night_rates.start_time);
-  const nightEnd = timeToMinutes(rideRates.night_rates.end_time);
-
-  let rate;
-  if (isWithinTimeRange(currentMinutes, dayStart, dayEnd)) {
-    rate = rideRates.day_rates;
-  } else if (isWithinTimeRange(currentMinutes, nightStart, nightEnd)) {
-    rate = rideRates.night_rates;
-  } else {
-    // Caso fora do horário definido (ex: madrugada) — fallback para nightRates
-    rate = rideRates.night_rates;
-  }
+  const rate = getCurrentRateCard(rideRates);
 
   // Calcular custos
   const extraWaitMinutes = Math.max(

@@ -2,6 +2,7 @@ import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { ArrowLeft, Wallet } from 'lucide-react-native'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   ActivityIndicator,
   ScrollView,
@@ -16,6 +17,7 @@ import { formatMoney } from '@/utils/formattedNumber'
 import { useReferralEarningsViewModel } from '@/viewModels/ReferralViewModel'
 
 export default function ReferralEarningsScreen() {
+  const { t } = useTranslation('promotions')
   const navigation =
     useNavigation<NativeStackNavigationProp<ProfileStackParamList>>()
   const {
@@ -38,7 +40,7 @@ export default function ReferralEarningsScreen() {
           <ArrowLeft size={20} color="#1f2937" />
         </TouchableOpacity>
         <Text className="text-xl font-bold text-gray-900">
-          Os meus ganhos de referência
+          {t('referral.title')}
         </Text>
       </View>
 
@@ -58,26 +60,32 @@ export default function ReferralEarningsScreen() {
                 <View className="flex-row items-center mb-4">
                   <Wallet size={24} color="#10B981" />
                   <Text className="ml-2 text-lg font-bold text-gray-900">
-                    Resumo
+                    {t('referral.summary')}
                   </Text>
                 </View>
 
                 <View className="flex-row justify-between mb-3">
-                  <Text className="text-gray-600">Total recebido</Text>
+                  <Text className="text-gray-600">
+                    {t('referral.total_paid')}
+                  </Text>
                   <Text className="text-gray-900 font-semibold">
                     {formatMoney(totals.paid, 0)}
                   </Text>
                 </View>
 
                 <View className="flex-row justify-between mb-3">
-                  <Text className="text-gray-600">Pendente</Text>
+                  <Text className="text-gray-600">
+                    {t('referral.pending')}
+                  </Text>
                   <Text className="text-green-600 font-semibold">
                     {formatMoney(totals.pending, 0)}
                   </Text>
                 </View>
 
                 <View className="flex-row justify-between mb-1">
-                  <Text className="text-gray-600">Em processamento</Text>
+                  <Text className="text-gray-600">
+                    {t('referral.in_processing')}
+                  </Text>
                   <Text className="text-amber-600 font-semibold">
                     {formatMoney(totals.requested, 0)}
                   </Text>
@@ -85,7 +93,9 @@ export default function ReferralEarningsScreen() {
 
                 {minimum > 0 && (
                   <Text className="text-gray-400 text-xs mt-3">
-                    Mínimo para saque: {formatMoney(minimum, 0)}
+                    {t('referral.minimum_for_withdrawal', {
+                      amount: formatMoney(minimum, 0),
+                    })}
                   </Text>
                 )}
               </View>
@@ -109,12 +119,14 @@ export default function ReferralEarningsScreen() {
                     canWithdraw ? 'text-white' : 'text-gray-500'
                   }`}
                 >
-                  Solicitar saque
+                  {t('referral.request_withdrawal')}
                 </Text>
               </TouchableOpacity>
               {!canWithdraw && totals.pending > 0 && (
                 <Text className="text-gray-400 text-center text-xs mt-2">
-                  Atinge o mínimo de {formatMoney(minimum, 0)} para sacar.
+                  {t('referral.below_minimum', {
+                    amount: formatMoney(minimum, 0),
+                  })}
                 </Text>
               )}
             </View>
@@ -122,12 +134,12 @@ export default function ReferralEarningsScreen() {
             {/* Histórico */}
             <View className="px-4 mt-6">
               <Text className="text-gray-500 text-sm mb-2 px-1">
-                Histórico
+                {t('referral.history')}
               </Text>
               {earnings.length === 0 ? (
                 <View className="bg-white rounded-2xl p-5 items-center">
                   <Text className="text-gray-500">
-                    Ainda não tens ganhos de referência.
+                    {t('referral.no_earnings_yet')}
                   </Text>
                 </View>
               ) : (
@@ -138,7 +150,9 @@ export default function ReferralEarningsScreen() {
                   >
                     <View className="flex-1">
                       <Text className="text-gray-900 font-medium">
-                        Ride {e.ride_id.slice(0, 8)}…
+                        {t('referral.ride_label', {
+                          id: e.ride_id.slice(0, 8),
+                        })}
                       </Text>
                       <Text className="text-gray-400 text-xs mt-0.5">
                         {new Date(e.created_at).toLocaleDateString('pt-PT')}

@@ -192,9 +192,28 @@ export function useRideFlow(
         rideRates
       )
 
-      // Use the higher fare: max(original, recalculated)
-      if (recalculatedFare.total > rideFare.total) {
-        finalFare = recalculatedFare
+      // calculateFare() é promo-blind — compara sempre valores BRUTOS
+      // (antes de desconto). Comparar contra rideFare.total penalizaria
+      // uma ride com promoção aplicada (total já líquido de desconto)
+      // face a um recálculo sempre bruto.
+      const originalGross = rideFare.breakdown.gross_amount ?? rideFare.total
+      const recalculatedGross =
+        recalculatedFare.breakdown.gross_amount ?? recalculatedFare.total
+
+      // Use o maior fare bruto: max(original, recalculado) — mas preserva
+      // o desconto/promoção original em vez de os descartar silenciosamente.
+      if (recalculatedGross > originalGross) {
+        const discount = rideFare.breakdown.discount ?? 0
+        finalFare = {
+          ...recalculatedFare,
+          total: recalculatedFare.total - discount,
+          breakdown: {
+            ...recalculatedFare.breakdown,
+            discount: rideFare.breakdown.discount,
+            promotion_id: rideFare.breakdown.promotion_id,
+            promotion_code: rideFare.breakdown.promotion_code
+          }
+        }
       }
     }
 

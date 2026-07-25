@@ -67,7 +67,7 @@ export const RideTrackingView = memo(function RideTrackingView({
         currentRide?.user?.name || currentRide?.details?.receiver.name
       }
       packageInfo={currentRide?.details?.item}
-      distanceTraveled={driverRoute.distanceKm}
+      distanceRemaining={driverRoute.distanceKm}
       distanceTotal={route.distanceKm}
     />
   )

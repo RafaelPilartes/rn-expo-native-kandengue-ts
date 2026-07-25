@@ -42,7 +42,7 @@
     "bank": "Bank",
     "bank_placeholder": "e.g. BFA, BAI, BIC…",
     "account_number": "Account number (IBAN)",
-    "account_number_placeholder": "0000 0000 0000 0000 0000 0",
+    "account_number_placeholder": "AO06 0000 0000 0000 0000 0000 0",
     "account_holder": "Account holder",
     "account_holder_placeholder": "Holder name",
     "submit": "Confirm request",

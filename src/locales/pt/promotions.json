@@ -42,7 +42,7 @@
     "bank": "Banco",
     "bank_placeholder": "Ex: BFA, BAI, BIC…",
     "account_number": "Número de conta (IBAN)",
-    "account_number_placeholder": "0000 0000 0000 0000 0000 0",
+    "account_number_placeholder": "AO06 0000 0000 0000 0000 0000 0",
     "account_holder": "Titular da conta",
     "account_holder_placeholder": "Nome do titular",
     "submit": "Confirmar pedido",

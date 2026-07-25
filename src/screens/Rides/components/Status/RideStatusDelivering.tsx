@@ -19,7 +19,7 @@ interface PackageInfo {
 }
 
 interface RideStatusDeliveringProps {
-  distanceTraveled: string
+  distanceRemaining: string
   distanceTotal: string
   duration: string
   packageInfo?: PackageInfo
@@ -27,7 +27,7 @@ interface RideStatusDeliveringProps {
 }
 
 export const RideStatusDelivering: React.FC<RideStatusDeliveringProps> = ({
-  distanceTraveled,
+  distanceRemaining,
   distanceTotal,
   duration,
   packageInfo,

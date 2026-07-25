@@ -10,13 +10,12 @@ import {
   unsubscribeFromTopic,
   setBackgroundMessageHandler,
   getInitialNotification,
-  requestPermission,
-  AuthorizationStatus,
   registerDeviceForRemoteMessages,
   type FirebaseMessagingTypes
 } from '@react-native-firebase/messaging'
 import { getAuth, getIdToken } from '@react-native-firebase/auth'
 import ApiDAO from '@/modules/Api/rest/Api.dao'
+import { requestNotificationPermission } from '@/services/permissions/notificationPermission'
 
 type NotificationRole = 'driver' | 'passenger'
 
@@ -41,20 +40,20 @@ export const DEFAULT_CHANNEL_ID = 'kandengue_default'
 export const PushNotificationService = {
   /**
    * Requests notification permission from the OS.
+   * Delegates to the react-native-permissions-based flow — on Android 13+
+   * this is the only path that actually shows the POST_NOTIFICATIONS
+   * system dialog; calling messaging().requestPermission() directly is a
+   * documented no-op on Android that always resolves AUTHORIZED.
    * Returns true if granted, false otherwise.
    */
   async requestPermission(): Promise<boolean> {
-    const authStatus = await requestPermission(getMessaging())
+    const result = await requestNotificationPermission()
 
-    const granted =
-      authStatus === AuthorizationStatus.AUTHORIZED ||
-      authStatus === AuthorizationStatus.PROVISIONAL
-
-    if (!granted) {
-      console.warn('[Push] Permission not granted:', authStatus)
+    if (!result.granted) {
+      console.warn('[Push] Permission not granted:', result)
     }
 
-    return granted
+    return result.granted
   },
 
   /**

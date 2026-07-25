@@ -28,7 +28,7 @@ interface Props {
   additionalTime?: string
   customerName?: string
   packageInfo?: any
-  distanceTraveled?: number
+  distanceRemaining?: number
   distanceTotal?: number
 }
 
@@ -48,7 +48,7 @@ export const RideStatusManager: React.FC<Props> = ({
   additionalTime,
   customerName,
   packageInfo,
-  distanceTraveled,
+  distanceRemaining,
   distanceTotal
 }) => {
   switch (status) {
@@ -85,7 +85,7 @@ export const RideStatusManager: React.FC<Props> = ({
     case 'picked_up':
       return (
         <RideStatusDelivering
-          distanceTraveled={distanceTraveled ? String(distanceTraveled) : '0'}
+          distanceRemaining={distanceRemaining ? String(distanceRemaining) : '0'}
           distanceTotal={distanceTotal ? String(distanceTotal) : '0'}
           duration={driverDuration ? String(driverDuration) : '0'}
           packageInfo={packageInfo}

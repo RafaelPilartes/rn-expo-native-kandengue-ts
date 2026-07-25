@@ -116,11 +116,15 @@ export function getNotificationCategoryLabel(
 
 export function getAdminRoleLabel(role: AdminRole): string {
   const labels: Record<AdminRole, string> = {
-    superadmin: 'Superadmin',
-    manager: 'Gestor',
-    finance: 'Financeiro',
-    content: 'Conteúdo',
-    support: 'Suporte'
+    direcao_geral: 'Direção Geral',
+    operacoes_qualidade: 'Operações e Qualidade',
+    administracao_financas: 'Administração e Finanças',
+    tecnologia_inovacao: 'Tecnologia e Inovação',
+    seguranca_qualidade_operacional: 'Segurança e Qualidade Operacional',
+    negocios_imagem_institucional: 'Negócios e Imagem Institucional',
+    capital_humano: 'Capital Humano',
+    contabilidade_financas: 'Contabilidade e Finanças',
+    tecnologia_inovacao_tecnica: 'Tecnologia e Inovação Técnica'
   }
   return labels[role]
 }

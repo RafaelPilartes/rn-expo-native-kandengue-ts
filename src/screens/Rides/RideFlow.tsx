@@ -14,8 +14,6 @@ import { MapConfirmBar } from './components/Map/MapConfirmBar'
 import { useMap } from '@/providers/MapProvider'
 import { useLocation } from '@/context/LocationContext'
 import { useRideFlowStore } from '@/storage/store/useRideFlowStore'
-import { useRideRoute } from '@/hooks/ride/useRideRoute'
-import { useFareCalculation } from '@/hooks/ride/useFareCalculation'
 import { useRideSummary } from '@/hooks/ride/useRideSummary'
 import { getAddressFromCoords } from '@/services/google/googleApi'
 import { CustomPlace } from '@/types/places'
@@ -76,21 +74,19 @@ export default function RideFlowScreen() {
     }
   }, [mapPickingMode])
 
-  // Prefetch ride rates for fare calculation
-  const { rideRates } = useRideSummary({
+  // Prefetch ride rates + route + fare for the estimation preview.
+  // useRideSummary já chama useRideRoute internamente com estas mesmas
+  // coordenadas — reutilizamos o seu `route`/`fareDetails` em vez de
+  // repetir a chamada à Directions API e o cálculo de fare.
+  const {
+    rideRates,
+    route: { coords: routeCoordsFlow, distanceKm, durationMinutes },
+    fareDetails
+  } = useRideSummary({
     rideId: undefined,
     previewPickup: pickup ?? { latitude: 0, longitude: 0 },
     previewDropoff: dropoff ?? { latitude: 0, longitude: 0 }
   })
-
-  // Calculate route when both locations are selected
-  const {
-    routeCoords: routeCoordsFlow,
-    distanceKm,
-    durationMinutes
-  } = useRideRoute(pickup ?? undefined, dropoff ?? undefined)
-
-  const { fareDetails } = useFareCalculation(distanceKm, 0, rideRates ?? null)
 
   const isLoadingRoute = !!(pickup && dropoff && distanceKm === 0)
 

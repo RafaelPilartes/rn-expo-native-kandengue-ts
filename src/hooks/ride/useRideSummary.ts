@@ -11,6 +11,7 @@ import { RideStatusType } from '@/types/enum'
 import { useDriverRealtimeLocation } from '../driver/useDriverRealtimeLocation'
 import { trimPolylineFromPosition } from '@/helpers/polyline'
 import { calculateHeading } from '@/helpers/bearing'
+import { getCurrentRateCard } from '@/helpers/rideTime'
 import { CustomPlace } from '@/types/places'
 
 type LatLng = { latitude: number; longitude: number }
@@ -145,12 +146,16 @@ export function useRideSummary(config: UseRideSummaryConfig) {
     return trimPolylineFromPosition(rawDriverRouteCoords, stableDriverPosition)
   }, [rawDriverRouteCoords, stableDriverPosition])
 
-  // Wait timer
+  // Wait timer — usa o mesmo tarifário (day/night) que calculateFare()
+  // seleciona para o cálculo real, para a contagem exibida nunca divergir
+  // do que é efetivamente faturado.
   const waitTimer = useWaitTimerByDate({
     isWaiting: rideStatus === 'arrived_pickup',
     startDate: ride?.waiting_start_at,
     endDate: ride?.waiting_end_at,
-    freeMinutes: rideRates?.day_rates?.wait_time_free_minutes
+    freeMinutes: rideRates
+      ? getCurrentRateCard(rideRates).wait_time_free_minutes
+      : undefined
   })
 
   // Fare calculation (unified — one source of truth)

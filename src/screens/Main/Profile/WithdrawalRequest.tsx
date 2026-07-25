@@ -2,6 +2,7 @@ import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { ArrowLeft } from 'lucide-react-native'
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -19,6 +20,7 @@ import { formatMoney } from '@/utils/formattedNumber'
 import { useReferralEarningsViewModel } from '@/viewModels/ReferralViewModel'
 
 export default function WithdrawalRequestScreen() {
+  const { t } = useTranslation('promotions')
   const navigation =
     useNavigation<NativeStackNavigationProp<ProfileStackParamList>>()
   const { showAlert } = useAlert()
@@ -34,9 +36,14 @@ export default function WithdrawalRequestScreen() {
   const [accountNumber, setAccountNumber] = useState('')
   const [accountHolder, setAccountHolder] = useState('')
 
+  // IBAN angolano: "AO" + 23 dígitos (25 carateres no total).
+  const normalizeIban = (value: string) =>
+    value.replace(/\s+/g, '').toUpperCase()
+  const isValidIban = (value: string) => /^AO\d{23}$/.test(normalizeIban(value))
+
   const formValid =
     bankName.trim().length > 0 &&
-    accountNumber.trim().length >= 4 &&
+    isValidIban(accountNumber) &&
     accountHolder.trim().length > 0
 
   const handleSubmit = async () => {
@@ -49,20 +56,20 @@ export default function WithdrawalRequestScreen() {
       return
     }
     if (!formValid) {
-      showAlert('Dados bancários', 'Preenche todos os campos.', 'warning')
+      showAlert('Dados bancários', t('withdrawal.incomplete_form'), 'warning')
       return
     }
     try {
       await requestWithdrawal({
         payment_details: {
           bank_name: bankName.trim(),
-          account_number: accountNumber.trim(),
+          account_number: normalizeIban(accountNumber),
           account_holder: accountHolder.trim(),
         },
       })
       showAlert(
-        'Pedido enviado',
-        'O teu saque será processado em breve.',
+        t('withdrawal.success_title'),
+        t('withdrawal.success_body'),
         'success',
       )
       navigation.goBack()
@@ -85,51 +92,58 @@ export default function WithdrawalRequestScreen() {
             <ArrowLeft size={20} color="#1f2937" />
           </TouchableOpacity>
           <Text className="text-xl font-bold text-gray-900">
-            Solicitar saque
+            {t('withdrawal.title')}
           </Text>
         </View>
 
         <ScrollView contentContainerStyle={{ padding: 16 }}>
           <View className="bg-white rounded-2xl p-5 mb-4">
             <Text className="text-gray-500 text-sm mb-1">
-              Total a receber
+              {t('withdrawal.total_to_receive')}
             </Text>
             <Text className="text-2xl font-bold text-green-600">
               {formatMoney(totals.pending, 0)}
             </Text>
             {minimum > 0 && (
               <Text className="text-gray-400 text-xs mt-2">
-                Mínimo para saque: {formatMoney(minimum, 0)}
+                {t('referral.minimum_for_withdrawal', {
+                  amount: formatMoney(minimum, 0),
+                })}
               </Text>
             )}
           </View>
 
-          <Text className="text-gray-600 mb-2 ml-1">Banco</Text>
+          <Text className="text-gray-600 mb-2 ml-1">
+            {t('withdrawal.bank')}
+          </Text>
           <TextInput
             value={bankName}
             onChangeText={setBankName}
-            placeholder="Ex: BFA, BAI, BIC…"
+            placeholder={t('withdrawal.bank_placeholder')}
             placeholderTextColor="#9CA3AF"
             className="bg-white rounded-xl px-4 py-3 mb-4 border border-gray-200"
           />
 
           <Text className="text-gray-600 mb-2 ml-1">
-            Número de conta (IBAN)
+            {t('withdrawal.account_number')}
           </Text>
           <TextInput
             value={accountNumber}
             onChangeText={setAccountNumber}
-            placeholder="0000 0000 0000 0000 0000 0"
+            placeholder={t('withdrawal.account_number_placeholder')}
             placeholderTextColor="#9CA3AF"
-            keyboardType="numeric"
+            autoCapitalize="characters"
+            autoCorrect={false}
             className="bg-white rounded-xl px-4 py-3 mb-4 border border-gray-200"
           />
 
-          <Text className="text-gray-600 mb-2 ml-1">Titular da conta</Text>
+          <Text className="text-gray-600 mb-2 ml-1">
+            {t('withdrawal.account_holder')}
+          </Text>
           <TextInput
             value={accountHolder}
             onChangeText={setAccountHolder}
-            placeholder="Nome do titular"
+            placeholder={t('withdrawal.account_holder_placeholder')}
             placeholderTextColor="#9CA3AF"
             className="bg-white rounded-xl px-4 py-3 mb-6 border border-gray-200"
           />
@@ -153,7 +167,7 @@ export default function WithdrawalRequestScreen() {
                     : 'text-gray-500'
                 }`}
               >
-                Confirmar pedido
+                {t('withdrawal.submit')}
               </Text>
             )}
           </TouchableOpacity>

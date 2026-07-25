@@ -1,5 +1,5 @@
 // src/screens/Rides/RideSummary.tsx
-import React, { useEffect, useRef, useState, useCallback } from 'react'
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { BackHandler, Vibration } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import {
@@ -99,19 +99,30 @@ export default function RideSummaryScreen() {
     previewDropoff: location.dropoff
   })
 
-  // Pickup/dropoff with description for map markers
-  const pickupMarker = {
-    ...location.pickup,
-    name: currentRide?.pickup?.description ?? location.pickup.name,
-    description: currentRide?.pickup?.description ?? location.pickup.description
-  }
+  // Pickup/dropoff with description for map markers.
+  // Memoizado — este ecrã re-renderiza a cada segundo (tick do waitTimer
+  // durante 'arrived_pickup'), e sem isto o mapa recebia uma nova
+  // referência destes objetos a cada tick, anulando a memoização interna
+  // dos markers do mapa.
+  const pickupMarker = useMemo(
+    () => ({
+      ...location.pickup,
+      name: currentRide?.pickup?.description ?? location.pickup.name,
+      description:
+        currentRide?.pickup?.description ?? location.pickup.description
+    }),
+    [location.pickup, currentRide?.pickup?.description]
+  )
 
-  const dropoffMarker = {
-    ...location.dropoff,
-    name: currentRide?.dropoff?.description ?? location.dropoff.name,
-    description:
-      currentRide?.dropoff?.description ?? location.dropoff.description
-  }
+  const dropoffMarker = useMemo(
+    () => ({
+      ...location.dropoff,
+      name: currentRide?.dropoff?.description ?? location.dropoff.name,
+      description:
+        currentRide?.dropoff?.description ?? location.dropoff.description
+    }),
+    [location.dropoff, currentRide?.dropoff?.description]
+  )
 
   // ─── Actions ──────────────────────────────────────────
 
@@ -278,6 +289,18 @@ export default function RideSummaryScreen() {
   // Validar código promocional contra contexto da ride
   const handlePromoValidate = useCallback(
     async (code: string) => {
+      // O fare ainda depende da chamada assíncrona ao Google Directions —
+      // sem isso, enviaríamos estimated_price: 0 e um código válido com
+      // regra de valor mínimo seria rejeitado incorretamente.
+      if (fareDetails?.total === undefined) {
+        showAlert(
+          'Aguarda um momento',
+          'Ainda estamos a calcular o valor da corrida.',
+          'warning',
+        )
+        return
+      }
+
       try {
         await validatePromo({
           code,
@@ -285,7 +308,7 @@ export default function RideSummaryScreen() {
             city_origin: location.pickup.name ?? '',
             city_destination: location.dropoff.name ?? '',
             ride_type: 'delivery',
-            estimated_price: fareDetails?.total ?? 0,
+            estimated_price: fareDetails.total,
             payment_method: paymentMethod ?? 'cash',
           },
         })
@@ -293,7 +316,7 @@ export default function RideSummaryScreen() {
         // PromotionViewModel já trata o erro via feedback
       }
     },
-    [validatePromo, location, fareDetails, paymentMethod]
+    [validatePromo, location, fareDetails, paymentMethod, showAlert]
   )
 
   const handleCancelRide = useCallback(
@@ -431,7 +454,7 @@ export default function RideSummaryScreen() {
               feedback={promoFeedback}
               onValidate={handlePromoValidate}
               onClear={resetPromo}
-              disabled={isCreatingRide}
+              disabled={isCreatingRide || fareDetails?.total === undefined}
             />
           }
           promoDiscountAmount={
