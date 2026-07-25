@@ -14,9 +14,7 @@ import { MapConfirmBar } from './components/Map/MapConfirmBar'
 import { useMap } from '@/providers/MapProvider'
 import { useLocation } from '@/context/LocationContext'
 import { useRideFlowStore } from '@/storage/store/useRideFlowStore'
-import { useRideRoute } from '@/hooks/ride/useRideRoute'
-import { useFareCalculation } from '@/hooks/ride/useFareCalculation'
-import { useRideSummary } from '@/hooks/useRideSummary'
+import { useRideSummary } from '@/hooks/ride/useRideSummary'
 import { getAddressFromCoords } from '@/services/google/googleApi'
 import { CustomPlace } from '@/types/places'
 
@@ -76,17 +74,19 @@ export default function RideFlowScreen() {
     }
   }, [mapPickingMode])
 
-  // Prefetch ride rates for fare calculation
-  const { rideRates } = useRideSummary(undefined)
-
-  // Calculate route when both locations are selected
+  // Prefetch ride rates + route + fare for the estimation preview.
+  // useRideSummary já chama useRideRoute internamente com estas mesmas
+  // coordenadas — reutilizamos o seu `route`/`fareDetails` em vez de
+  // repetir a chamada à Directions API e o cálculo de fare.
   const {
-    routeCoords: routeCoordsFlow,
-    distanceKm,
-    durationMinutes
-  } = useRideRoute(pickup ?? undefined, dropoff ?? undefined)
-
-  const { fareDetails } = useFareCalculation(distanceKm, 0, rideRates ?? null)
+    rideRates,
+    route: { coords: routeCoordsFlow, distanceKm, durationMinutes },
+    fareDetails
+  } = useRideSummary({
+    rideId: undefined,
+    previewPickup: pickup ?? { latitude: 0, longitude: 0 },
+    previewDropoff: dropoff ?? { latitude: 0, longitude: 0 }
+  })
 
   const isLoadingRoute = !!(pickup && dropoff && distanceKm === 0)
 
@@ -228,7 +228,7 @@ export default function RideFlowScreen() {
       )}
 
       {/* Full-Screen Map wrapped to intercept touches instantly */}
-      <View 
+      <View
         className="flex-1"
         onTouchStart={() => {
           if (mapPickingMode) {
@@ -252,7 +252,7 @@ export default function RideFlowScreen() {
                   {
                     id: 'flow-route',
                     coordinates: routeCoordsFlow,
-                    color: '#111827',
+                    color: '#e0212d',
                     width: 4
                   }
                 ]

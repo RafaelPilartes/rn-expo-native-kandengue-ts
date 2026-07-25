@@ -1,5 +1,6 @@
 // src/providers/AppProvider.tsx
 import React, { createContext, useContext, useCallback, ReactNode } from 'react'
+import { Linking } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { HomeStackParamList, MainTabParamList } from '@/types/navigation'
@@ -10,6 +11,8 @@ import ROUTES from '@/constants/routes'
 import { useAlert } from '@/context/AlertContext'
 import { useUserState } from '../hooks/useUserState'
 import { useRidesViewModel } from '@/viewModels/RideViewModel'
+import { usePushNotifications } from '@/hooks/usePushNotifications'
+import { displayNotification } from '@/services/notifications/notifee.service'
 
 interface AppContextReturn {
   // Estado
@@ -42,6 +45,34 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const { user } = useAuthStore()
 
   const { showAlert } = useAlert()
+
+  // Push notifications — registers FCM token once user is authenticated
+  usePushNotifications({
+    userId: user?.firebase_uid,
+    role: 'passenger',
+    onForegroundMessage: message => {
+      // App is in foreground: FCM suppresses the system banner.
+      // Use notifee to show a real heads-up notification with sound (Uber/Yango style).
+      const title = message.notification?.title ?? 'Kandengue Atrevido'
+      const body = message.notification?.body ?? ''
+      const data = message.data as Record<string, string> | undefined
+      displayNotification(title, body, data)
+    },
+    onPermissionBlocked: () => {
+      showAlert(
+        'Notificações Bloqueadas',
+        'As notificações estão desativadas. Não receberá avisos sobre suas corridas e promoções. Por favor, ative nas configurações do app.',
+        'warning',
+        [
+          { text: 'Agora não', style: 'cancel' },
+          {
+            text: 'Abrir Configurações',
+            onPress: () => Linking.openSettings()
+          }
+        ]
+      )
+    },
+  })
 
   // Estados via Custom Hooks
   const { currentUserData } = useUserState()

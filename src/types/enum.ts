@@ -2,7 +2,7 @@ export type LanguageEnum = 'pt' | 'en' | 'fr';
 export type AppTheme = 'light' | 'dark';
 
 export type TrustedContactStatusType = 'pending' | 'accepted' | 'rejected';
-export type NotificationType = 'push' | 'sms' | 'both';
+export type NotificationType = 'ride' | 'wallet' | 'document' | 'system';
 
 export type LocationSourceType =
   | 'emergency'
@@ -45,7 +45,7 @@ export type GenderType = 'male' | 'female' | 'other';
 export type MonthEnumType = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 export type currencyEnumType = 'AOA' | 'USD';
 // =========================================================================
-export type UserStatus = 'active' | 'inactive' | 'pending' | 'banned';
+export type UserStatus = 'active' | 'inactive' | 'pending' | 'banned' | 'deleted';
 export type UserAvailability = 'available' | 'on_mission';
 
 // =========================================================================
@@ -82,23 +82,39 @@ export type TransactionCategoryType =
   | 'ride_fee'
   | 'pension'
   | 'bonus'
+  | 'mission_bonus'
   | 'refund';
 
-export type TransactionStatus = 'pending' | 'approved' | 'rejected';
+export type TransactionStatus = 'pending' | 'success' | 'failed' | 'reversed';
 export type RequestStatus = 'pending' | 'approved' | 'rejected';
 
-export type WalletTopupMethodType = 'bank_transfer' | 'automated' | 'cash';
+export type WalletTopupStatus =
+  | 'pending'       // criado localmente
+  | 'processing'    // enviado para Unitel
+  | 'approved'      // aprovado
+  | 'rejected'      // rejeitado
+  | 'success'       // confirmado
+  | 'failed'        // falhou
+  | 'cancelled'     // cancelado
+  | 'timeout'       // sem resposta
+  | 'reversed';     // estornado
 
-// export type NotificationType = 'ride' | 'wallet' | 'document' | 'system'
+export type WalletTopupMethodType = 'unitel_money' | 'bank_transfer' | 'cash';
+
+
 export type NotificationCategory = 'driver' | 'passenger' | 'admin' | 'all';
 
 // =========================================================================
 export type AdminRole =
-  | 'superadmin'
-  | 'manager'
-  | 'finance'
-  | 'content'
-  | 'support';
+  | 'direcao_geral'
+  | 'operacoes_qualidade'
+  | 'administracao_financas'
+  | 'tecnologia_inovacao'
+  | 'seguranca_qualidade_operacional'
+  | 'negocios_imagem_institucional'
+  | 'capital_humano'
+  | 'contabilidade_financas'
+  | 'tecnologia_inovacao_tecnica';
 
 export type LogActionType =
   // Sessão e autenticação

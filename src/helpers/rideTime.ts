@@ -1,3 +1,6 @@
+import type { RideRatesInterface } from '@/interfaces/IRideRates';
+import type { RateType } from '@/types/ride';
+
 /**
  * Converte "HH:mm" → minutos do dia
  */
@@ -27,4 +30,33 @@ export function isWithinTimeRange(
   // Caso cruzando a meia-noite: start > end (ex.: 22:00 até 05:00)
   // Nesse caso, o intervalo é "start → 23:59" OU "00:00 → end"
   return currentMinutes >= startMinutes || currentMinutes <= endMinutes;
+}
+
+/**
+ * Devolve o tarifário (day_rates/night_rates) aplicável agora — mesma
+ * seleção usada em calculateFare() para o cálculo real do fare. Extraído
+ * para aqui para que UI que precise de exibir valores desse tarifário
+ * (ex: minutos de espera grátis) nunca divirja do que é realmente faturado.
+ */
+export function getCurrentRateCard(
+  rideRates: RideRatesInterface,
+  now: Date = new Date(),
+): RateType {
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+  const dayStart = timeToMinutes(rideRates.day_rates.start_time);
+  const dayEnd = timeToMinutes(rideRates.day_rates.end_time);
+
+  const nightStart = timeToMinutes(rideRates.night_rates.start_time);
+  const nightEnd = timeToMinutes(rideRates.night_rates.end_time);
+
+  if (isWithinTimeRange(currentMinutes, dayStart, dayEnd)) {
+    return rideRates.day_rates;
+  }
+  if (isWithinTimeRange(currentMinutes, nightStart, nightEnd)) {
+    return rideRates.night_rates;
+  }
+
+  // Caso fora do horário definido (ex: madrugada) — fallback para night_rates
+  return rideRates.night_rates;
 }

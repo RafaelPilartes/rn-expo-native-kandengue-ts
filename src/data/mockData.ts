@@ -126,12 +126,12 @@ export const vehicles: VehicleInterface[] = [
 export const admin: AdminInterface[] = [
   {
     ...users[2],
-    role: 'superadmin',
+    role: 'direcao_geral',
     permissions: [{ value: 'manage_all', label: 'Gerenciar Tudo' }]
   },
   {
     ...users[3],
-    role: 'manager',
+    role: 'operacoes_qualidade',
     permissions: [
       { value: 'manage_users', label: 'Gerenciar Usuários' },
       {
@@ -245,7 +245,7 @@ export const notifications: NotificationInterface[] = [
     id: 'n1',
     title: 'Nova corrida disponível',
     message: 'Tem uma nova solicitação de entrega próxima.',
-    type: 'push',
+    type: 'ride',
     category: 'driver',
     specific_user: true,
     user: users[4],
@@ -255,7 +255,7 @@ export const notifications: NotificationInterface[] = [
     id: 'n2',
     title: 'Documento aprovado',
     message: 'Sua carta de condução foi aprovada.',
-    type: 'push',
+    type: 'document',
     category: 'driver',
     specific_user: true,
     user: users[5],
@@ -265,7 +265,7 @@ export const notifications: NotificationInterface[] = [
     id: 'n3',
     title: 'Carregamento pendente',
     message: 'Seu carregamento de 5000 Kz está em análise.',
-    type: 'push',
+    type: 'wallet',
     category: 'driver',
     specific_user: true,
     user: users[5],
@@ -275,7 +275,7 @@ export const notifications: NotificationInterface[] = [
     id: 'n4',
     title: 'Nova atualização',
     message: 'Aplicativo atualizado para versão 1.0.5',
-    type: 'push',
+    type: 'system',
     category: 'all',
     created_at: new Date()
   }
@@ -569,19 +569,25 @@ export const walletTopupRequests: WalletTopupRequestInterface[] = [
   {
     id: 'req1',
     wallet_id: 'w1',
+    user_id: 'u5',
     amount: 5000,
+    currency: 'AOA',
     method: 'bank_transfer',
+    idempotency_key: 'idem-req1',
     proof_url: 'https://cdn.app.com/proofs/proof1.png',
     status: 'approved',
     created_at: new Date('2025-09-01T10:00:00Z'),
     updated_at: new Date('2025-09-01T12:00:00Z'),
-    reviewed_by: admin[0]
+    reviewed_by: admin[0].id
   },
   {
     id: 'req2',
     wallet_id: 'w2',
+    user_id: 'u6',
     amount: 3000,
+    currency: 'AOA',
     method: 'bank_transfer',
+    idempotency_key: 'idem-req2',
     proof_url: 'https://cdn.app.com/proofs/proof2.png',
     status: 'pending',
     created_at: new Date('2025-09-12T15:30:00Z')
@@ -589,12 +595,15 @@ export const walletTopupRequests: WalletTopupRequestInterface[] = [
   {
     id: 'req3',
     wallet_id: 'w1',
+    user_id: 'u5',
     amount: 2000,
+    currency: 'AOA',
     method: 'bank_transfer',
+    idempotency_key: 'idem-req3',
     status: 'rejected',
     created_at: new Date('2025-09-10T11:00:00Z'),
     updated_at: new Date('2025-09-10T13:00:00Z'),
-    reviewed_by: admin[1]
+    reviewed_by: admin[1].id
   }
 ]
 

@@ -20,7 +20,6 @@ export class UserEntity implements UserInterface {
   updated_at?: Date
   last_login?: Date
   firebase_uid?: string
-  location?: LocationType
   last_location_update?: Date
 
   constructor(params: {
@@ -59,7 +58,6 @@ export class UserEntity implements UserInterface {
     this.updated_at = params.updated_at
     this.last_login = params.last_login
     this.firebase_uid = params.firebase_uid
-    this.location = params.location
     this.last_location_update = params.last_location_update
   }
 

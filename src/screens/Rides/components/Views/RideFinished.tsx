@@ -1,12 +1,13 @@
 // src/screens/Ride/RideFinishedScreen.tsx
 import React, { useCallback, useState } from 'react'
-import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native'
+import { ActivityIndicator, View, Text, TouchableOpacity, ScrollView, Image } from 'react-native'
 import { Check, Star, MapPin, Navigation } from 'lucide-react-native'
 import ImageView from 'react-native-image-viewing'
 import { RideInterface } from '@/interfaces/IRide'
 import { formatMoney } from '@/utils/formattedNumber'
-import { useRoute, useNavigation } from '@react-navigation/native'
+import { useNavigation } from '@react-navigation/native'
 import ROUTES from '@/constants/routes'
+import { useRideFinishedFare } from '@/hooks/ride/useRideFinishedFare'
 // import { useAppProvider } from '@/providers/AppProvider'
 
 type RideFinishedScreenRoutePros = {
@@ -14,33 +15,33 @@ type RideFinishedScreenRoutePros = {
   rideDetails: RideInterface
 }
 
-// type RideFinishedScreenRoutePros = { ... } // Leaving types as is
-
 export const RideCompletedScreen: React.FC<RideFinishedScreenRoutePros> = ({
   rideId,
   rideDetails
 }) => {
-  // const { navigationMainStack, navigationHomeStack } = useAppProvider() // Removed
   const navigation = useNavigation()
-  const route = useRoute()
+
+  const docId = rideId ?? rideDetails.id
+  const hasPromo = !!rideDetails.promotion_usage_id
 
   // ESTADO PARA CONTROLAR CLICKS MÚLTIPLOS
   const [isNavigating, setIsNavigating] = useState(false)
   const [isImageViewerVisible, setIsImageViewerVisible] = useState(false)
 
-  const totalPaid = `Kz ${formatMoney(rideDetails.fare.total)}`
+  const { fare, isVerifying } = useRideFinishedFare(docId, rideDetails.fare, hasPromo)
+
+  const grossAmount = fare.breakdown?.gross_amount
+  const discount = fare.breakdown?.discount
+  const hasDiscount = discount !== undefined && discount > 0
+  const totalPaid = formatMoney(fare.total)
 
   // USAR useCallback PARA PREVENIR RECRIAÇÃO DAS FUNÇÕES
   const handleGoHome = useCallback(() => {
     if (isNavigating) return
 
     setIsNavigating(true)
-    console.log('🔄 Navegando para Home...')
-
-    // navigationHomeStack.navigate(ROUTES.HomeStack.HOME)
     ;(navigation as any).navigate(ROUTES.HomeStack.HOME)
 
-    // Reset após navegação
     setTimeout(() => setIsNavigating(false), 1000)
   }, [isNavigating, navigation])
 
@@ -48,38 +49,21 @@ export const RideCompletedScreen: React.FC<RideFinishedScreenRoutePros> = ({
     if (isNavigating) return
 
     setIsNavigating(true)
-    console.log('🔄 Navegando para Rating...')
-
-    // navigationHomeStack.navigate(ROUTES.HomeStack.HOME)
     ;(navigation as any).navigate(ROUTES.HomeStack.HOME)
-    // navigationMainStack.navigate(ROUTES.Ride.RIDE_RATING, {
-    //   rideId,
-    //   rideDetails,
-    // });
 
     setTimeout(() => setIsNavigating(false), 1000)
-  }, [isNavigating, navigation, rideId, rideDetails])
+  }, [isNavigating, navigation])
 
   const handleViewHistory = useCallback(() => {
     if (isNavigating) return
 
     setIsNavigating(true)
-    console.log('🔄 Navegando para Histórico...')
-
-    // navigationMainStack.navigate(ROUTES.MainTab.HISTORY)
     ;(navigation as any).navigate(ROUTES.MainTab.HISTORY)
 
     setTimeout(() => setIsNavigating(false), 1000)
   }, [isNavigating, navigation])
 
-  // VERIFICAR SE O COMPONENTE ESTÁ SENDO RENDERIZADO MÚLTIPLAS VEZES
-  React.useEffect(() => {
-    console.log('🎯 RideCompletedScreen renderizado')
 
-    return () => {
-      console.log('🧹 RideCompletedScreen desmontado')
-    }
-  }, [])
 
   return (
     <ScrollView
@@ -160,17 +144,60 @@ export const RideCompletedScreen: React.FC<RideFinishedScreenRoutePros> = ({
 
           {/* PAGAMENTO */}
           <View className="border border-green-200 bg-green-50 rounded-xl p-4 mb-6">
-            <Text className="text-green-800 font-semibold mb-1">
-              Total da corrida
-            </Text>
+            <View className="flex-row items-center justify-between mb-3">
+              <Text className="text-green-800 font-semibold">
+                Resumo de pagamento
+              </Text>
+              {isVerifying && <ActivityIndicator size="small" color="#059669" />}
+            </View>
 
-            <Text className="text-green-700 text-2xl font-bold">
-              {totalPaid}
-            </Text>
+            {isVerifying && (
+              <View className="items-center py-3">
+                <ActivityIndicator size="large" color="#059669" />
+                <Text className="text-green-700 text-sm mt-2">
+                  A verificar promoção...
+                </Text>
+              </View>
+            )}
 
-            <Text className="text-green-700 text-xs mt-1">
-              O valor final da corrida.
-            </Text>
+            {!isVerifying && (
+              <>
+                {hasDiscount && (
+                  <>
+                    <View className="flex-row justify-between items-center mb-1">
+                      <Text className="text-gray-500 text-sm">Valor original</Text>
+                      <Text className="text-gray-500 text-sm line-through">
+                        Kz {formatMoney(grossAmount!)}
+                      </Text>
+                    </View>
+                    <View className="flex-row justify-between items-center mb-3">
+                      <Text className="text-green-700 text-sm font-medium">
+                        Desconto aplicado
+                      </Text>
+                      <Text className="text-green-700 text-sm font-semibold">
+                        − Kz {formatMoney(discount!)}
+                      </Text>
+                    </View>
+                    <View className="h-px bg-green-200 mb-3" />
+                  </>
+                )}
+
+                <View className="flex-row justify-between items-center">
+                  <Text className="text-green-800 font-semibold text-base">
+                    {hasDiscount ? 'Total a pagar' : 'Total da corrida'}
+                  </Text>
+                  <Text className="text-green-700 text-2xl font-bold">
+                    Kz {totalPaid}
+                  </Text>
+                </View>
+
+                {hasDiscount && (
+                  <Text className="text-green-600 text-xs mt-2 text-right">
+                    Poupou Kz {formatMoney(discount!)} com o código promocional
+                  </Text>
+                )}
+              </>
+            )}
           </View>
 
           {/* PROVA DE ENTREGA */}
@@ -260,15 +287,7 @@ export const RideCompletedScreen: React.FC<RideFinishedScreenRoutePros> = ({
         </Text>
       </TouchableOpacity>
 
-      {/* DEBUG - Apenas em desenvolvimento */}
-      {__DEV__ && (
-        <View className="mt-4 p-2 bg-yellow-100 rounded-lg">
-          <Text className="text-yellow-800 text-xs text-center">
-            🔍 Debug: {isNavigating ? 'Navegando...' : 'Pronto'} |
-            Renderizações: {React.useRef(0).current++}
-          </Text>
-        </View>
-      )}
+
     </ScrollView>
   )
 }

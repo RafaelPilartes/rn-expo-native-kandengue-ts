@@ -105,7 +105,7 @@ export const DriverRideSheet = forwardRef<BottomSheetModal, Props>(
     }
 
     const navigation = useNavigation<any>()
-    
+
     const handleMessage = () => {
       if (rideData.user?.id && rideData.driver?.id) {
         navigation.navigate(ROUTES.Rides.CHAT, {
@@ -113,12 +113,12 @@ export const DriverRideSheet = forwardRef<BottomSheetModal, Props>(
           driver: {
             id: rideData.driver.id,
             name: rideData.driver.name,
-            avatar: rideData.driver.photo,
+            avatar: rideData.driver.photo
           },
           passenger: {
             id: rideData.user.id,
             name: rideData.user.name,
-            avatar: rideData.user.photo,
+            avatar: rideData.user.photo
           }
         })
       } else {
@@ -255,7 +255,7 @@ export const DriverRideSheet = forwardRef<BottomSheetModal, Props>(
                     <Phone color="white" size={18} />
                   </TouchableOpacity>
                   <TouchableOpacity
-                    className="w-10 h-10 rounded-full bg-blue-500 items-center justify-center"
+                    className="w-10 h-10 rounded-full bg-primary-200 items-center justify-center"
                     onPress={handleMessage}
                   >
                     <MessageCircle color="white" size={18} />
@@ -342,10 +342,19 @@ export const DriverRideSheet = forwardRef<BottomSheetModal, Props>(
           {/* Preço e ações */}
           <View className="flex-row items-center justify-between border-t border-gray-100 pt-4 mb-12">
             <View>
+              {(rideData.fare?.breakdown?.discount ?? 0) > 0 && (
+                <Text className="text-gray-400 text-xs line-through">
+                  Kz {formatMoney(rideData.fare.breakdown!.gross_amount!, 0)}
+                </Text>
+              )}
               <Text className="text-green-600 text-2xl font-bold">
-                Kz {formatMoney(fareDetails?.total || 0, 0)}
+                Kz {formatMoney(rideData.fare?.total ?? fareDetails?.total ?? 0, 0)}
               </Text>
-              <Text className="text-gray-400 text-xs">Valor total</Text>
+              <Text className="text-gray-400 text-xs">
+                {(rideData.fare?.breakdown?.discount ?? 0) > 0
+                  ? `Desc. Kz ${formatMoney(rideData.fare.breakdown!.discount!, 0)}`
+                  : 'Valor total'}
+              </Text>
             </View>
 
             {/* Botão de cancelamento (disponível apenas em certos status) */}

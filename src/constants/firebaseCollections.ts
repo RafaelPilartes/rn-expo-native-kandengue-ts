@@ -115,4 +115,42 @@ export const firebaseCollections = {
     root: 'logs',
     single: (logId: string) => `logs/${logId}`,
   },
+
+  // ============================================
+  // PROMOTIONS
+  promotions: {
+    root: 'promotions',
+    single: (code: string) => `promotions/${code}`,
+  },
+
+  // ============================================
+  // PROMOTION USAGES
+  promotionUsages: {
+    root: 'promotion_usages',
+    single: (id: string) => `promotion_usages/${id}`,
+    activeReservation: (userId: string) =>
+      `promotion_usages/active_reservation_${userId}`,
+    ridePromo: (rideId: string) => `promotion_usages/${rideId}_promo`,
+  },
+
+  // ============================================
+  // REFERRAL EARNINGS
+  referralEarnings: {
+    root: 'referral_earnings',
+    single: (id: string) => `referral_earnings/${id}`,
+  },
+
+  // ============================================
+  // WITHDRAWAL REQUESTS
+  withdrawalRequests: {
+    root: 'withdrawal_requests',
+    single: (id: string) => `withdrawal_requests/${id}`,
+  },
+
+  // ============================================
+  // APP CONFIG
+  appConfig: {
+    root: 'app_config',
+    referralSettings: 'app_config/referral_settings',
+  },
 };

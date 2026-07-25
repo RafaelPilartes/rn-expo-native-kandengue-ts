@@ -23,4 +23,8 @@ export interface UserInterface {
   location?: LocationType
 
   last_location_update?: Date
+
+  // Promoções (atualizado pelo trigger onRideCompleted)
+  completed_rides?: number
+  last_completed_ride_at?: Date | null
 }

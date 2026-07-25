@@ -1,16 +1,14 @@
-// src/screens/hooks/useRideFlow.ts
+// src/hooks/ride/useRideFlow.ts
 import { RideStatusType, RideType } from '@/types/enum'
 import { useRidesViewModel } from '@/viewModels/RideViewModel'
-import { useAuthStore } from '@/storage/store/useAuthStore'
 import { useLocation } from '../useLocation'
-import { DriverInterface } from '@/interfaces/IDriver'
 import { RideFareInterface } from '@/interfaces/IRideFare'
-import { useWalletsViewModel } from '@/viewModels/WalletViewModel'
-import { useTransactionsViewModel } from '@/viewModels/TransactionViewModel'
 import { RideInterface } from '@/interfaces/IRide'
 import { GeoLocationType } from '@/types/geoLocation'
 import { RideDetailsType } from '@/types/ride'
 import { useAppProvider } from '@/providers/AppProvider'
+import { calculateFare } from '@/helpers/rideCalculate'
+import { RideRateEntity } from '@/core/entities/RideRate'
 
 type SyncStatusToServerParams = {
   status: RideStatusType
@@ -22,8 +20,10 @@ type SyncStatusToServerParams = {
   completedAt?: Date
   canceledAt?: Date
   fare?: RideFareInterface | null
+  cancelledBy?: 'driver' | 'user' | 'system'
 }
-type CreateParams = {
+
+export type CreateRideParams = {
   pickup: GeoLocationType
   dropoff: GeoLocationType
   type: RideType
@@ -31,11 +31,14 @@ type CreateParams = {
   duration: number
   details: RideDetailsType
   fare: RideFareInterface
+  promotion_id?: string
+  promotion_usage_id?: string
 }
 
 export function useRideFlow(
   rideId?: string,
-  rideFare?: RideFareInterface | null
+  rideFare?: RideFareInterface | null,
+  rideRates?: RideRateEntity | null
 ) {
   const { createRide, updateRide } = useRidesViewModel()
   const { startTracking, stopTracking } = useLocation()
@@ -50,7 +53,8 @@ export function useRideFlow(
     waitingEndAt,
     completedAt,
     canceledAt,
-    fare
+    fare,
+    cancelledBy
   }: SyncStatusToServerParams) => {
     if (!rideId) return
 
@@ -66,7 +70,8 @@ export function useRideFlow(
           waiting_end_at: waitingEndAt ?? undefined,
           completed_at: completedAt ?? undefined,
           canceled_at: canceledAt ?? undefined,
-          fare: fare ?? undefined
+          fare: fare ?? undefined,
+          cancelled_by: cancelledBy ?? undefined
         }
       })
     } catch (error: any) {
@@ -82,41 +87,48 @@ export function useRideFlow(
     duration,
     type,
     details,
-    fare
-  }: CreateParams): Promise<RideInterface | undefined> => {
+    fare,
+    promotion_id,
+    promotion_usage_id
+  }: CreateRideParams): Promise<RideInterface | undefined> => {
     if (!currentUserData) return
 
     const newRide: Omit<RideInterface, 'id'> = {
       user: currentUserData,
-      pickup: pickup,
-      dropoff: dropoff,
+      pickup,
+      dropoff,
       status: 'idle',
-      fare: fare,
-      distance: distance,
-      duration: duration,
-      type: type,
-      details: details
+      fare,
+      distance,
+      duration,
+      type,
+      details,
+      ...(rideRates ? {
+        rate: {
+          insurance_percent: rideRates.insurance_percent,
+          payouts: {
+            driver_percent: rideRates.payouts.driver_percent,
+            company_percent: rideRates.payouts.company_percent,
+            pension_fund_percent: rideRates.payouts.pension_fund_percent,
+          }
+        }
+      } : {}),
+      ...(promotion_id ? { promotion_id } : {}),
+      ...(promotion_usage_id ? { promotion_usage_id } : {})
     }
 
-    console.log('newRide', newRide)
-
-    const ride = await createRide.mutateAsync(newRide)
-
     try {
-      return ride
+      return await createRide.mutateAsync(newRide)
     } catch (error: any) {
       console.error('❌ Erro ao criar corrida:', error)
       throw new Error(error.message || 'Erro ao criar corrida')
     }
   }
 
-  /** ---- ACTIONS ---- */
   const confirm = async () => {
     try {
       await syncStatusToServer({ status: 'driver_on_the_way' })
       startTracking('RIDE')
-
-      console.log('✅ Corrida confirmada - Motorista a caminho')
     } catch (error: any) {
       console.error('❌ Erro ao confirmar corrida:', error)
       throw error
@@ -129,8 +141,6 @@ export function useRideFlow(
         status: 'arrived_pickup',
         waitingStartAt: new Date()
       })
-
-      console.log('✅ Chegou ao local de recolha')
     } catch (error: any) {
       console.error('❌ Erro ao confirmar chegada na recolha:', error)
       throw error
@@ -143,8 +153,6 @@ export function useRideFlow(
         status: 'picked_up',
         waitingEndAt: new Date()
       })
-
-      console.log('✅ Pacote recolhido com sucesso')
     } catch (error: any) {
       console.error('❌ Erro ao confirmar recolha do pacote:', error)
       throw error
@@ -154,32 +162,88 @@ export function useRideFlow(
   const arrivedDropoff = async () => {
     try {
       await syncStatusToServer({ status: 'arrived_dropoff' })
-      console.log('✅ Chegou ao local de entrega')
     } catch (error: any) {
       console.error('❌ Erro ao confirmar chegada na entrega:', error)
       throw error
     }
   }
 
-  const completed = async (photoUri?: string) => {
+  /**
+   * Complete the ride with fare recalculation.
+   * Final fare = max(original_fare, fare_based_on_actual_distance)
+   * This ensures the driver is compensated for longer routes.
+   */
+  const completed = async (
+    photoUri?: string,
+    actualDistanceKm?: number,
+    waitMinutes?: number
+  ) => {
     if (!rideFare) {
-      const errorMsg = 'Dados de fare não encontrados para completar a corrida'
-      console.error('❌', errorMsg)
-      throw new Error(errorMsg)
+      throw new Error('Dados de fare não encontrados para completar a corrida')
+    }
+
+    let finalFare = rideFare
+
+    // Recalculate fare if actual distance is greater and we have rates
+    if (actualDistanceKm && rideRates && actualDistanceKm > 0) {
+      const recalculatedFare = calculateFare(
+        actualDistanceKm,
+        waitMinutes ?? 0,
+        rideRates
+      )
+
+      // calculateFare() é promo-blind — compara sempre valores BRUTOS
+      // (antes de desconto). Comparar contra rideFare.total penalizaria
+      // uma ride com promoção aplicada (total já líquido de desconto)
+      // face a um recálculo sempre bruto.
+      const originalGross = rideFare.breakdown.gross_amount ?? rideFare.total
+      const recalculatedGross =
+        recalculatedFare.breakdown.gross_amount ?? recalculatedFare.total
+
+      // Use o maior fare bruto: max(original, recalculado) — mas preserva
+      // o desconto/promoção original em vez de os descartar silenciosamente.
+      if (recalculatedGross > originalGross) {
+        const discount = rideFare.breakdown.discount ?? 0
+        finalFare = {
+          ...recalculatedFare,
+          total: recalculatedFare.total - discount,
+          breakdown: {
+            ...recalculatedFare.breakdown,
+            discount: rideFare.breakdown.discount,
+            promotion_id: rideFare.breakdown.promotion_id,
+            promotion_code: rideFare.breakdown.promotion_code
+          }
+        }
+      }
+    }
+
+    try {
+      await syncStatusToServer({
+        status: 'completed',
+        completedAt: new Date(),
+        proofDropoffPhoto: photoUri,
+        fare: finalFare
+      })
+
+      await stopTracking()
+    } catch (error: any) {
+      console.error('❌ Erro ao completar corrida:', error)
+      throw error
     }
   }
 
   const canceled = async (reason: string) => {
     try {
+      // cancelled_by: 'user' — sinaliza ao trigger onRideCancelled que aplica
+      // a janela de graça (2min) sobre driver_matched_at.
       await syncStatusToServer({
         status: 'canceled',
         reason,
-        canceledAt: new Date()
+        canceledAt: new Date(),
+        cancelledBy: 'user'
       })
 
       await stopTracking()
-
-      console.log('❌ Corrida cancelada:', reason)
     } catch (error: any) {
       console.error('❌ Erro ao cancelar corrida:', error)
       throw error

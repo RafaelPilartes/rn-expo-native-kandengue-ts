@@ -36,7 +36,9 @@ const ROUTES = {
     COMPLAINTS: 'ComplaintsScreen',
     HELP: 'HelpScreen',
     PRIVATE: 'PrivacyPolicyScreen',
-    TERMS: 'TermsConditionsScreen'
+    TERMS: 'TermsConditionsScreen',
+    REFERRAL_EARNINGS: 'ReferralEarningsScreen',
+    WITHDRAWAL_REQUEST: 'WithdrawalRequestScreen'
   },
   MotoBoyStack: {
     REQUESTS: 'RequestsScreen',

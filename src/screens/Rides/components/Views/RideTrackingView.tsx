@@ -5,25 +5,18 @@ import { RideStatusManager } from '../Status/RideStatusManager'
 import { RideInterface } from '@/interfaces/IRide'
 import { RideStatusType } from '@/types/enum'
 import { RideFareInterface } from '@/interfaces/IRideFare'
-import { CustomPlace } from '@/types/places'
 import { formatMoney } from '@/utils/formattedNumber'
+import type { RouteInfo, WaitTimerInfo } from '@/hooks/ride/useRideSummary'
 
 interface RideTrackingViewProps {
   rideId: string | undefined
   currentRide: RideInterface | null
   isLoadingData: boolean
   rideStatus: RideStatusType
-  location: {
-    pickup: CustomPlace
-    dropoff: CustomPlace
-  }
   fareDetails: RideFareInterface | null
-  fareDetailsTemp: RideFareInterface | null
-  durationMinutes: number | undefined
-  durationDriver: string | null
-  distanceKm: number
-  currentTime: string | null
-  additionalTime: number
+  route: RouteInfo
+  driverRoute: RouteInfo
+  waitTimer: WaitTimerInfo
   onCancel: () => void
   onAutoCancel: (reason: string) => void
   onCenterMap: () => void
@@ -34,14 +27,10 @@ export const RideTrackingView = memo(function RideTrackingView({
   currentRide,
   isLoadingData,
   rideStatus,
-  location,
   fareDetails,
-  fareDetailsTemp,
-  durationMinutes,
-  durationDriver,
-  distanceKm,
-  currentTime,
-  additionalTime,
+  route,
+  driverRoute,
+  waitTimer,
   onCancel,
   onAutoCancel,
   onCenterMap
@@ -62,28 +51,24 @@ export const RideTrackingView = memo(function RideTrackingView({
   return (
     <RideStatusManager
       status={rideStatus}
-      pickupDescription={
-        currentRide?.pickup.description || location.pickup.description
-      }
-      dropoffDescription={
-        currentRide?.dropoff.description || location.dropoff.description
-      }
-      price={formatMoney(fareDetails?.total || fareDetailsTemp?.total || 0, 0)}
+      pickupDescription={currentRide?.pickup.description}
+      dropoffDescription={currentRide?.dropoff.description}
+      price={formatMoney(currentRide?.fare?.total ?? fareDetails?.total ?? 0, 0)}
       searchStartTime={currentRide?.created_at}
       onCancel={onCancel}
       onAutoCancel={onAutoCancel}
       onCenterMap={onCenterMap}
-      duration={durationMinutes}
+      duration={route.durationMinutes}
       driverName={currentRide?.driver?.name}
-      driverDuration={durationDriver ?? '0'}
-      currentTime={currentTime ?? '0'}
-      additionalTime={String(additionalTime)}
+      driverDuration={driverRoute.durationText ?? '0'}
+      currentTime={waitTimer.formatted}
+      additionalTime={String(waitTimer.extraMinutes)}
       customerName={
         currentRide?.user?.name || currentRide?.details?.receiver.name
       }
       packageInfo={currentRide?.details?.item}
-      distanceTraveled={distanceKm}
-      distanceTotal={distanceKm}
+      distanceRemaining={driverRoute.distanceKm}
+      distanceTotal={route.distanceKm}
     />
   )
 })

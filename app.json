@@ -2,7 +2,7 @@
   "expo": {
     "name": "Kandengue Atrevido",
     "slug": "RnNativeKandengueTs",
-    "version": "1.0.9",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -76,6 +76,16 @@
     "plugins": [
       "@react-native-firebase/app",
       "@react-native-firebase/auth",
+      [
+        "@react-native-firebase/messaging",
+        {
+          "ios": {
+            "permissions": ["alert", "badge", "sound"]
+          }
+        }
+      ],
+      "./plugins/withFcmDefaultChannel",
+      "./plugins/withNotifeeGradle",
       "expo-maps",
       [
         "expo-build-properties",

@@ -1,6 +1,15 @@
 // src/screens/Ride/components/ConfirmRideCard.tsx
-import React from 'react'
-import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native'
+import React, { useEffect, useRef } from 'react'
+import {
+  Animated,
+  Keyboard,
+  Platform,
+  Text,
+  TouchableOpacity,
+  ActivityIndicator,
+  View
+} from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Clock, MapPin, Route } from 'lucide-react-native'
 
 interface ConfirmRideCardProps {
@@ -10,6 +19,11 @@ interface ConfirmRideCardProps {
   isLoading: boolean
   onConfirm: () => void
   onCancel?: () => void
+  /** Slot opcional para inserir o componente de código promocional. */
+  promoSlot?: React.ReactNode
+  /** Linha de desconto aplicada — exibida acima do total quando há desconto. */
+  discountLabel?: string
+  finalPrice?: string
 }
 
 export const ConfirmRideCard: React.FC<ConfirmRideCardProps> = ({
@@ -18,10 +32,49 @@ export const ConfirmRideCard: React.FC<ConfirmRideCardProps> = ({
   distance,
   isLoading,
   onConfirm,
-  onCancel
+  onCancel,
+  promoSlot,
+  discountLabel,
+  finalPrice
 }) => {
+  const { bottom: safeBottom } = useSafeAreaInsets()
+  const bottomAnim = useRef(new Animated.Value(safeBottom)).current
+
+  useEffect(() => {
+    bottomAnim.setValue(safeBottom)
+  }, [safeBottom, bottomAnim])
+
+  useEffect(() => {
+    const showEvent =
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow'
+    const hideEvent =
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide'
+
+    const onShow = Keyboard.addListener(showEvent, e => {
+      Animated.timing(bottomAnim, {
+        toValue: e.endCoordinates.height + 8,
+        duration: Platform.OS === 'ios' ? e.duration : 220,
+        useNativeDriver: false
+      }).start()
+    })
+    const onHide = Keyboard.addListener(hideEvent, e => {
+      Animated.timing(bottomAnim, {
+        toValue: safeBottom,
+        duration: Platform.OS === 'ios' ? e.duration : 220,
+        useNativeDriver: false
+      }).start()
+    })
+    return () => {
+      onShow.remove()
+      onHide.remove()
+    }
+  }, [safeBottom, bottomAnim])
+
   return (
-    <View className="absolute bottom-safe left-4 right-4 bg-white rounded-2xl shadow-2xl border border-gray-100">
+    <Animated.View
+      className="absolute left-4 right-4 bg-white rounded-2xl shadow-2xl border border-gray-100"
+      style={{ bottom: bottomAnim }}
+    >
       {/* Header */}
       <View className="p-4 border-b border-gray-100">
         <Text className="text-lg font-bold text-gray-900 text-center">
@@ -47,12 +100,28 @@ export const ConfirmRideCard: React.FC<ConfirmRideCardProps> = ({
           <Text className="text-gray-900 font-semibold">{duration}</Text>
         </View>
 
+        {/* Promo code slot */}
+        {promoSlot}
+
+        {discountLabel && (
+          <View className="flex-row justify-between items-center mb-3">
+            <Text className="text-gray-500 line-through text-sm">{price}</Text>
+            <Text className="text-green-600 font-semibold">
+              − {discountLabel}
+            </Text>
+          </View>
+        )}
+
         <View className="flex-row justify-between items-center mb-6">
           <View className="flex-row items-center">
             <MapPin size={20} color="#6B7280" />
-            <Text className="text-gray-600 ml-2">Valor total</Text>
+            <Text className="text-gray-600 ml-2">
+              {finalPrice ? 'Total a pagar' : 'Valor total'}
+            </Text>
           </View>
-          <Text className="text-2xl font-bold text-green-600">{price}</Text>
+          <Text className="text-2xl font-bold text-green-600">
+            {finalPrice ?? price}
+          </Text>
         </View>
 
         {/* Botões */}
@@ -89,6 +158,6 @@ export const ConfirmRideCard: React.FC<ConfirmRideCardProps> = ({
           Ao confirmar, você concorda com nossos termos de serviço
         </Text>
       </View>
-    </View>
+    </Animated.View>
   )
 }

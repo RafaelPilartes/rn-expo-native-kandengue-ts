@@ -19,6 +19,9 @@ interface RideEstimationViewProps {
   onConfirm: () => void
   onCancel: () => void
   onCenterMap: () => void
+  promoSlot?: React.ReactNode
+  promoDiscountAmount?: number
+  promoFinalPrice?: number
 }
 
 export const RideEstimationView = memo(function RideEstimationView({
@@ -29,8 +32,15 @@ export const RideEstimationView = memo(function RideEstimationView({
   isLoading,
   onConfirm,
   onCancel,
-  onCenterMap
+  onCenterMap,
+  promoSlot,
+  promoDiscountAmount,
+  promoFinalPrice,
 }: RideEstimationViewProps) {
+  const total = fareDetails?.total || 0
+  const hasDiscount =
+    promoDiscountAmount !== undefined && promoDiscountAmount > 0
+
   return (
     <>
       <RoutePreviewCard
@@ -43,12 +53,23 @@ export const RideEstimationView = memo(function RideEstimationView({
       </View>
 
       <ConfirmRideCard
-        price={formatMoney(fareDetails?.total || 0, 0)}
+        price={formatMoney(total, 0)}
         duration={String(duration)}
         distance={distance ?? '0'}
         isLoading={isLoading}
         onConfirm={onConfirm}
         onCancel={onCancel}
+        promoSlot={promoSlot}
+        discountLabel={
+          hasDiscount
+            ? formatMoney(promoDiscountAmount as number, 0)
+            : undefined
+        }
+        finalPrice={
+          hasDiscount && promoFinalPrice !== undefined
+            ? formatMoney(promoFinalPrice, 0)
+            : undefined
+        }
       />
     </>
   )

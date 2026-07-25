@@ -28,6 +28,12 @@ import { FirebaseFileDAO } from './firebase/file.dao';
 import { IAuthRepository } from '@/core/interfaces/IAuthRepository';
 import { FirebaseAuthDAO } from './firebase/auth.dao';
 import { FirebaseComplaintDAO } from './firebase/complaints.dao';
+import type { IPromotionRepository } from '@/core/interfaces/IPromotionRepository';
+import { RestPromotionDAO } from './rest/promotion.dao';
+import type { IPromotionUsageRepository } from '@/core/interfaces/IPromotionUsageRepository';
+import { FirebasePromotionUsageDAO } from './firebase/promotionUsage.dao';
+import type { IAppConfigRepository } from '@/core/interfaces/IAppConfigRepository';
+import { FirebaseAppConfigDAO } from './firebase/appConfig.dao';
 // import { RestUserDAO } from "./rest/users.dao"; // Futuro
 
 // Factory para escolher implementação
@@ -52,3 +58,10 @@ export const walletTopupRequestRepository: IWalletTopupRequestRepository =
   new FirebaseWalletTopupRequestDAO();
 export const complaintRepository = new FirebaseComplaintDAO();
 export const fileRepository: IFileRepository = new FirebaseFileDAO();
+
+// Promoções: REST para escritas/validação, Firestore para leitura/listeners.
+export const promotionRepository: IPromotionRepository = new RestPromotionDAO();
+export const promotionUsageRepository: IPromotionUsageRepository =
+  new FirebasePromotionUsageDAO();
+export const appConfigRepository: IAppConfigRepository =
+  new FirebaseAppConfigDAO();

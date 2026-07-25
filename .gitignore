@@ -42,3 +42,10 @@ yarn-error.*
 
 # agent
 .agent/
+
+# Firebase
+google-services.json
+GoogleService-Info.plist
+
+# AI context
+CLAUDE.md

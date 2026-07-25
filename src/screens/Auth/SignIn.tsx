@@ -225,7 +225,9 @@ export default function LoginScreen() {
                 }
                 placeholder={`${t('auth:input_email_placeholder')}`}
                 value={email}
-                onChangeText={text => setEmail(text.toLowerCase().trim())}
+                onChangeText={text =>
+                  setEmail(text.toLowerCase().replace(/\s/g, ''))
+                }
                 keyboardType="email-address"
                 autoComplete="email"
                 autoCapitalize="none"
@@ -237,7 +239,7 @@ export default function LoginScreen() {
                 label={`${t('auth:input_password_label')}`}
                 placeholder={`${t('auth:input_password_placeholder')}`}
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={text => setPassword(text.replace(/\s/g, ''))}
                 error={errors.password}
                 onSubmitEditing={handleLogin}
               />

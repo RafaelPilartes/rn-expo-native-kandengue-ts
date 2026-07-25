@@ -115,10 +115,10 @@ export default function RideChatScreen() {
           </TouchableOpacity>
           <View className="ml-4 flex-1">
             <Text className="font-bold text-gray-900 text-lg">
-              Chat da Corrida
+              {driver.name}
             </Text>
             <Text className="text-xs text-green-600 font-medium">
-              Motorista & Passageiro
+              Motorista
             </Text>
           </View>
         </View>

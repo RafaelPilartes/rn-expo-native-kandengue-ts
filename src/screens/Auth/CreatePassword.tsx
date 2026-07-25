@@ -166,7 +166,7 @@ export default function CreatePasswordScreen({ route }: CreatePasswordProps) {
             <InputPasswordField
               label={t('auth:input_password_label')}
               value={password}
-              onChangeText={setPassword}
+              onChangeText={text => setPassword(text.replace(/\s/g, ''))}
               error={errors.password}
               placeholder={t('auth:input_password_placeholder')}
             />
@@ -230,7 +230,7 @@ export default function CreatePasswordScreen({ route }: CreatePasswordProps) {
             <InputPasswordField
               label={t('auth:input_password_confirm_label')}
               value={confirmPassword}
-              onChangeText={setConfirmPassword}
+              onChangeText={text => setConfirmPassword(text.replace(/\s/g, ''))}
               error={errors.confirmPassword}
               placeholder={t('auth:input_password_confirm_placeholder')}
             />

@@ -7,7 +7,14 @@ import {
   ActivityIndicator,
   Keyboard
 } from 'react-native'
-import { Crosshair, ArrowRight, MapPin, Map, X } from 'lucide-react-native'
+import {
+  Crosshair,
+  ArrowRight,
+  ArrowLeft,
+  MapPin,
+  Map,
+  X
+} from 'lucide-react-native'
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
 import { useBottomSheet } from '@gorhom/bottom-sheet'
 import { GOOGLE_API_KEY } from '@/constants/keys'
@@ -15,6 +22,7 @@ import { CustomPlace } from '@/types/places'
 import { useRideFlowStore } from '@/storage/store/useRideFlowStore'
 import { useLocation } from '@/context/LocationContext'
 import { getAddressFromCoords } from '@/services/google/googleApi'
+import { useNavigation } from '@react-navigation/native'
 
 const cleanGoogleStyles = {
   container: { flex: 0 },
@@ -70,9 +78,10 @@ export const RouteInputStep = memo(function RouteInputStep() {
     setMapPickingMode
   } = useRideFlowStore()
   const { requestCurrentLocation } = useLocation()
+  const navigation = useNavigation()
 
   // Aceder aos métodos do BottomSheet pai
-  const { expand } = useBottomSheet()
+  const { expand, close } = useBottomSheet()
 
   const pickupRef = useRef<any>(null)
   const dropoffRef = useRef<any>(null)
@@ -183,9 +192,18 @@ export const RouteInputStep = memo(function RouteInputStep() {
 
   return (
     <View className="flex-1 px-5 pt-4 pb-6">
-      <Text className="text-xl font-bold text-gray-900 mb-5">
-        Para onde vai a encomenda?
-      </Text>
+      <View className="flex-row items-center mb-5">
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          className="mr-3 p-1.5 rounded-full bg-gray-100"
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <ArrowLeft size={20} color="#111827" />
+        </TouchableOpacity>
+        <Text className="text-xl font-bold text-gray-900">
+          Para onde vai a encomenda?
+        </Text>
+      </View>
 
       {/* Route Card Minimalist */}
       <View

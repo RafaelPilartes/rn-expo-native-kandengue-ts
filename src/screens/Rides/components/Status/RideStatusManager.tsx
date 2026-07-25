@@ -1,12 +1,11 @@
 import React from 'react'
-import { View, Text } from 'react-native'
 import { RideStatusIdle } from './RideStatusIdle'
 import { RideStatusArrival } from './RideStatusArrival'
 import { RideStatusArrivedDestination } from './RideStatusArrivedDestination'
 import { RideStatusDelivering } from './RideStatusDelivering'
+import { RideStatusCanceled } from './RideStatusCanceled'
 import { DriverStatusOverlay } from './DriverStatusOverlay'
 import { converter } from '@/utils/converter'
-// import { RideStatusCompleted } from './RideStatusCompleted';
 
 interface Props {
   status: string
@@ -22,14 +21,14 @@ interface Props {
   // Driver/Active props
   duration?: number
   driverName?: string
-  driverDuration?: string // Estimated time
+  driverDuration?: string
 
   // Arrival/Delivering props
   currentTime?: string
   additionalTime?: string
   customerName?: string
   packageInfo?: any
-  distanceTraveled?: number
+  distanceRemaining?: number
   distanceTotal?: number
 }
 
@@ -49,7 +48,7 @@ export const RideStatusManager: React.FC<Props> = ({
   additionalTime,
   customerName,
   packageInfo,
-  distanceTraveled,
+  distanceRemaining,
   distanceTotal
 }) => {
   switch (status) {
@@ -86,7 +85,7 @@ export const RideStatusManager: React.FC<Props> = ({
     case 'picked_up':
       return (
         <RideStatusDelivering
-          distanceTraveled={distanceTraveled ? String(distanceTraveled) : '0'}
+          distanceRemaining={distanceRemaining ? String(distanceRemaining) : '0'}
           distanceTotal={distanceTotal ? String(distanceTotal) : '0'}
           duration={driverDuration ? String(driverDuration) : '0'}
           packageInfo={packageInfo}
@@ -101,16 +100,7 @@ export const RideStatusManager: React.FC<Props> = ({
         />
       )
     case 'canceled':
-      return (
-        <View className="absolute top-safe left-4 right-4 bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
-          <Text className="text-lg font-bold text-red-600 text-center mb-2">
-            Corrida Cancelada
-          </Text>
-          <Text className="text-gray-600 text-center">
-            Esta corrida foi cancelada. Você pode criar uma nova.
-          </Text>
-        </View>
-      )
+      return <RideStatusCanceled />
     default:
       return null
   }
