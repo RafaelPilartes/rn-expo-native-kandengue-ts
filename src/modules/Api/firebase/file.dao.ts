@@ -220,6 +220,17 @@ export class FirebaseFileDAO {
   }
 
   /**
+   * ✅ UPLOAD MÚLTIPLO - reutiliza uploadSimple por arquivo
+   */
+  async uploadMultiple(
+    fileUris: string[],
+    folder: string = 'uploads'
+  ): Promise<UploadResult[]> {
+    console.log(`📤 UPLOAD MÚLTIPLO - ${fileUris.length} arquivos`)
+    return Promise.all(fileUris.map(uri => this.uploadSimple(uri, folder)))
+  }
+
+  /**
    * ✅ DELETE ARQUIVO (API MODULAR)
    */
   async deleteFile(path: string): Promise<void> {
