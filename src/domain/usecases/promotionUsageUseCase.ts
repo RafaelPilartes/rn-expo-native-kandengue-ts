@@ -1,13 +1,13 @@
 // src/domain/usecases/promotionUsageUseCase.ts
 import { promotionUsageRepository } from '@/modules/Api'
-import type { PromotionUsageInterface } from '@/interfaces/IPromotion'
+import type { PromotionUsage } from '@rafaelpilartes/kandengue-shared/usage'
 
 export class PromotionUsageUseCase {
   private repository = promotionUsageRepository
 
   async getActiveReservation(
     userId: string,
-  ): Promise<PromotionUsageInterface | null> {
+  ): Promise<PromotionUsage | null> {
     try {
       return await this.repository.getActiveReservation(userId)
     } catch (error: any) {
@@ -18,7 +18,7 @@ export class PromotionUsageUseCase {
 
   async getByRideId(
     rideId: string,
-  ): Promise<PromotionUsageInterface | null> {
+  ): Promise<PromotionUsage | null> {
     try {
       return await this.repository.getByRideId(rideId)
     } catch (error: any) {
@@ -29,7 +29,7 @@ export class PromotionUsageUseCase {
 
   listenActiveReservation(
     userId: string,
-    onUpdate: (usage: PromotionUsageInterface | null) => void,
+    onUpdate: (usage: PromotionUsage | null) => void,
     onError?: (err: Error) => void,
   ) {
     try {

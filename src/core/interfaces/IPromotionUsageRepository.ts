@@ -1,5 +1,5 @@
 // core/interfaces/IPromotionUsageRepository.ts
-import type { PromotionUsageInterface } from '@/interfaces/IPromotion';
+import type { PromotionUsage } from '@rafaelpilartes/kandengue-shared/usage';
 
 /**
  * Repository de leitura sobre `promotion_usages` (Firestore).
@@ -8,13 +8,13 @@ import type { PromotionUsageInterface } from '@/interfaces/IPromotion';
 export interface IPromotionUsageRepository {
   getActiveReservation(
     userId: string,
-  ): Promise<PromotionUsageInterface | null>;
+  ): Promise<PromotionUsage | null>;
 
-  getByRideId(rideId: string): Promise<PromotionUsageInterface | null>;
+  getByRideId(rideId: string): Promise<PromotionUsage | null>;
 
   listenActiveReservation(
     userId: string,
-    onUpdate: (usage: PromotionUsageInterface | null) => void,
+    onUpdate: (usage: PromotionUsage | null) => void,
     onError?: (err: Error) => void,
   ): () => void;
 }
