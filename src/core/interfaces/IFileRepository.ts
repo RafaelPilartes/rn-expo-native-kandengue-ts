@@ -30,5 +30,7 @@ export interface IFileRepository {
     rideId: string,
     photoType: 'pickup' | 'dropoff'
   ): Promise<UploadResult>
+  uploadMultiple(fileUris: string[], folder: string): Promise<UploadResult[]>
   deleteFile(path: string): Promise<void>
+  getFileURL(path: string): Promise<string>
 }
